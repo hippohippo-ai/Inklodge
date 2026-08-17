@@ -46,6 +46,7 @@ reset_file progress.md "# 进度
 - 上次更新时间：$(date +%Y-%m-%d)"
 reset_file outline.md "# 大纲"
 reset_file characters.md "# 人物"
+reset_file artifacts.md "# 道具"
 reset_file conflicts.md "# 矛盾关系"
 reset_file chapters.md "# 章节规划"
 reset_file foreshadowing.md "# 伏笔暗线"

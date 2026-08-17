@@ -89,6 +89,7 @@ state/              所有设定与进度（记忆的"硬盘"）
   requirements.md   你口述要求的细化与固化（全书总约束）
   outline.md        大纲
   characters.md     人物：性格/目的/秘密/弧线
+  artifacts.md      道具/法宝：金箍棒、钉耙、紧箍咒、生死簿……
   conflicts.md      矛盾关系矩阵
   chapters.md       章节规划
   foreshadowing.md  伏笔暗线表

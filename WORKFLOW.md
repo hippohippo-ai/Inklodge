@@ -67,6 +67,7 @@ while 当前章节 < 总章节数:
 | `state/theme.md` | 题材/基调/视角/规模 | 阶段 00 |
 | `state/outline.md` | 大纲 | 阶段 01 |
 | `state/characters.md` | 人物 + 状态备注 | 阶段 02 / 每章后 |
+| `state/artifacts.md` | 道具/法宝设定与伏笔 | 阶段 02 / 新道具出现时 |
 | `state/conflicts.md` | 矛盾矩阵 | 阶段 03 |
 | `state/chapters.md` | 章节规划 | 阶段 04 |
 | `state/foreshadowing.md` | 伏笔暗线表 | 阶段 05 / 每章后 |

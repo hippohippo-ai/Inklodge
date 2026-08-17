@@ -8,6 +8,7 @@ export const STATE_FILES = [
   { name: 'theme', title: '主题' },
   { name: 'outline', title: '大纲' },
   { name: 'characters', title: '人物' },
+  { name: 'artifacts', title: '道具' },
   { name: 'conflicts', title: '矛盾' },
   { name: 'chapters', title: '章节规划' },
   { name: 'foreshadowing', title: '伏笔' },

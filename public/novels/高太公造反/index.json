@@ -1,0 +1,27 @@
+{
+  "title": "高太公造反",
+  "theme": "高太公造反",
+  "cover": "#5b3a1e",
+  "progress": {
+    "stage": 1,
+    "currentChapter": 0,
+    "totalChapters": 40,
+    "status": "规划中"
+  },
+  "stateFiles": [
+    "chapter-log",
+    "chapters",
+    "characters",
+    "conflicts",
+    "final-check",
+    "foreshadowing",
+    "knowledge",
+    "outline",
+    "plot-check",
+    "progress",
+    "requirements",
+    "revisions",
+    "timeline"
+  ],
+  "chapters": []
+}

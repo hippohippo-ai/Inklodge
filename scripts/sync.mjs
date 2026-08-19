@@ -20,7 +20,13 @@ function read(p) {
 
 // 主题（theme.txt 第一行）
 const themeRaw = read(path.join(stateDir, 'theme.txt')).trim()
-const title = themeRaw.split('\n')[0].trim() || '未命名'
+const title = themeRaw.split('\n')[0].trim()
+
+// 新书尚未定题时，只保留已有书库，不生成「待定」书目。
+if (!title || title === '待定' || title === '（待定）') {
+  console.log('话本 · 当前工作区尚未定题，保留已有书库')
+  process.exit(0)
+}
 
 // 解析进度
 const progressRaw = read(path.join(stateDir, 'progress.md'))

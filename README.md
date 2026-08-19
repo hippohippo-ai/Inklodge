@@ -27,7 +27,7 @@ bash scripts/new-novel.sh "你的主题"
 bash scripts/new-novel.sh "都市悬疑·失忆法医追查连环案"
 ```
 
-> 也可以直接改 `state/theme.txt`。旧作品会自动备份到 `backup/`。
+> 也可以直接改 `state/theme.txt`。已完成的作品可整理到 `books/<书名>/`，新书继续使用根目录工作区。
 
 ### 第二步：让 AI 开写
 
@@ -69,7 +69,8 @@ npm run preview    # 本地预览构建产物
 ```
 
 **多小说**：书库支持任意多本小说。
-- 仓库内置（bundled）：AI 生成器写在 `state/` + `novel/` 的小说，构建时自动同步进 `public/novels/<书名>/`，网页只读展示。
+- 仓库内置（bundled）：AI 生成器写在根目录 `state/` + `novel/` 的当前小说，构建时自动同步进 `public/novels/<书名>/`，网页只读展示。
+- 已完成作品：整理在 `books/<书名>/novel/` 与 `books/<书名>/state/`，作为写作档案保存；网页阅读副本仍在 `public/novels/<书名>/`。
 - 本地草稿（local）：网页里「新建小说」创建的，存在浏览器 localStorage，可编辑、可导出/导入 JSON。
 
 **部署到 GitHub Pages**：
@@ -100,7 +101,8 @@ state/              所有设定与进度（记忆的"硬盘"）
   progress.md       当前阶段/章节
   revisions.md      设定修订记录
   final-check.md    精校报告
-novel/              正文 chapter-01.md、chapter-02.md……
+novel/              当前新书正文 chapter-01.md、chapter-02.md……
+books/              已完成小说的独立档案（如 `books/高太公造反/`）
 scripts/            new-novel.sh（开新书）、progress.sh（看进度）、sync.mjs（同步进网页）
 WORKFLOW.md         Agent 的操作总纲
 （网页端）

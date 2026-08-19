@@ -5,11 +5,11 @@
     "theme": "高太公造反",
     "cover": "#5b3a1e",
     "progress": {
-      "stage": 9,
-      "currentChapter": 0,
+      "stage": 13,
+      "currentChapter": 40,
       "totalChapters": 40,
-      "status": "规划中"
+      "status": "已完成"
     },
-    "chapterCount": 0
+    "chapterCount": 40
   }
 ]

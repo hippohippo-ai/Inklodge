@@ -2,3 +2,9 @@ node_modules/
 dist/
 .DS_Store
 *.log
+create_bundle.py
+project_num.txt
+books/create_bundle.py
+books/project_num.txt
+create_bundle.py
+project_num.txt

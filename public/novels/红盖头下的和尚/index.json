@@ -4,7 +4,7 @@
   "cover": "#5b3a1e",
   "progress": {
     "stage": 9,
-    "currentChapter": 1,
+    "currentChapter": 2,
     "totalChapters": 40,
     "status": "写作中"
   },
@@ -26,6 +26,7 @@
     "timeline"
   ],
   "chapters": [
-    "chapter-01"
+    "chapter-01",
+    "chapter-02"
   ]
 }

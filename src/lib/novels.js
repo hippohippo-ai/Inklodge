@@ -131,7 +131,9 @@ async function loadBundledNovel(id) {
   await Promise.all(
     chapterNames.map(async (c) => {
       const content = await fetchText(`${base}/chapters/${c}.md`, '')
-      chapters.push({ id: c, title: c, content })
+      const match = content.match(/^#\s+(.+)$/m)
+      const title = match ? match[1].trim() : c
+      chapters.push({ id: c, title, content })
     })
   )
   return {

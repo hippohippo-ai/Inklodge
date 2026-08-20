@@ -45,7 +45,7 @@ export default function StorytellerArchive({ novel, onChange }) {
     <div className="archive-page">
       <section className="archive-hero">
         <div>
-          <span className="archive-kicker">说书楼 · 人物与书稿登记</span>
+          <span className="archive-kicker">Inklodge · 人物与书稿登记</span>
           <h2>说书人档案</h2>
           <p>一部书先记下落笔之人的姓名，再记下它走过的路。</p>
         </div>

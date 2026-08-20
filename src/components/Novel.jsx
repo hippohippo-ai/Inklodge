@@ -19,7 +19,7 @@ export default function Novel({ novel, loading, onBack, onUpdate }) {
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   if (loading || !novel) {
-    return <div className="app-loading">说书楼 · 打开《{novel?.title || ''}》……</div>
+    return <div className="app-loading">Inklodge · 打开《{novel?.title || ''}》……</div>
   }
 
   const isLocal = novel.source === 'local'
@@ -38,7 +38,7 @@ export default function Novel({ novel, loading, onBack, onUpdate }) {
     <div className="novel">
       <header className="novel-header">
         <button className="btn ghost back" onClick={onBack}>
-          ← 回说书楼
+          ← 回墨庐
         </button>
         <div className="novel-title">
           <span className="novel-name">{novel.title}</span>

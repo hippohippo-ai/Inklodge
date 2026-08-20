@@ -1,16 +1,16 @@
 [
   {
-    "id": "红盖头下的和尚",
-    "title": "红盖头下的和尚",
-    "theme": "红盖头下的和尚",
+    "id": "留春信",
+    "title": "留春信",
+    "theme": "留春信",
     "cover": "#5b3a1e",
     "progress": {
-      "stage": 12,
-      "currentChapter": 15,
+      "stage": 40,
+      "currentChapter": 40,
       "totalChapters": 40,
-      "status": "重建版正文写作中；第 1–15 章反 AI 痕迹脱毒完成，第 16–24 章结构重规划完成，待继续写作"
+      "status": "全书完成（第 1–40 章正文均已落文，4000–4500 字/章达标，纯汉字总计约 142,700）；卷五收尾与状态文件已同步"
     },
-    "chapterCount": 16
+    "chapterCount": 40
   },
   {
     "id": "高太公造反",

@@ -39,15 +39,15 @@ export default function Library({ library, onOpen, onChanged }) {
     <div className="library">
       <header className="site-header">
         <div className="site-brand">
-          <span className="brand-mark">说书楼</span>
-          <span className="brand-sub">写书 · 读书 · 说书</span>
+          <span className="brand-mark">Inklodge</span>
+          <span className="brand-sub">墨庐 · 卷册</span>
         </div>
         <div className="header-actions">
           <button className="btn ghost" onClick={() => exportLocalNovels()}>
-            导出书稿
+            导出卷册
           </button>
           <button className="btn ghost" onClick={() => fileRef.current?.click()}>
-            导入书稿
+            导入卷册
           </button>
           <input
             ref={fileRef}
@@ -57,62 +57,52 @@ export default function Library({ library, onOpen, onChanged }) {
             onChange={(e) => handleImport(e.target.files[0])}
           />
           <button className="btn primary" onClick={() => setShowNew(true)}>
-            ＋ 开新书
+            ＋ 起草新卷
           </button>
         </div>
       </header>
 
-      <section className="story-stage" aria-label="说书台">
-        <div className="story-scroll">
-          <span className="scroll-kicker">说书楼</span>
-          <strong>一盏灯，半卷书</strong>
-          <small>今日开讲，诸位请坐</small>
-        </div>
-        <div className="story-desk">
-          <span className="desk-lamp">◆</span>
-          <span>书场已开</span>
-        </div>
+      <section className="stage-quote" aria-label="题词">
+        <p>一盏清灯，半卷残篇；事落纸墨，方有回声。</p>
+        <span>INKS, SCROLLS & TALES</span>
       </section>
 
       {showNew && (
         <div className="modal-mask" onClick={() => setShowNew(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3>开一部新书（案头草稿）</h3>
+            <h3>起草新卷</h3>
             <label>
-              书名
+              卷名
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="例如：高太公造反"
+                placeholder="例如：留春信"
                 autoFocus
               />
             </label>
             <label>
-              题眼 / 一句话
+              立题 / 题眼
               <input
                 value={theme}
                 onChange={(e) => setTheme(e.target.value)}
-                placeholder="例如：老农死后入地府造反，一路打上天庭西天"
+                placeholder="例如：七日冥婚，七封残信与七条江湖路"
               />
             </label>
             <div className="modal-actions">
               <button className="btn ghost" onClick={() => setShowNew(false)}>
-                先不落笔
+                暂歇
               </button>
               <button className="btn primary" onClick={createNovel} disabled={!title.trim()}>
                 立卷
               </button>
             </div>
-            <p className="hint">
-              先在案头起草。若要正式开写，请按 README 使用 AI 生成器；写成后运行构建，书稿便会收入「楼中藏书」。
-            </p>
           </div>
         </div>
       )}
 
       <section className="shelf">
-        <h2 className="shelf-title">楼中藏书</h2>
-        {bundled.length === 0 && <p className="empty-hint">楼中暂时空着。用 AI 生成器写好书稿后，运行 <code>npm run build</code>，它便会登楼。</p>}
+        <h2 className="shelf-title">藏卷典藏</h2>
+        {bundled.length === 0 && <p className="empty-hint">暂无藏卷。</p>}
         <div className="card-grid">
           {bundled.map((n) => (
             <NovelCard key={n.id} n={n} onOpen={() => onOpen(n.id)} />
@@ -122,7 +112,7 @@ export default function Library({ library, onOpen, onChanged }) {
 
       <section className="shelf">
         <h2 className="shelf-title">案头草稿</h2>
-        {local.length === 0 && <p className="empty-hint">案头还没有草稿。点右上角「开新书」，即可落笔。</p>}
+        {local.length === 0 && <p className="empty-hint">案头还没有草稿。点「起草新卷」，即可落笔。</p>}
         <div className="card-grid">
           {local.map((n) => (
             <NovelCard key={n.id} n={n} onOpen={() => onOpen(n.id)} />
@@ -131,7 +121,7 @@ export default function Library({ library, onOpen, onChanged }) {
       </section>
 
       <footer className="site-footer">
-        说书楼 · 多小说写作与阅读平台 · 正文由 AI 生成器撰写，本页负责管理与阅读
+        Inklodge · 墨庐 · 写作与阅读空间
       </footer>
     </div>
   )

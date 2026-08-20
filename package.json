@@ -1,8 +1,8 @@
 {
-  "name": "shuoshulou",
+  "name": "inklodge",
   "private": true,
   "version": "0.1.0",
-  "description": "说书楼 · 多小说写作与阅读平台（写作走 AI 生成器流程，阅读走网页）",
+  "description": "Inklodge 墨庐 · 古典武侠与当代叙事的沉浸式阅读空间（AI 写作流程 + 网页阅读）",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -54,7 +54,7 @@ export default function StateFiles({ novel, onChange }) {
               </button>
             </div>
           ) : (
-            <span className="pill">只读（楼中藏书）</span>
+            <span className="pill">只读（墨庐藏书）</span>
           )}
         </div>
 

@@ -1,4 +1,4 @@
-// 说书楼数据层
+// 墨庐数据层
 // 两类小说：
 //  - bundled（仓库内置）：位于 public/novels/<书名>/，由 AI 生成器直接写 markdown，脚本同步。只读。
 //  - local（浏览器本地）：存于 localStorage，可自由编辑、导入导出。
@@ -195,11 +195,12 @@ export function exportLocalNovels() {
   })
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
-  a.download = 'shuoshulou-novels.json'
+  a.download = 'inklodge-novels.json'
   a.click()
   URL.revokeObjectURL(a.href)
 }
 
+// 导入只解析 JSON 内容、不校验文件名，旧的 shuoshulou-novels.json 导出文件仍可直接导入。
 export function importLocalNovels(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()

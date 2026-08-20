@@ -42,7 +42,7 @@ export default function Novel({ novel, loading, onBack, onUpdate }) {
         </button>
         <div className="novel-title">
           <span className="novel-name">{novel.title}</span>
-          <span className="novel-source">{isLocal ? '案头草稿' : '楼中藏书'}</span>
+          <span className="novel-source">{isLocal ? '案头草稿' : '墨庐藏书'}</span>
         </div>
         <nav className="tabs">
           {TABS.map((t) => (

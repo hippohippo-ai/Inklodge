@@ -24,7 +24,7 @@ export default function Library({ library, onOpen, onChanged }) {
     if (!file) return
     try {
       const n = await importLocalNovels(file)
-      alert(`已收入楼中 ${n} 本书稿`)
+      alert(`已收入墨庐 ${n} 本书稿`)
       onChanged()
     } catch {
       alert('入楼失败：JSON 格式不正确')
@@ -136,7 +136,7 @@ function NovelCard({ n, onOpen }) {
     <button className="novel-card" onClick={onOpen} style={{ '--cover': n.cover }}>
       <div className="card-cover">
         <span className="card-title">{n.title}</span>
-        <span className="card-tag">{n.source === 'bundled' ? '楼中' : '案头'}</span>
+        <span className="card-tag">{n.source === 'bundled' ? '墨庐' : '案头'}</span>
       </div>
       <div className="card-body">
         <p className="card-theme">{n.theme || '（尚未立题）'}</p>

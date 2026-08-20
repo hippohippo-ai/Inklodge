@@ -46,7 +46,7 @@ export default function Writer({ novel, onChange }) {
     return (
       <div className="writer readonly">
         <div className="notice">
-          <strong>楼中藏书只读。</strong>
+          <strong>墨庐藏书只读。</strong>
           <p>
             这部书由 AI 生成器落在 <code>novel/</code> 目录；运行 <code>npm run build</code> 后，便可在「入卷阅读」中查看。
             只有案头草稿可以在此处直接改写。
@@ -125,7 +125,7 @@ export default function Writer({ novel, onChange }) {
 
 function ChapterList({ chapters, idx, onSelect }) {
   if (chapters.length === 0) {
-    return <p className="empty-hint">还没有章节。案头草稿点「添一章」；楼中藏书由 AI 生成器写入。</p>
+    return <p className="empty-hint">还没有章节。案头草稿点「添一章」；墨庐藏书由 AI 生成器写入。</p>
   }
   return (
     <aside className="chapter-list">

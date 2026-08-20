@@ -1,4 +1,4 @@
-name: Deploy 说书楼 to GitHub Pages
+name: Deploy 墨庐 to GitHub Pages
 
 on:
   push:

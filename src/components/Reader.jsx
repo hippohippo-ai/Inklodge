@@ -8,11 +8,34 @@ const THEMES = [
   { key: 'night', label: '夜' },
 ]
 
-const BM_KEY = 'shuoshulou.bookmarks'
+const BM_KEY = 'inklodge.bookmarks'
+const FONT_KEY = 'inklodge.fontsize'
+const THEME_KEY = 'inklodge.theme'
+
+// 旧版「shuoshulou.*」键名：首次读取时迁移到 inklodge.*，避免书签与设置丢失
+const LEGACY_KEYS = {
+  [BM_KEY]: 'shuoshulou.bookmarks',
+  [FONT_KEY]: 'shuoshulou.fontsize',
+  [THEME_KEY]: 'shuoshulou.theme',
+}
+
+function readStorage(key, fallback = null) {
+  try {
+    const current = localStorage.getItem(key)
+    if (current !== null) return current
+    const legacy = localStorage.getItem(LEGACY_KEYS[key])
+    if (legacy !== null) {
+      localStorage.setItem(key, legacy)
+      localStorage.removeItem(LEGACY_KEYS[key])
+      return legacy
+    }
+  } catch { /* ignore */ }
+  return fallback
+}
 
 function loadBookmarks(novelId) {
   try {
-    const all = JSON.parse(localStorage.getItem(BM_KEY) || '{}')
+    const all = JSON.parse(readStorage(BM_KEY, '{}') || '{}')
     return all[novelId] || []
   } catch {
     return []
@@ -21,7 +44,7 @@ function loadBookmarks(novelId) {
 
 function saveBookmarks(novelId, bms) {
   try {
-    const all = JSON.parse(localStorage.getItem(BM_KEY) || '{}')
+    const all = JSON.parse(readStorage(BM_KEY, '{}') || '{}')
     all[novelId] = bms
     localStorage.setItem(BM_KEY, JSON.stringify(all))
   } catch { /* ignore */ }
@@ -34,10 +57,10 @@ export default function Reader({ novel }) {
     return saved < chapters.length ? saved : 0
   })
   const [fontSize, setFontSize] = useState(
-    Number(localStorage.getItem('shuoshulou.fontsize') || 19)
+    Number(readStorage(FONT_KEY, '19') || 19)
   )
   const [theme, setTheme] = useState(
-    localStorage.getItem('shuoshulou.theme') || 'paper'
+    readStorage(THEME_KEY, 'paper') || 'paper'
   )
 
   // UI state
@@ -59,11 +82,11 @@ export default function Reader({ novel }) {
 
   // Persist preferences
   useEffect(() => {
-    localStorage.setItem('shuoshulou.fontsize', String(fontSize))
+    localStorage.setItem(FONT_KEY, String(fontSize))
   }, [fontSize])
 
   useEffect(() => {
-    localStorage.setItem('shuoshulou.theme', theme)
+    localStorage.setItem(THEME_KEY, theme)
   }, [theme])
 
   useEffect(() => {

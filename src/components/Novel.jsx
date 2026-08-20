@@ -17,7 +17,7 @@ export default function Novel({ novel, loading, onBack, onUpdate }) {
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   if (loading || !novel) {
-    return <div className="app-loading">话本 · 打开《{novel?.title || ''}》……</div>
+    return <div className="app-loading">说书楼 · 打开《{novel?.title || ''}》……</div>
   }
 
   const isLocal = novel.source === 'local'

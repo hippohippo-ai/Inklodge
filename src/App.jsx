@@ -42,7 +42,7 @@ export default function App() {
   }
 
   if (!library) {
-    return <div className="app-loading">话本 · 加载中……</div>
+    return <div className="app-loading">说书楼 · 加载中……</div>
   }
 
   if (current) {

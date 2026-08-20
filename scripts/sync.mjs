@@ -1,4 +1,4 @@
-// 话本同步脚本：把根目录当前工作小说（state/ + novel/）同步到 public/novels/<书名>/
+// 说书楼同步脚本：把根目录当前工作小说（state/ + novel/）同步到 public/novels/<书名>/
 // 并在构建前重建顶层 manifest（public/novels/index.json）。
 // 由 package.json 的 prebuild 调用：node scripts/sync.mjs
 import fs from 'node:fs'
@@ -24,7 +24,7 @@ const title = themeRaw.split('\n')[0].trim()
 
 // 新书尚未定题时，只保留已有书库，不生成「待定」书目。
 if (!title || title === '待定' || title === '（待定）') {
-  console.log('话本 · 当前工作区尚未定题，保留已有书库')
+  console.log('说书楼 · 当前工作区尚未定题，保留已有书库')
   process.exit(0)
 }
 
@@ -91,4 +91,4 @@ if (fs.existsSync(publicNovels)) {
   }
 }
 fs.writeFileSync(path.join(publicNovels, 'index.json'), JSON.stringify(novels, null, 2))
-console.log(`话本 · 已同步《${title}》→ public/novels/，书库共 ${novels.length} 本`)
+console.log(`说书楼 · 已同步《${title}》→ public/novels/，书库共 ${novels.length} 本`)

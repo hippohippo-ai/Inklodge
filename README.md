@@ -1,4 +1,4 @@
-# 话本 Huaben · 多小说写作与阅读平台
+# 说书楼 Shuoshulou · 多小说写作与阅读平台
 
 用 AI（Codebuff）写长篇小说的通用流水线 + React 网页阅读/管理端。**提示词全部固定**，换一个主题就能开一本新书；支持多本小说同时管理、写作与阅读。
 
@@ -57,7 +57,7 @@ bash scripts/progress.sh
 
 Agent 会读 `state/progress.md` 和 `state/chapter-log.md`，从断点接着写，不会失忆。
 
-## 网页端（话本）
+## 网页端（说书楼）
 
 React + Vite 构建，纯静态，可部署到 GitHub Pages。
 
@@ -74,10 +74,10 @@ npm run preview    # 本地预览构建产物
 - 本地草稿（local）：网页里「新建小说」创建的，存在浏览器 localStorage，可编辑、可导出/导入 JSON。
 
 **部署到 GitHub Pages**：
-1. 推到 GitHub 仓库（如 `huaben`）。
+1. 推到 GitHub 仓库（如 `shuoshulou`）。
 2. 仓库 Settings → Pages → Source 选 **GitHub Actions**。
 3. 每次 push 到 `main`，`.github/workflows/deploy.yml` 会自动构建部署。
-4. 访问 `https://<用户名>.github.io/huaben/`。
+4. 访问 `https://<用户名>.github.io/shuoshulou/`。
 
 （也可手动：`npm run deploy`，需先安装 `gh-pages`。）
 

@@ -1,4 +1,4 @@
-// 话本数据层
+// 说书楼数据层
 // 两类小说：
 //  - bundled（仓库内置）：位于 public/novels/<书名>/，由 AI 生成器直接写 markdown，脚本同步。只读。
 //  - local（浏览器本地）：存于 localStorage，可自由编辑、导入导出。
@@ -162,7 +162,7 @@ export function exportLocalNovels() {
   })
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
-  a.download = 'huaben-novels.json'
+  a.download = 'shuoshulou-novels.json'
   a.click()
   URL.revokeObjectURL(a.href)
 }

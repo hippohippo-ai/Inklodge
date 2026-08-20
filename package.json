@@ -1,8 +1,8 @@
 {
-  "name": "huaben",
+  "name": "shuoshulou",
   "private": true,
   "version": "0.1.0",
-  "description": "话本 · 多小说写作与阅读平台（写作走 AI 生成器流程，阅读走网页）",
+  "description": "说书楼 · 多小说写作与阅读平台（写作走 AI 生成器流程，阅读走网页）",
   "type": "module",
   "scripts": {
     "dev": "vite",

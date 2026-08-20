@@ -15,10 +15,10 @@ export default function Reader({ novel }) {
     return saved < chapters.length ? saved : 0
   })
   const [fontSize, setFontSize] = useState(
-    Number(localStorage.getItem('huaben.fontsize') || 19)
+    Number(localStorage.getItem('shuoshulou.fontsize') || localStorage.getItem('huaben.fontsize') || 19)
   )
   const [theme, setTheme] = useState(
-    localStorage.getItem('huaben.theme') || 'paper'
+    localStorage.getItem('shuoshulou.theme') || localStorage.getItem('huaben.theme') || 'paper'
   )
 
   useEffect(() => {
@@ -26,11 +26,11 @@ export default function Reader({ novel }) {
   }, [idx, novel.id, chapters.length])
 
   useEffect(() => {
-    localStorage.setItem('huaben.fontsize', String(fontSize))
+    localStorage.setItem('shuoshulou.fontsize', String(fontSize))
   }, [fontSize])
 
   useEffect(() => {
-    localStorage.setItem('huaben.theme', theme)
+    localStorage.setItem('shuoshulou.theme', theme)
   }, [theme])
 
   const current = chapters[idx]

@@ -39,7 +39,7 @@ export default function Library({ library, onOpen, onChanged }) {
     <div className="library">
       <header className="site-header">
         <div className="site-brand">
-          <span className="brand-mark">话本</span>
+          <span className="brand-mark">说书楼</span>
           <span className="brand-sub">写书 · 读书 · 说书</span>
         </div>
         <div className="header-actions">
@@ -120,7 +120,7 @@ export default function Library({ library, onOpen, onChanged }) {
       </section>
 
       <footer className="site-footer">
-        话本 · 多小说写作与阅读平台 · 正文由 AI 生成器撰写，本页负责管理与阅读
+        说书楼 · 多小说写作与阅读平台 · 正文由 AI 生成器撰写，本页负责管理与阅读
       </footer>
     </div>
   )

@@ -1,21 +1,26 @@
 # 说书楼 Shuoshulou · 多小说写作与阅读平台
 
-用 AI（Codebuff）写长篇小说的通用流水线 + React 网页阅读/管理端。**提示词全部固定**，换一个主题就能开一本新书；支持多本小说同时管理、写作与阅读。
+这里是一座给长篇小说用的说书楼：楼下起稿，楼上读书；AI 负责落笔，文件负责记事，人负责定方向。
 
-- 写作：`prompts/` 固定提示词 + `state/` 落盘（防 AI 记性差）——见下方「生成器」说明。
-- 阅读/管理：React 网页（书库 / 阅读器 / 写作页 / 设定页 / 进度页），可部署到 GitHub Pages。
+项目由两部分组成：
 
-## 它解决什么问题
+- **写作台**：`prompts/` 固定流程，`state/` 保存大纲、人物、伏笔、时间线和每章总结，避免写到后面忘了前文。
+- **阅读台**：React + Vite 网页端，管理书库、阅读正文、查看设定和跟踪进度。
+- **说书人档案**：每部书登记作者、卷首题词、卷数和创作路程；案头草稿可在网页中编辑，楼中藏书随写作台同步展示。
 
-AI 写长文最大的问题是**记性差**：写到第 20 章，忘了第 3 章的伏笔，人物说出不该知道的话。本系统靠三点解决：
+## 这座楼解决什么问题
 
-1. **一切落盘**：大纲、人物、矛盾、伏笔、时间线、知识矩阵、每章总结全部写入 `state/` 文件。
-2. **一章一总结**：每写完一章立刻同步所有状态文件，下一章只读文件，不靠对话记忆。
-3. **知识矩阵**：记录每个角色在时间线上「知道 / 不知道 / 知道一半 / 错误认知」，从源头杜绝剧透和漏洞。
+长篇小说最怕两件事：写到第二十章，忘了第三章埋过的线；人物明明不知道，却替作者把答案说了出来。
 
-## 怎么用（两步）
+说书楼把记忆交给文件保管：
 
-### 第一步：定主题
+1. **凡有设定，皆落成文字**：大纲、人物、矛盾、伏笔、时间线、知识矩阵和章节总结都写入 `state/`。
+2. **一章一记**：每写完一章，立即总结并同步状态，下一章只按文件续写，不凭聊天记忆猜前情。
+3. **人物各有耳目**：知识矩阵记录每个角色在每个阶段知道什么、不知道什么、知道一半什么，减少剧透与逻辑漏洞。
+
+## 开一本新书
+
+### 第一步：立题
 
 ```bash
 bash scripts/new-novel.sh "你的主题"
@@ -27,97 +32,109 @@ bash scripts/new-novel.sh "你的主题"
 bash scripts/new-novel.sh "都市悬疑·失忆法医追查连环案"
 ```
 
-> 也可以直接改 `state/theme.txt`。已完成的作品可整理到 `books/<书名>/`，新书继续使用根目录工作区。
+也可以直接编辑 `state/theme.txt`。已完成的作品放进 `books/<书名>/`，根目录继续作为当前写作台。
 
-### 第二步：让 AI 开写
+### 第二步：请 Agent 开讲
 
-对 Agent 说一句：
+对 Agent 说：
 
-```
+```text
 按 WORKFLOW.md 开始写小说，主题见 state/theme.txt
 ```
 
-Agent 会严格按 13 个阶段推进：主题确认 → 大纲 → 人物 → 矛盾 → 章节 → 伏笔 → 时间线 → 知识矩阵 → 漏洞检查 → 写章节 → 总结 → 循环 → 润色 → 精校。
+Agent 会依次走完：主题确认 → 大纲 → 人物 → 矛盾 → 章节 → 伏笔 → 时间线 → 知识矩阵 → 漏洞检查 → 写章节 → 章节总结 → 循环写作 → 润色 → 精校交付。
 
-## 随时查看进度
+### 第三步：查看进度
 
 ```bash
 bash scripts/progress.sh
 ```
 
-会显示：当前主题、当前阶段、写到第几章、最近总结。
+命令会报出当前主题、所处阶段、写到哪一章以及最近的章节记录。
 
-## 中途打断 / 换会话怎么办
+## 中途停笔，如何接着说
 
-直接说：
+直接告诉 Agent：
 
-```
+```text
 按 WORKFLOW.md 恢复断点继续写
 ```
 
-Agent 会读 `state/progress.md` 和 `state/chapter-log.md`，从断点接着写，不会失忆。
+Agent 会先读取 `state/progress.md` 与 `state/chapter-log.md`，再检查伏笔、时间线和知识矩阵，从上次停笔处接续。
 
-## 网页端（说书楼）
+## 网页阅读台
 
-React + Vite 构建，纯静态，可部署到 GitHub Pages。
+说书楼由 React + Vite 构建，可作为纯静态站点部署到 GitHub Pages。
 
 ```bash
 npm install        # 安装依赖
-npm run dev        # 本地开发（http://localhost:5174）
-npm run build      # 构建（prebuild 自动把根目录当前小说同步进 public/novels）
-npm run preview    # 本地预览构建产物
+npm run dev        # 启动本地阅读台（默认 http://localhost:5174）
+npm run build      # 构建，并把当前写作台同步到 public/novels
+npm run preview    # 预览构建结果
 ```
 
-**多小说**：书库支持任意多本小说。
-- 仓库内置（bundled）：AI 生成器写在根目录 `state/` + `novel/` 的当前小说，构建时自动同步进 `public/novels/<书名>/`，网页只读展示。
-- 已完成作品：整理在 `books/<书名>/novel/` 与 `books/<书名>/state/`，作为写作档案保存；网页阅读副本仍在 `public/novels/<书名>/`。
-- 本地草稿（local）：网页里「新建小说」创建的，存在浏览器 localStorage，可编辑、可导出/导入 JSON。
+### 书稿从哪里来
 
-**部署到 GitHub Pages**：
-1. 推到 GitHub 仓库（如 `shuoshulou`）。
-2. 仓库 Settings → Pages → Source 选 **GitHub Actions**。
-3. 每次 push 到 `main`，`.github/workflows/deploy.yml` 会自动构建部署。
+- **楼中藏书（bundled）**：根目录 `state/` + `novel/` 的当前作品。运行构建后，自动同步到 `public/novels/<书名>/`，网页端只读展示；`state/archive.json` 会一并登记作者、题词和卷数。
+- **已完稿档案**：整理到 `books/<书名>/novel/` 与 `books/<书名>/state/`；网页阅读副本仍放在 `public/novels/<书名>/`。
+- **案头草稿（local）**：在网页里点击「开新书」创建，保存在浏览器 `localStorage`，可以直接编辑，也可以导入或导出 JSON。
+
+### 部署到 GitHub Pages
+
+1. 推送到 GitHub 仓库（例如 `shuoshulou`）。
+2. 在仓库 **Settings → Pages → Source** 中选择 **GitHub Actions**。
+3. 每次推送到 `main`，`.github/workflows/deploy.yml` 会自动构建并部署。
 4. 访问 `https://<用户名>.github.io/shuoshulou/`。
 
-（也可手动：`npm run deploy`，需先安装 `gh-pages`。）
+也可以手动部署：
 
-## 目录结构
-
+```bash
+npm run deploy
 ```
-prompts/            13 个固定提示词（每个阶段一个，一般不用动）
-state/              所有设定与进度（记忆的"硬盘"）
-  theme.txt         主题（你唯一要改的文件）
-  requirements.md   你口述要求的细化与固化（全书总约束）
-  outline.md        大纲
-  characters.md     人物：性格/目的/秘密/弧线
-  artifacts.md      道具/法宝：金箍棒、钉耙、紧箍咒、生死簿……
+
+手动部署需要先安装 `gh-pages`。
+
+## 目录地图
+
+```text
+prompts/            13 个固定提示词，规定每个写作阶段怎么走
+state/              所有设定与进度，长篇小说的“记忆硬盘”
+  theme.txt         主题，通常只需改这一处
+  archive.json       说书人档案：作者、题词和卷数
+  requirements.md   用户要求的细化与全书总约束
+  outline.md        总大纲
+  characters.md     人物、目的、秘密与弧线
+  artifacts.md      道具与场景机关
   conflicts.md      矛盾关系矩阵
   chapters.md       章节规划
   foreshadowing.md  伏笔暗线表
   timeline.md       时间线
-  knowledge.md      知识矩阵（防剧透核心）
-  plot-check.md     漏洞检查报告
-  chapter-log.md    每章总结（防记忆丢失核心）
-  progress.md       当前阶段/章节
+  knowledge.md      知识矩阵，防止人物越界知情
+  plot-check.md     漏洞检查
+  chapter-log.md    每章总结，防止断点失忆
+  progress.md       当前阶段与章节进度
   revisions.md      设定修订记录
-  final-check.md    精校报告
-novel/              当前新书正文 chapter-01.md、chapter-02.md……
-books/              已完成小说的独立档案（如 `books/高太公造反/`）
-scripts/            new-novel.sh（开新书）、progress.sh（看进度）、sync.mjs（同步进网页）
-WORKFLOW.md         Agent 的操作总纲
-（网页端）
-  package.json / vite.config.js / index.html
-  src/              React 源码（书库/阅读器/写作/设定/进度）
-  public/novels/    同步后的小说数据（网页只读加载）
-  .github/workflows/deploy.yml   GitHub Pages 自动部署
+  final-check.md    最终精校报告
+novel/              当前书稿正文：chapter-01.md、chapter-02.md……
+books/              已完成作品的独立写作档案
+scripts/            开新书、查看进度、同步书库的脚本
+WORKFLOW.md         Agent 的完整操作总纲
+src/                React 网页源码
+public/novels/      构建后供网页读取的书稿数据
 ```
 
-## 想改设定？
+## 想改设定
 
-告诉 Agent：「修改 X 设定」，Agent 会走修订记录流程（`state/revisions.md`），并全篇同步检查，不会悄悄改。
+告诉 Agent：
 
-## 默认参数（可在 `state/theme.md` 阶段 0 调整）
+```text
+修改 X 设定
+```
 
-- 每章约 4000 字（正文通常 4000–4500 字，具体书目以 `state/theme.md` 为准）
-- 章节数由大纲规模决定（进度文件可调）
-- 视角 / 基调 / 结局方向在阶段 0 确定
+Agent 应先把改动记入 `state/revisions.md`，再同步大纲、人物、章节、伏笔、时间线和知识矩阵，并检查正文影响；不会悄悄改完就算数。
+
+## 默认写作参数
+
+- 每章正文通常 4000–4500 个实际 UTF-8 字符。
+- 章节总数由大纲决定，当前长篇模板为 40 章。
+- 视角、基调和结局方向在阶段 0 的主题确认中确定。

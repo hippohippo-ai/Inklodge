@@ -23,6 +23,29 @@ export const STATE_FILES = [
 const LOCAL_KEY = 'huaben.local.novels' // { id: novel }
 const PROGRESS_KEY = 'huaben.reading' // { novelId: lastChapterIndex }
 
+export const DEFAULT_ARCHIVE = {
+  author: '待署名',
+  epigraph: '',
+  volumes: 1,
+}
+
+export function normalizeArchive(archive) {
+  return {
+    author: String(archive?.author || '').trim() || DEFAULT_ARCHIVE.author,
+    epigraph: String(archive?.epigraph || '').trim(),
+    volumes: Math.max(1, Number.parseInt(archive?.volumes, 10) || DEFAULT_ARCHIVE.volumes),
+  }
+}
+
+function normalizeProgress(progress, fallbackStatus) {
+  return {
+    stage: Number.isFinite(progress?.stage) ? progress.stage : 0,
+    currentChapter: Math.max(0, Number(progress?.currentChapter) || 0),
+    totalChapters: Math.max(0, Number(progress?.totalChapters) || 0),
+    status: progress?.status || fallbackStatus,
+  }
+}
+
 function localStore() {
   try {
     return JSON.parse(localStorage.getItem(LOCAL_KEY) || '{}')
@@ -58,8 +81,9 @@ export async function loadLibrary() {
     title: n.title,
     theme: n.theme || '',
     cover: n.cover || '#5b3a1e',
+    archive: normalizeArchive(n.archive),
     source: 'local',
-    progress: n.progress || { stage: 0, currentChapter: 0, totalChapters: 0, status: '本地草稿' },
+    progress: normalizeProgress(n.progress, '本地草稿'),
     chapterCount: (n.chapters || []).length,
   }))
   return [...bundled, ...local]
@@ -75,8 +99,9 @@ async function fetchBundledIndex() {
       title: n.title,
       theme: n.theme || '',
       cover: n.cover || '#5b3a1e',
+      archive: normalizeArchive(n.archive),
       source: 'bundled',
-      progress: n.progress || { stage: 0, currentChapter: 0, totalChapters: 0, status: '规划中' },
+      progress: normalizeProgress(n.progress, '规划中'),
       chapterCount: n.chapterCount || 0,
     }))
   } catch {
@@ -114,8 +139,9 @@ async function loadBundledNovel(id) {
     title: (idx && idx.title) || id,
     theme: (idx && idx.theme) || '',
     cover: (idx && idx.cover) || '#5b3a1e',
+    archive: normalizeArchive(idx && idx.archive),
     source: 'bundled',
-    progress: (idx && idx.progress) || { stage: 0, currentChapter: 0, totalChapters: 0, status: '规划中' },
+    progress: normalizeProgress(idx && idx.progress, '规划中'),
     stateFiles,
     chapters,
   }
@@ -132,6 +158,7 @@ export function createLocalNovel({ title, theme = '' }) {
     title,
     theme: theme || title,
     cover: pickCover(title),
+    archive: { ...DEFAULT_ARCHIVE },
     source: 'local',
     progress: { stage: 0, currentChapter: 0, totalChapters: 0, status: '本地草稿' },
     stateFiles: emptyState,
@@ -145,7 +172,11 @@ export function createLocalNovel({ title, theme = '' }) {
 
 export function saveLocalNovel(novel) {
   const map = localStore()
-  map[novel.id] = novel
+  map[novel.id] = {
+    ...novel,
+    archive: normalizeArchive(novel.archive),
+    progress: normalizeProgress(novel.progress, '本地草稿'),
+  }
   writeLocalStore(map)
 }
 
@@ -179,6 +210,8 @@ export function importLocalNovels(file) {
           if (n && n.title) {
             n.id = n.id || titleToId(n.title)
             n.source = 'local'
+            n.archive = normalizeArchive(n.archive)
+            n.progress = normalizeProgress(n.progress, '本地草稿')
             map[n.id] = n
           }
         }

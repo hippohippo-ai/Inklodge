@@ -27,7 +27,7 @@ export default function Progress({ novel }) {
   return (
     <div className="progress">
       <section className="progress-card">
-        <h3>写作进度</h3>
+        <h3>写作路程</h3>
         <div className="progress-big">
           <span className="progress-num">{current}</span>
           <span className="progress-total">/ {total} 章</span>
@@ -39,7 +39,7 @@ export default function Progress({ novel }) {
       </section>
 
       <section className="progress-card">
-        <h3>生成器阶段</h3>
+        <h3>说书阶段</h3>
         <ol className="stage-list">
           {STAGES.map((s) => {
             const done = s.n < stage
@@ -60,9 +60,9 @@ export default function Progress({ novel }) {
       </section>
 
       <section className="progress-card">
-        <h3>章节</h3>
+        <h3>卷章</h3>
         {chapters.length === 0 ? (
-          <p className="empty-hint">尚未开始写正文。</p>
+          <p className="empty-hint">尚未落笔写正文。</p>
         ) : (
           <ul className="chapter-status-list">
             {chapters.map((c, i) => (

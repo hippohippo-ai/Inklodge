@@ -2,6 +2,11 @@
   "title": "红盖头下的和尚",
   "theme": "红盖头下的和尚",
   "cover": "#5b3a1e",
+  "archive": {
+    "author": "SomethingHippo",
+    "epigraph": "一盏灯，半卷书；故事落在纸上，才有后来人听见。",
+    "volumes": 1
+  },
   "progress": {
     "stage": 12,
     "currentChapter": 15,

@@ -42,10 +42,9 @@ export default function Reader({ novel }) {
   if (chapters.length === 0) {
     return (
       <div className="reader-empty">
-        <h3>还没有正文</h3>
+        <h3>此卷尚无正文</h3>
         <p>
-          这本书的正文由 AI 生成器撰写。写好章节后同步进仓库并重新构建，
-          就会出现在这里；也可以在「写作」页为本地草稿直接写。
+          正文由 AI 生成器落笔。写好章节后同步书库并重新构建，书稿便会出现在这里；案头草稿也可在「落笔写作」页直接续写。
         </p>
       </div>
     )

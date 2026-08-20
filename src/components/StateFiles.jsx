@@ -54,7 +54,7 @@ export default function StateFiles({ novel, onChange }) {
               </button>
             </div>
           ) : (
-            <span className="pill">只读（仓库内置）</span>
+            <span className="pill">只读（楼中藏书）</span>
           )}
         </div>
 
@@ -75,7 +75,7 @@ export default function StateFiles({ novel, onChange }) {
             {dirty && (
               <div className="statefile-save">
                 <button className="btn primary" onClick={save}>
-                  保存
+                  保存此页
                 </button>
               </div>
             )}

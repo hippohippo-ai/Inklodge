@@ -18,9 +18,22 @@ function read(p) {
   }
 }
 
+function readJson(p, fallback) {
+  try {
+    return JSON.parse(read(p))
+  } catch {
+    return fallback
+  }
+}
+
 // 主题（theme.txt 第一行）
 const themeRaw = read(path.join(stateDir, 'theme.txt')).trim()
 const title = themeRaw.split('\n')[0].trim()
+const archive = readJson(path.join(stateDir, 'archive.json'), {
+  author: '待署名',
+  epigraph: '',
+  volumes: 1,
+})
 
 // 新书尚未定题时，只保留已有书库，不生成「待定」书目。
 if (!title || title === '待定' || title === '（待定）') {
@@ -64,7 +77,7 @@ if (fs.existsSync(novelDir)) {
 // 每本小说的 index.json
 fs.writeFileSync(
   path.join(dest, 'index.json'),
-  JSON.stringify({ title, theme: title, cover: '#5b3a1e', progress, stateFiles, chapters }, null, 2)
+  JSON.stringify({ title, theme: title, cover: '#5b3a1e', archive, progress, stateFiles, chapters }, null, 2)
 )
 
 // 顶层 manifest：扫描所有小说

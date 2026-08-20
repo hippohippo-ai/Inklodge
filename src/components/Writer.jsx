@@ -46,11 +46,10 @@ export default function Writer({ novel, onChange }) {
     return (
       <div className="writer readonly">
         <div className="notice">
-          <strong>仓库内置小说为只读。</strong>
+          <strong>楼中藏书只读。</strong>
           <p>
-            正文由 AI 生成器直接写在仓库的 <code>novel/</code> 目录里，
-            运行 <code>npm run build</code> 同步后即可在「阅读」页查看。
-            本地草稿才可在本页直接编辑。
+            这部书由 AI 生成器落在 <code>novel/</code> 目录；运行 <code>npm run build</code> 后，便可在「入卷阅读」中查看。
+            只有案头草稿可以在此处直接改写。
           </p>
         </div>
         <ChapterList chapters={chapters} idx={safeIdx} onSelect={selectChapter} />
@@ -72,7 +71,7 @@ export default function Writer({ novel, onChange }) {
     <div className="writer">
       <div className="writer-toolbar">
         <button className="btn primary" onClick={addChapter}>
-          ＋ 新建章节
+          ＋ 添一章
         </button>
         <div className="seg">
           <button className={`seg-btn ${mode === 'edit' ? 'active' : ''}`} onClick={() => setMode('edit')}>
@@ -108,7 +107,7 @@ export default function Writer({ novel, onChange }) {
           <textarea
             className="editor-textarea"
             value={display}
-            placeholder="在这里写正文……（支持 Markdown）"
+            placeholder="从这里落笔……（支持 Markdown）"
             onChange={(e) => {
               setDraft(e.target.value)
               setDirty(true)
@@ -126,7 +125,7 @@ export default function Writer({ novel, onChange }) {
 
 function ChapterList({ chapters, idx, onSelect }) {
   if (chapters.length === 0) {
-    return <p className="empty-hint">还没有章节。本地草稿点「新建章节」，仓库内置由 AI 写入。</p>
+    return <p className="empty-hint">还没有章节。案头草稿点「添一章」；楼中藏书由 AI 生成器写入。</p>
   }
   return (
     <aside className="chapter-list">

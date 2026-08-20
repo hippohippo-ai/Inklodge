@@ -24,10 +24,10 @@ export default function Library({ library, onOpen, onChanged }) {
     if (!file) return
     try {
       const n = await importLocalNovels(file)
-      alert(`已导入 ${n} 本小说`)
+      alert(`已收入楼中 ${n} 本书稿`)
       onChanged()
     } catch {
-      alert('导入失败：JSON 格式不对')
+      alert('入楼失败：JSON 格式不正确')
     }
     if (fileRef.current) fileRef.current.value = ''
   }
@@ -44,10 +44,10 @@ export default function Library({ library, onOpen, onChanged }) {
         </div>
         <div className="header-actions">
           <button className="btn ghost" onClick={() => exportLocalNovels()}>
-            导出本地小说
+            导出书稿
           </button>
           <button className="btn ghost" onClick={() => fileRef.current?.click()}>
-            导入
+            导入书稿
           </button>
           <input
             ref={fileRef}
@@ -57,15 +57,27 @@ export default function Library({ library, onOpen, onChanged }) {
             onChange={(e) => handleImport(e.target.files[0])}
           />
           <button className="btn primary" onClick={() => setShowNew(true)}>
-            ＋ 新建小说
+            ＋ 开新书
           </button>
         </div>
       </header>
 
+      <section className="story-stage" aria-label="说书台">
+        <div className="story-scroll">
+          <span className="scroll-kicker">说书楼</span>
+          <strong>一盏灯，半卷书</strong>
+          <small>今日开讲，诸位请坐</small>
+        </div>
+        <div className="story-desk">
+          <span className="desk-lamp">◆</span>
+          <span>书场已开</span>
+        </div>
+      </section>
+
       {showNew && (
         <div className="modal-mask" onClick={() => setShowNew(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3>新建小说（本地草稿）</h3>
+            <h3>开一部新书（案头草稿）</h3>
             <label>
               书名
               <input
@@ -76,7 +88,7 @@ export default function Library({ library, onOpen, onChanged }) {
               />
             </label>
             <label>
-              主题 / 一句话
+              题眼 / 一句话
               <input
                 value={theme}
                 onChange={(e) => setTheme(e.target.value)}
@@ -85,23 +97,22 @@ export default function Library({ library, onOpen, onChanged }) {
             </label>
             <div className="modal-actions">
               <button className="btn ghost" onClick={() => setShowNew(false)}>
-                取消
+                先不落笔
               </button>
               <button className="btn primary" onClick={createNovel} disabled={!title.trim()}>
-                创建
+                立卷
               </button>
             </div>
             <p className="hint">
-              在浏览器里快速起草。正式写作建议用仓库里的 AI 生成器流程（见 README），
-              写好后同步进「仓库内置」书库。
+              先在案头起草。若要正式开写，请按 README 使用 AI 生成器；写成后运行构建，书稿便会收入「楼中藏书」。
             </p>
           </div>
         </div>
       )}
 
       <section className="shelf">
-        <h2 className="shelf-title">仓库内置</h2>
-        {bundled.length === 0 && <p className="empty-hint">暂无。用 AI 生成器写好小说后，运行 <code>npm run build</code> 即会同步到这里。</p>}
+        <h2 className="shelf-title">楼中藏书</h2>
+        {bundled.length === 0 && <p className="empty-hint">楼中暂时空着。用 AI 生成器写好书稿后，运行 <code>npm run build</code>，它便会登楼。</p>}
         <div className="card-grid">
           {bundled.map((n) => (
             <NovelCard key={n.id} n={n} onOpen={() => onOpen(n.id)} />
@@ -110,8 +121,8 @@ export default function Library({ library, onOpen, onChanged }) {
       </section>
 
       <section className="shelf">
-        <h2 className="shelf-title">本地草稿</h2>
-        {local.length === 0 && <p className="empty-hint">暂无本地草稿。点右上角「新建小说」即可开始。</p>}
+        <h2 className="shelf-title">案头草稿</h2>
+        {local.length === 0 && <p className="empty-hint">案头还没有草稿。点右上角「开新书」，即可落笔。</p>}
         <div className="card-grid">
           {local.map((n) => (
             <NovelCard key={n.id} n={n} onOpen={() => onOpen(n.id)} />
@@ -135,10 +146,13 @@ function NovelCard({ n, onOpen }) {
     <button className="novel-card" onClick={onOpen} style={{ '--cover': n.cover }}>
       <div className="card-cover">
         <span className="card-title">{n.title}</span>
-        <span className="card-tag">{n.source === 'bundled' ? '仓库' : '草稿'}</span>
+        <span className="card-tag">{n.source === 'bundled' ? '楼中' : '案头'}</span>
       </div>
       <div className="card-body">
-        <p className="card-theme">{n.theme || '（未填主题）'}</p>
+        <p className="card-theme">{n.theme || '（尚未立题）'}</p>
+        <p className="card-archive-line">
+          {n.archive?.author || '待署名'} · {n.archive?.volumes || 1} 卷
+        </p>
         <div className="card-meta">
           <span>{n.chapterCount} 章</span>
           <span>{n.progress.status || '—'}</span>

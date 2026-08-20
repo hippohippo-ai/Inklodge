@@ -3,10 +3,10 @@
   "theme": "红盖头下的和尚",
   "cover": "#5b3a1e",
   "progress": {
-    "stage": 9,
-    "currentChapter": 11,
+    "stage": 12,
+    "currentChapter": 15,
     "totalChapters": 40,
-    "status": "重建版正文写作中"
+    "status": "重建版正文写作中；第 1–15 章反 AI 痕迹脱毒完成，第 16–24 章结构重规划完成，待继续写作"
   },
   "stateFiles": [
     "artifacts",
@@ -36,6 +36,10 @@
     "chapter-08",
     "chapter-09",
     "chapter-10",
-    "chapter-11"
+    "chapter-11",
+    "chapter-12",
+    "chapter-13",
+    "chapter-14",
+    "chapter-15"
   ]
 }

@@ -4,9 +4,9 @@
   "cover": "#5b3a1e",
   "progress": {
     "stage": 9,
-    "currentChapter": 2,
+    "currentChapter": 11,
     "totalChapters": 40,
-    "status": "写作中"
+    "status": "重建版正文写作中"
   },
   "stateFiles": [
     "artifacts",
@@ -27,6 +27,15 @@
   ],
   "chapters": [
     "chapter-01",
-    "chapter-02"
+    "chapter-02",
+    "chapter-03",
+    "chapter-04",
+    "chapter-05",
+    "chapter-06",
+    "chapter-07",
+    "chapter-08",
+    "chapter-09",
+    "chapter-10",
+    "chapter-11"
   ]
 }

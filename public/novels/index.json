@@ -1,5 +1,18 @@
 [
   {
+    "id": "红盖头下的和尚",
+    "title": "红盖头下的和尚",
+    "theme": "红盖头下的和尚",
+    "cover": "#5b3a1e",
+    "progress": {
+      "stage": 9,
+      "currentChapter": 1,
+      "totalChapters": 40,
+      "status": "写作中"
+    },
+    "chapterCount": 1
+  },
+  {
     "id": "高太公造反",
     "title": "高太公造反",
     "theme": "高太公造反",

@@ -1,0 +1,31 @@
+{
+  "title": "红盖头下的和尚",
+  "theme": "红盖头下的和尚",
+  "cover": "#5b3a1e",
+  "progress": {
+    "stage": 9,
+    "currentChapter": 1,
+    "totalChapters": 40,
+    "status": "写作中"
+  },
+  "stateFiles": [
+    "artifacts",
+    "chapter-log",
+    "chapters",
+    "characters",
+    "conflicts",
+    "final-check",
+    "foreshadowing",
+    "knowledge",
+    "outline",
+    "plot-check",
+    "progress",
+    "requirements",
+    "revisions",
+    "theme",
+    "timeline"
+  ],
+  "chapters": [
+    "chapter-01"
+  ]
+}

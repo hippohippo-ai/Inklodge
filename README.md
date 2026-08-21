@@ -1,4 +1,5 @@
 # Inklodge · 墨庐
+https://hippohippo-ai.github.io/Inklodge/
 
 古典武侠与当代叙事的沉浸式阅读空间。
 

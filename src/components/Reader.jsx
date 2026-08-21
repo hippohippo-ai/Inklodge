@@ -155,10 +155,17 @@ export default function Reader({ novel }) {
   // Strip the first # heading from markdown to avoid duplicate title display
   const cleanContent = useMemo(() => {
     if (!current) return ''
-    return current.content.replace(/^#\s+.+(\r?\n)+/, '')
+    return current.content.replace(/^\uFEFF?#\s+[^\r\n]*(?:\r?\n|$)/, '')
   }, [current])
 
-  const html = useMemo(() => renderMarkdown(cleanContent), [cleanContent])
+  const html = useMemo(() => {
+    const rendered = renderMarkdown(cleanContent)
+    return rendered.replace(/<p>([\s\S]*?)<\/p>/g, (full, inner) => {
+      const text = inner.replace(/<[^>]*>/g, '').replace(/&(?:amp|lt|gt|quot|#39);/g, 'x')
+      const className = text.trim().length < 15 ? 'short-paragraph' : ''
+      return `<p${className ? ` class="${className}"` : ''}>${inner}</p>`
+    })
+  }, [cleanContent])
 
   // Bookmark helpers
   const isBookmarked = bookmarks.some((b) => b.chapterIdx === idx)

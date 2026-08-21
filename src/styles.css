@@ -1039,6 +1039,9 @@ html, body, #root {
   text-indent: 2em;
   word-break: break-word;
 }
+.markdown-body p.short-paragraph {
+  text-indent: 0.8em;
+}
 
 .markdown-body blockquote {
   margin: 1.8em 0;
@@ -1207,6 +1210,7 @@ html, body, #root {
     overscroll-behavior-y: auto;
   }
   .reader-article { padding: 16px 16px 64px; }
+  .markdown-body p.short-paragraph { text-indent: 0; }
   .chapter-main-title { font-size: 22px; margin: 16px 0 32px; }
   .reader-book-title { max-width: 32vw; }
   .reader-chapter-number { flex-shrink: 0; }

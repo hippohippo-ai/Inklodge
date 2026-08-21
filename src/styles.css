@@ -291,10 +291,21 @@ html, body, #root {
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line-subtle);
   z-index: 30;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
 }
-.reader-header-bar.hidden { transform: translateY(-100%); opacity: 0; pointer-events: none; }
-.reader-header-bar.visible { transform: translateY(0); opacity: 1; }
+
+.reader-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.reader-book-title,
+.reader-chapter-number { color: var(--ink-deep); font-weight: 600; }
+.reader-meta-separator { color: var(--ink-light); }
 
 .bar-left, .bar-right { display: flex; align-items: center; gap: 8px; }
 .bar-center { flex: 1; text-align: center; overflow: hidden; padding: 0 16px; }
@@ -393,6 +404,8 @@ html, body, #root {
   flex: 1;
   height: 100%;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 64px 0 80px;
   scroll-behavior: smooth;
 }
@@ -998,12 +1011,34 @@ html, body, #root {
   .archive-actions, .archive-status-label { align-items: stretch; flex-direction: column; }
 
   /* Reader mobile */
-  .reader-header-bar { padding: 0 12px; height: 44px; }
-  .icon-btn-text { padding: 4px 6px; font-size: 11px; }
-  .bar-center { display: none; }
-  .reader-footer-bar { height: 48px; padding: 0 12px; }
-  .page-btn { padding: 4px 10px; font-size: 11px; }
-  .chapter-slider-wrap { flex: 0 1 180px; margin: 0 8px; }
+  .reader-header-bar {
+    padding: 0 12px;
+    height: 44px;
+  }
+  .reader-header-bar .bar-left,
+  .reader-header-bar .bar-right { display: none; }
+  .bar-center.reader-meta {
+    display: flex;
+    width: 100%;
+    padding: 0;
+    gap: 5px;
+    font-size: 12px;
+  }
+  .reader-meta .current-chapter-text { font-size: 12px; }
+  .reader-footer-bar {
+    height: 52px;
+    padding: 0 8px;
+    gap: 2px;
+  }
+  .page-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 6px 3px;
+    font-size: 11px;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+  .chapter-slider-wrap { display: none; }
   .reader-article { padding: 16px 16px 64px; }
   .chapter-main-title { font-size: 22px; margin: 16px 0 32px; }
 }

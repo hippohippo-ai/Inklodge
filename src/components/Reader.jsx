@@ -50,6 +50,10 @@ function saveBookmarks(novelId, bms) {
   } catch { /* ignore */ }
 }
 
+function chapterName(title = '') {
+  return title.replace(/^第[0-9０-９一二三四五六七八九十百千万]+章[：:\s·—-]*/, '').trim() || title
+}
+
 export default function Reader({ novel }) {
   const chapters = novel.chapters || []
   const [idx, setIdx] = useState(() => {
@@ -66,7 +70,7 @@ export default function Reader({ novel }) {
   // UI state
   const [showToc, setShowToc] = useState(false)
   const [showBookmarks, setShowBookmarks] = useState(false)
-  const [headerVisible, setHeaderVisible] = useState(true)
+  const [footerVisible, setFooterVisible] = useState(true)
   const [bookmarks, setBookmarks] = useState(() => loadBookmarks(novel.id))
 
   const scrollRef = useRef(null)
@@ -77,7 +81,7 @@ export default function Reader({ novel }) {
     if (chapters.length) setReadingPos(novel.id, idx)
     if (scrollRef.current) scrollRef.current.scrollTop = 0
     lastScrollTop.current = 0
-    setHeaderVisible(true)
+    setFooterVisible(true)
   }, [idx, novel.id, chapters.length])
 
   // Persist preferences
@@ -93,24 +97,24 @@ export default function Reader({ novel }) {
     saveBookmarks(novel.id, bookmarks)
   }, [bookmarks, novel.id])
 
-  // Scroll-to-hide logic
+  // 手机上按阅读手势控制底部导航：上滑（正文向上滚动）显示，下滑隐藏。
   const handleScroll = () => {
     const el = scrollRef.current
     if (!el) return
     const st = el.scrollTop
-    if (Math.abs(st - lastScrollTop.current) < 8) return
-    if (st > lastScrollTop.current && st > 60) {
-      setHeaderVisible(false)
+    const delta = st - lastScrollTop.current
+    if (Math.abs(delta) < 6) return
+    if (st <= 0 || delta < 0) {
+      setFooterVisible(false)
     } else {
-      setHeaderVisible(true)
+      setFooterVisible(true)
     }
     lastScrollTop.current = st
   }
 
-  const toggleBars = () => setHeaderVisible((v) => !v)
-
   // Current chapter
   const current = chapters[idx]
+  const currentChapterName = chapterName(current?.title || '')
 
   // Strip the first # heading from markdown to avoid duplicate title display
   const cleanContent = useMemo(() => {
@@ -166,7 +170,7 @@ export default function Reader({ novel }) {
   return (
     <div className={`reader reader-${theme}`}>
       {/* Floating header */}
-      <header className={`reader-header-bar ${headerVisible ? 'visible' : 'hidden'}`}>
+      <header className="reader-header-bar visible">
         <div className="bar-left">
           <button className="icon-btn-text" onClick={() => setShowToc(true)} title="目录">
             ☰ 目录
@@ -183,8 +187,12 @@ export default function Reader({ novel }) {
           </button>
         </div>
 
-        <div className="bar-center">
-          <span className="current-chapter-text">{current?.title}</span>
+        <div className="bar-center reader-meta" aria-label="当前阅读位置">
+          <span className="reader-book-title">{novel.title}</span>
+          <span className="reader-meta-separator">·</span>
+          <span className="reader-chapter-number">第{idx + 1}章</span>
+          <span className="reader-meta-separator">·</span>
+          <span className="current-chapter-text">{currentChapterName}</span>
         </div>
 
         <div className="bar-right">
@@ -264,7 +272,6 @@ export default function Reader({ novel }) {
         className="reader-scroll-container"
         ref={scrollRef}
         onScroll={handleScroll}
-        onClick={toggleBars}
       >
         <article className="reader-article" style={{ fontSize: `${fontSize}px` }}>
           {current && (
@@ -277,11 +284,17 @@ export default function Reader({ novel }) {
       </main>
 
       {/* Floating footer */}
-      <footer className={`reader-footer-bar ${headerVisible ? 'visible' : 'hidden'}`}>
+      <footer className={`reader-footer-bar ${footerVisible ? 'visible' : 'hidden'}`}>
+        <button
+          className="btn ghost page-btn toc-page-btn"
+          onClick={() => setShowToc(true)}
+        >
+          ☰ 返回目录
+        </button>
         <button
           className="btn ghost page-btn"
           disabled={idx === 0}
-          onClick={(e) => { e.stopPropagation(); setIdx((i) => Math.max(0, i - 1)) }}
+          onClick={() => setIdx((i) => Math.max(0, i - 1))}
         >
           ← 上一章
         </button>
@@ -301,7 +314,7 @@ export default function Reader({ novel }) {
         <button
           className="btn primary page-btn"
           disabled={idx === chapters.length - 1}
-          onClick={(e) => { e.stopPropagation(); setIdx((i) => Math.min(chapters.length - 1, i + 1)) }}
+          onClick={() => setIdx((i) => Math.min(chapters.length - 1, i + 1))}
         >
           下一章 →
         </button>

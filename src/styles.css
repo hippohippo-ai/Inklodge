@@ -227,7 +227,49 @@ html, body, #root {
 
 /* ==================== 小说导航栏 (Novel View) ==================== */
 
-.novel { min-height: 100vh; display: flex; flex-direction: column; }
+.novel {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-paper);
+  color: var(--ink-main);
+}
+
+/* 阅读主题同时作用于小说外层，避免顶部主菜单仍停留在纸色。 */
+.novel:has(.reader.reader-ink) {
+  --bg-paper: #faf9f6;
+  --bg-card: #fdfcf9;
+  --bg-subtle: #eeece4;
+  --ink-deep: #111;
+  --ink-main: #222;
+  --ink-muted: #78736a;
+  --ink-light: #a6a095;
+}
+.novel:has(.reader.reader-eye) {
+  --bg-paper: #eef5e8;
+  --bg-card: #f7fbf2;
+  --bg-subtle: #e1ecd9;
+  --ink-deep: #293b2d;
+  --ink-main: #354839;
+  --ink-muted: #667d6a;
+  --ink-light: #93a694;
+  --line-subtle: rgba(41, 59, 45, 0.12);
+  --line-focus: rgba(41, 59, 45, 0.24);
+  --cinnabar: #71884f;
+  --cinnabar-soft: #8ca66a;
+  --cinnabar-subtle: rgba(113, 136, 79, 0.09);
+}
+.novel:has(.reader.reader-night) {
+  --bg-paper: #161514;
+  --bg-card: #1c1a18;
+  --bg-subtle: #242220;
+  --ink-deep: #ded9cd;
+  --ink-main: #bbb5a7;
+  --ink-muted: #78736a;
+  --ink-light: #4e4a44;
+  --line-subtle: rgba(255, 255, 255, 0.06);
+  --line-focus: rgba(255, 255, 255, 0.15);
+}
 
 .novel-header {
   height: 56px;
@@ -291,6 +333,16 @@ html, body, #root {
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line-subtle);
   z-index: 30;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+.reader-header-bar.hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+.reader-header-bar.visible {
+  transform: translateY(0);
+  opacity: 1;
 }
 
 .reader-meta {
@@ -304,7 +356,16 @@ html, body, #root {
   overflow: hidden;
 }
 .reader-book-title,
-.reader-chapter-number { color: var(--ink-deep); font-weight: 600; }
+.reader-chapter-number {
+  color: var(--ink-deep);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.reader-book-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .reader-meta-separator { color: var(--ink-light); }
 
 .bar-left, .bar-right { display: flex; align-items: center; gap: 8px; }
@@ -369,6 +430,34 @@ html, body, #root {
   cursor: pointer;
 }
 .theme-dot.active { background: var(--ink-deep); color: var(--bg-paper); border-color: var(--ink-deep); }
+.mobile-font-controls,
+.mobile-theme-select {
+  display: none;
+}
+.mobile-font-controls {
+  align-items: center;
+  gap: 2px;
+  color: var(--ink-muted);
+  font-size: 10px;
+  white-space: nowrap;
+}
+.mobile-font-btn {
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  font-family: var(--font-serif);
+  font-size: 11px;
+  padding: 3px 2px;
+}
+.mobile-theme-select {
+  border: 1px solid var(--line-subtle);
+  border-radius: 2px;
+  background: var(--bg-card);
+  color: var(--ink-muted);
+  font-family: var(--font-serif);
+  font-size: 11px;
+  padding: 3px 2px;
+}
 
 /* 底部极细翻页栏 */
 .reader-footer-bar {
@@ -403,11 +492,22 @@ html, body, #root {
 .reader-scroll-container {
   flex: 1;
   height: 100%;
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
+  overflow-y: scroll;
+  overscroll-behavior-y: auto;
   -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+  scrollbar-color: var(--ink-light) transparent;
   padding: 64px 0 80px;
   scroll-behavior: smooth;
+}
+.reader-scroll-container::-webkit-scrollbar { width: 8px; }
+.reader-scroll-container::-webkit-scrollbar-track { background: transparent; }
+.reader-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--ink-light);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background-clip: padding-box;
 }
 
 .reader-article {
@@ -484,6 +584,14 @@ html, body, #root {
 }
 .toc-drawer-item:hover { background: var(--bg-subtle); }
 .toc-drawer-item.active { color: var(--cinnabar); font-weight: 600; background: var(--cinnabar-subtle); }
+.toc-volume-label {
+  padding: 18px 24px 7px;
+  color: var(--cinnabar);
+  border-top: 1px solid var(--line-subtle);
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+.toc-volume-label:first-child { border-top: none; padding-top: 8px; }
 
 .toc-no {
   font-family: var(--font-en);
@@ -959,7 +1067,25 @@ html, body, #root {
 /* ==================== 三色主题 ==================== */
 
 .reader-paper { --bg-paper: #f8f6f0; }
+.reader-eye {
+  --bg-paper: #eef5e8;
+  --bg-card: #f7fbf2;
+  --bg-subtle: #e1ecd9;
+  --ink-deep: #293b2d;
+  --ink-main: #354839;
+  --ink-muted: #667d6a;
+  --ink-light: #93a694;
+  --line-subtle: rgba(41, 59, 45, 0.12);
+  --line-focus: rgba(41, 59, 45, 0.24);
+  --cinnabar: #71884f;
+  --cinnabar-soft: #8ca66a;
+  --cinnabar-subtle: rgba(113, 136, 79, 0.09);
+}
 .reader-ink { --bg-paper: #faf9f6; --ink-deep: #111; --ink-main: #222; }
+.reader-ink .reader-header-bar,
+.reader-ink .reader-footer-bar { background: rgba(250, 249, 246, 0.94); }
+.reader-eye .reader-header-bar,
+.reader-eye .reader-footer-bar { background: rgba(238, 245, 232, 0.94); }
 .reader-night {
   --bg-paper: #161514;
   --bg-card: #1c1a18;
@@ -993,8 +1119,23 @@ html, body, #root {
   .tabs { order: 3; width: 100%; overflow-x: auto; margin-left: 0; }
   .tab { white-space: nowrap; }
 
-  .novel-header { height: auto; min-height: 48px; padding: 8px 16px; flex-wrap: wrap; }
+  .novel-header {
+    height: auto;
+    min-height: 48px;
+    padding: 8px 16px;
+    flex-wrap: wrap;
+  }
   .novel-actions { width: 100%; justify-content: flex-end; }
+
+  /* 阅读页占满移动端视口，避免外层页面把底部导航推到屏幕之外。 */
+  .novel {
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden;
+  }
+  .novel-body {
+    min-height: 0;
+  }
 
   .writer { flex-direction: column; }
   .chapter-list { width: 100%; max-height: 180px; border-right: none; border-bottom: 1px solid var(--line-subtle); flex-direction: row; overflow-x: auto; }
@@ -1011,6 +1152,10 @@ html, body, #root {
   .archive-actions, .archive-status-label { align-items: stretch; flex-direction: column; }
 
   /* Reader mobile */
+  .reader {
+    height: auto;
+    min-height: 0;
+  }
   .reader-header-bar {
     padding: 0 12px;
     height: 44px;
@@ -1019,16 +1164,32 @@ html, body, #root {
   .reader-header-bar .bar-right { display: none; }
   .bar-center.reader-meta {
     display: flex;
-    width: 100%;
-    padding: 0;
+    flex: 1;
+    width: auto;
+    padding: 0 4px 0 0;
     gap: 5px;
     font-size: 12px;
   }
+  .mobile-font-controls {
+    display: flex;
+    flex: 0 0 62px;
+    justify-content: center;
+  }
+  .mobile-theme-select {
+    display: block;
+    flex: 0 0 52px;
+    max-width: 52px;
+  }
   .reader-meta .current-chapter-text { font-size: 12px; }
   .reader-footer-bar {
-    height: 52px;
-    padding: 0 8px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(52px + env(safe-area-inset-bottom));
+    padding: 0 8px env(safe-area-inset-bottom);
     gap: 2px;
+    z-index: 60;
   }
   .page-btn {
     flex: 1 1 0;
@@ -1039,6 +1200,15 @@ html, body, #root {
     white-space: nowrap;
   }
   .chapter-slider-wrap { display: none; }
+  .reader-scroll-container {
+    min-height: 0;
+    padding: 52px 0 calc(72px + env(safe-area-inset-bottom));
+    touch-action: pan-y;
+    overscroll-behavior-y: auto;
+  }
   .reader-article { padding: 16px 16px 64px; }
   .chapter-main-title { font-size: 22px; margin: 16px 0 32px; }
+  .reader-book-title { max-width: 32vw; }
+  .reader-chapter-number { flex-shrink: 0; }
+  .reader-meta-separator { flex-shrink: 0; }
 }

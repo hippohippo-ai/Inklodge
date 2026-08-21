@@ -1,15 +1,32 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { renderMarkdown } from '../lib/markdown.js'
 import { getReadingPos, setReadingPos } from '../lib/novels.js'
 
 const THEMES = [
-  { key: 'paper', label: '纸' },
-  { key: 'ink', label: '墨' },
-  { key: 'night', label: '夜' },
+  { key: 'paper', label: '纸色' },
+  { key: 'eye', label: '护眼' },
+  { key: 'ink', label: '墨色' },
+  { key: 'night', label: '暗色' },
 ]
+
+const VOLUMES = [
+  { start: 0, title: '卷一：红灯引路' },
+  { start: 8, title: '卷二：七封信' },
+  { start: 16, title: '卷三：出庄之后' },
+  { start: 24, title: '卷四：冥婚' },
+  { start: 32, title: '卷五：灯灭之后' },
+]
+
+function volumeTitle(index) {
+  return VOLUMES.find((volume, i) => {
+    const next = VOLUMES[i + 1]
+    return index >= volume.start && (!next || index < next.start)
+  })?.title
+}
 
 const BM_KEY = 'inklodge.bookmarks'
 const FONT_KEY = 'inklodge.fontsize'
+const FONT_DEFAULT_KEY = 'inklodge.fontsize.default-v2'
 const THEME_KEY = 'inklodge.theme'
 
 // 旧版「shuoshulou.*」键名：首次读取时迁移到 inklodge.*，避免书签与设置丢失
@@ -31,6 +48,18 @@ function readStorage(key, fallback = null) {
     }
   } catch { /* ignore */ }
   return fallback
+}
+
+function initialFontSize() {
+  const stored = Number(readStorage(FONT_KEY, '') || 0)
+  try {
+    // 将旧版默认的 19px 只迁移一次，用户之后的字号选择继续保留。
+    if (!localStorage.getItem(FONT_DEFAULT_KEY)) {
+      localStorage.setItem(FONT_DEFAULT_KEY, '1')
+      return stored === 19 || !stored ? 17 : stored
+    }
+  } catch { /* ignore */ }
+  return stored || 17
 }
 
 function loadBookmarks(novelId) {
@@ -60,9 +89,7 @@ export default function Reader({ novel }) {
     const saved = getReadingPos(novel.id)
     return saved < chapters.length ? saved : 0
   })
-  const [fontSize, setFontSize] = useState(
-    Number(readStorage(FONT_KEY, '19') || 19)
-  )
+  const [fontSize, setFontSize] = useState(initialFontSize)
   const [theme, setTheme] = useState(
     readStorage(THEME_KEY, 'paper') || 'paper'
   )
@@ -71,6 +98,7 @@ export default function Reader({ novel }) {
   const [showToc, setShowToc] = useState(false)
   const [showBookmarks, setShowBookmarks] = useState(false)
   const [footerVisible, setFooterVisible] = useState(true)
+  const [headerVisible, setHeaderVisible] = useState(true)
   const [bookmarks, setBookmarks] = useState(() => loadBookmarks(novel.id))
 
   const scrollRef = useRef(null)
@@ -79,9 +107,18 @@ export default function Reader({ novel }) {
   // Persist reading position
   useEffect(() => {
     if (chapters.length) setReadingPos(novel.id, idx)
-    if (scrollRef.current) scrollRef.current.scrollTop = 0
+  }, [idx, novel.id, chapters.length])
+
+  // 切章后始终回到新章节开头；用 layout effect 避免先闪现上一章尾部。
+  useLayoutEffect(() => {
+    const el = scrollRef.current
+    if (el) {
+      el.scrollTop = 0
+      el.scrollTo?.({ top: 0, left: 0, behavior: 'auto' })
+    }
     lastScrollTop.current = 0
     setFooterVisible(true)
+    setHeaderVisible(true)
   }, [idx, novel.id, chapters.length])
 
   // Persist preferences
@@ -101,14 +138,13 @@ export default function Reader({ novel }) {
   const handleScroll = () => {
     const el = scrollRef.current
     if (!el) return
-    const st = el.scrollTop
+    const st = Math.max(0, el.scrollTop)
     const delta = st - lastScrollTop.current
-    if (Math.abs(delta) < 6) return
-    if (st <= 0 || delta < 0) {
-      setFooterVisible(false)
-    } else {
-      setFooterVisible(true)
-    }
+    if (Math.abs(delta) < 2) return
+    // 正文向下（scrollTop 增大）时收起；向上回滚时重新出现。
+    const visible = st <= 0 || delta < 0
+    setFooterVisible(visible)
+    setHeaderVisible(visible)
     lastScrollTop.current = st
   }
 
@@ -170,7 +206,7 @@ export default function Reader({ novel }) {
   return (
     <div className={`reader reader-${theme}`}>
       {/* Floating header */}
-      <header className="reader-header-bar visible">
+      <header className={`reader-header-bar ${headerVisible ? 'visible' : 'hidden'}`}>
         <div className="bar-left">
           <button className="icon-btn-text" onClick={() => setShowToc(true)} title="目录">
             ☰ 目录
@@ -194,6 +230,29 @@ export default function Reader({ novel }) {
           <span className="reader-meta-separator">·</span>
           <span className="current-chapter-text">{currentChapterName}</span>
         </div>
+
+        <div className="mobile-font-controls" aria-label="字号设置">
+          <button
+            className="mobile-font-btn"
+            onClick={() => setFontSize((s) => Math.max(14, s - 1))}
+            aria-label="减小字号"
+          >A−</button>
+          <span>{fontSize}</span>
+          <button
+            className="mobile-font-btn"
+            onClick={() => setFontSize((s) => Math.min(32, s + 1))}
+            aria-label="增大字号"
+          >A+</button>
+        </div>
+
+        <select
+          className="mobile-theme-select"
+          value={theme}
+          onChange={(e) => setTheme(e.target.value)}
+          aria-label="阅读模式"
+        >
+          {THEMES.map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}
+        </select>
 
         <div className="bar-right">
           <div className="font-controls">
@@ -225,16 +284,21 @@ export default function Reader({ novel }) {
               <button className="close-btn" onClick={() => setShowToc(false)}>✕</button>
             </div>
             <div className="drawer-list">
-              {chapters.map((c, i) => (
-                <button
-                  key={c.id}
-                  className={`toc-drawer-item ${i === idx ? 'active' : ''}`}
-                  onClick={() => { setIdx(i); setShowToc(false) }}
-                >
-                  <span className="toc-no">{String(i + 1).padStart(2, '0')}</span>
-                  <span className="toc-title">{c.title}</span>
-                </button>
-              ))}
+              {chapters.map((c, i) => {
+                const volume = volumeTitle(i)
+                return (
+                  <div key={c.id}>
+                    {volume && <div className="toc-volume-label">{volume}</div>}
+                    <button
+                      className={`toc-drawer-item ${i === idx ? 'active' : ''}`}
+                      onClick={() => { setIdx(i); setShowToc(false) }}
+                    >
+                      <span className="toc-no">{String(i + 1).padStart(2, '0')}</span>
+                      <span className="toc-title">{c.title}</span>
+                    </button>
+                  </div>
+                )
+              })}
             </div>
           </aside>
         </div>
@@ -284,7 +348,10 @@ export default function Reader({ novel }) {
       </main>
 
       {/* Floating footer */}
-      <footer className={`reader-footer-bar ${footerVisible ? 'visible' : 'hidden'}`}>
+      <footer
+        className={`reader-footer-bar ${footerVisible ? 'visible' : 'hidden'}`}
+        aria-label="章节导航"
+      >
         <button
           className="btn ghost page-btn toc-page-btn"
           onClick={() => setShowToc(true)}

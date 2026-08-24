@@ -68,7 +68,8 @@ if (fs.existsSync(stateDir)) {
 
 const chapters = []
 if (fs.existsSync(novelDir)) {
-  for (const f of fs.readdirSync(novelDir).filter((f) => f.endsWith('.md')).sort()) {
+  const publishable = (f) => /^chapter-\d+\.md$/.test(f) || f === 'copyright.md' || f === 'preface.md'
+  for (const f of fs.readdirSync(novelDir).filter(publishable).sort()) {
     fs.copyFileSync(path.join(novelDir, f), path.join(dest, 'chapters', f))
     chapters.push(f.replace(/\.md$/, ''))
   }

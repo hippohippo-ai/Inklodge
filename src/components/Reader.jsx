@@ -113,8 +113,11 @@ export default function Reader({ novel }) {
   useLayoutEffect(() => {
     const el = scrollRef.current
     if (el) {
+      // 覆盖 CSS 的 scroll-behavior: smooth，切章时立即跳回顶部，不做平滑动画。
+      const prev = el.style.scrollBehavior
+      el.style.scrollBehavior = 'auto'
       el.scrollTop = 0
-      el.scrollTo?.({ top: 0, left: 0, behavior: 'auto' })
+      el.style.scrollBehavior = prev
     }
     lastScrollTop.current = 0
     setFooterVisible(true)
@@ -135,14 +138,16 @@ export default function Reader({ novel }) {
   }, [bookmarks, novel.id])
 
   // 手机上按阅读手势控制底部导航：上滑（正文向上滚动）显示，下滑隐藏。
+  // 桌面端保持导航常显，滚动时不收起。
   const handleScroll = () => {
     const el = scrollRef.current
     if (!el) return
     const st = Math.max(0, el.scrollTop)
     const delta = st - lastScrollTop.current
     if (Math.abs(delta) < 2) return
+    const mobile = window.matchMedia('(max-width: 820px)').matches
     // 正文向下（scrollTop 增大）时收起；向上回滚时重新出现。
-    const visible = st <= 0 || delta < 0
+    const visible = mobile ? st <= 0 || delta < 0 : true
     setFooterVisible(visible)
     setHeaderVisible(visible)
     lastScrollTop.current = st
@@ -293,9 +298,11 @@ export default function Reader({ novel }) {
             <div className="drawer-list">
               {chapters.map((c, i) => {
                 const volume = volumeTitle(i)
+                const prevVolume = i > 0 ? volumeTitle(i - 1) : null
+                const showVolumeLabel = volume && volume !== prevVolume
                 return (
                   <div key={c.id}>
-                    {volume && <div className="toc-volume-label">{volume}</div>}
+                    {showVolumeLabel && <div className="toc-volume-label">{volume}</div>}
                     <button
                       className={`toc-drawer-item ${i === idx ? 'active' : ''}`}
                       onClick={() => { setIdx(i); setShowToc(false) }}

@@ -126,14 +126,15 @@ async function loadBundledNovel(id) {
       stateFiles[name] = await fetchText(`${base}/state/${name}.md`, '')
     })
   )
-  const chapters = []
   const chapterNames = (idx && idx.chapters) || []
-  await Promise.all(
+  // Promise.all preserves result order matching the input array — do NOT use .push()
+  // inside the map, or concurrent fetches will shuffle chapters randomly.
+  const chapters = await Promise.all(
     chapterNames.map(async (c) => {
       const content = await fetchText(`${base}/chapters/${c}.md`, '')
       const match = content.match(/^#\s+(.+)$/m)
       const title = match ? match[1].trim() : c
-      chapters.push({ id: c, title, content })
+      return { id: c, title, content }
     })
   )
   return {

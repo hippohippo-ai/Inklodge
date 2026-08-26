@@ -30,7 +30,7 @@ function readJson(p, fallback) {
 const themeRaw = read(path.join(stateDir, 'theme.txt')).trim()
 const title = themeRaw.split('\n')[0].trim()
 const archive = readJson(path.join(stateDir, 'archive.json'), {
-  author: '待署名',
+  author: '咸鱼散翁',
   epigraph: '',
   volumes: 1,
 })

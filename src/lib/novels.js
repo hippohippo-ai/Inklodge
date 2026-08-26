@@ -24,7 +24,7 @@ const LOCAL_KEY = 'huaben.local.novels' // { id: novel }
 const PROGRESS_KEY = 'huaben.reading' // { novelId: lastChapterIndex }
 
 export const DEFAULT_ARCHIVE = {
-  author: '待署名',
+  author: '咸鱼散翁',
   epigraph: '',
   volumes: 1,
 }

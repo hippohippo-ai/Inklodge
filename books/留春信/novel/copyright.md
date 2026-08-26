@@ -2,7 +2,7 @@
 
 **留春信**
 
-著　　者：（笔名）
+著　　者：咸鱼散翁
 
 出　　版：（出版社名称）
 
@@ -50,7 +50,7 @@
 
 **版权信息**
 
-Copyright © 2026 by （作者名）
+Copyright © 2026 by 咸鱼散翁
 
 All rights reserved.
 

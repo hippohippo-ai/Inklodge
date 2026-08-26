@@ -141,7 +141,7 @@ function NovelCard({ n, onOpen }) {
       <div className="card-body">
         <p className="card-theme">{n.theme || '（尚未立题）'}</p>
         <p className="card-archive-line">
-          {n.archive?.author || '待署名'} · {n.archive?.volumes || 1} 卷
+          {n.archive?.author || '咸鱼散翁'} · {n.archive?.volumes || 1} 卷
         </p>
         <div className="card-meta">
           <span>{n.chapterCount} 章</span>

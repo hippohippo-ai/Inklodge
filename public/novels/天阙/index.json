@@ -1,0 +1,43 @@
+{
+  "title": "天阙",
+  "theme": "天阙",
+  "cover": "#5b3a1e",
+  "archive": {
+    "author": "咸鱼散翁",
+    "epigraph": "",
+    "volumes": 14
+  },
+  "progress": {
+    "stage": 9,
+    "currentChapter": 1,
+    "totalChapters": 270,
+    "status": "大纲、人物与世界观已就绪，第1章《码头》初稿已落文，待按 WORKFLOW.md 继续写作"
+  },
+  "stateFiles": [
+    "artifacts",
+    "chapter-log",
+    "chapters",
+    "characters",
+    "conflicts",
+    "darklines",
+    "factions",
+    "final-check",
+    "foreshadowing",
+    "geography",
+    "knowledge",
+    "outline",
+    "plot-check",
+    "plot-lines",
+    "progress",
+    "rankings",
+    "relations",
+    "requirements",
+    "revisions",
+    "timeline",
+    "weapons",
+    "worldbuilding"
+  ],
+  "chapters": [
+    "chapter-01"
+  ]
+}

@@ -1,12 +1,12 @@
 {
   "title": "高太公造反",
+  "theme": "高太公造反",
+  "cover": "#5b3a1e",
   "archive": {
     "author": "咸鱼散翁",
     "epigraph": "",
     "volumes": 1
   },
-  "theme": "高太公造反",
-  "cover": "#5b3a1e",
   "progress": {
     "stage": 13,
     "currentChapter": 40,

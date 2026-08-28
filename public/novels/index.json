@@ -4,19 +4,29 @@
     "title": "天阙",
     "theme": "天阙",
     "cover": "#5b3a1e",
+    "archive": {
+      "author": "咸鱼散翁",
+      "epigraph": "",
+      "volumes": 14
+    },
     "progress": {
       "stage": 9,
       "currentChapter": 1,
       "totalChapters": 270,
       "status": "大纲、人物与世界观已就绪，第1章《码头》初稿已落文，待按 WORKFLOW.md 继续写作"
     },
-    "chapterCount": 1
+    "chapterCount": 44
   },
   {
     "id": "留春信",
     "title": "留春信",
     "theme": "留春信",
     "cover": "#5b3a1e",
+    "archive": {
+      "author": "咸鱼散翁",
+      "epigraph": "一盏灯，半卷书；故事落在纸上，才有后来人听见。",
+      "volumes": 1
+    },
     "progress": {
       "stage": 40,
       "currentChapter": 40,
@@ -30,6 +40,11 @@
     "title": "高太公造反",
     "theme": "高太公造反",
     "cover": "#5b3a1e",
+    "archive": {
+      "author": "咸鱼散翁",
+      "epigraph": "",
+      "volumes": 1
+    },
     "progress": {
       "stage": 13,
       "currentChapter": 40,

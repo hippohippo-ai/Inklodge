@@ -1,108 +1,68 @@
-// 墨庐同步脚本：把根目录当前工作小说（state/ + novel/）同步到 public/novels/<书名>/
-// 并在构建前重建顶层 manifest（public/novels/index.json）。
-// 由 package.json 的 prebuild 调用：node scripts/sync.mjs
+// 墨庐同步脚本：扫描 books/<项目>/，同步每本小说到 public/novels/<书名>/。
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
-const stateDir = path.join(root, 'state')
-const novelDir = path.join(root, 'novel')
+const projectsDir = path.join(root, 'books')
 const publicNovels = path.join(root, 'public', 'novels')
 
 function read(p) {
-  try {
-    return fs.readFileSync(p, 'utf8')
-  } catch {
-    return ''
-  }
+  try { return fs.readFileSync(p, 'utf8') } catch { return '' }
 }
-
 function readJson(p, fallback) {
-  try {
-    return JSON.parse(read(p))
-  } catch {
-    return fallback
+  try { return JSON.parse(read(p)) } catch { return fallback }
+}
+function number(re, text) {
+  const match = re.exec(text)
+  return match ? Number(match[1]) : 0
+}
+function projectTitle(projectDir, stateDir) {
+  const theme = read(path.join(stateDir, 'theme.txt')).trim()
+  return theme.split('\n')[0].trim() || path.basename(projectDir)
+}
+function syncProject(projectDir) {
+  const stateDir = path.join(projectDir, 'state')
+  const novelDir = path.join(projectDir, 'novel')
+  if (!fs.existsSync(stateDir) || !fs.existsSync(novelDir)) return null
+
+  const title = projectTitle(projectDir, stateDir)
+  if (!title || title === '待定' || title === '（待定）') return null
+  const archive = readJson(path.join(stateDir, 'archive.json'), { author: '咸鱼散翁', epigraph: '', volumes: 1 })
+  const progressRaw = read(path.join(stateDir, 'progress.md'))
+  const progress = {
+    stage: number(/当前阶段[：:]\s*(\d+)/, progressRaw),
+    currentChapter: number(/当前章节[：:]\s*(\d+)/, progressRaw),
+    totalChapters: number(/总章节数[：:]\s*(\d+)/, progressRaw),
+    status: (/状态[：:]\s*([^\n]+)/.exec(progressRaw)?.[1]?.trim()) || '',
   }
-}
+  const dest = path.join(publicNovels, title)
+  fs.rmSync(dest, { recursive: true, force: true })
+  fs.mkdirSync(path.join(dest, 'state'), { recursive: true })
+  fs.mkdirSync(path.join(dest, 'chapters'), { recursive: true })
 
-// 主题（theme.txt 第一行）
-const themeRaw = read(path.join(stateDir, 'theme.txt')).trim()
-const title = themeRaw.split('\n')[0].trim()
-const archive = readJson(path.join(stateDir, 'archive.json'), {
-  author: '咸鱼散翁',
-  epigraph: '',
-  volumes: 1,
-})
-
-// 新书尚未定题时，只保留已有书库，不生成「待定」书目。
-if (!title || title === '待定' || title === '（待定）') {
-  console.log('墨庐 · 当前工作区尚未定题，保留已有书库')
-  process.exit(0)
-}
-
-// 解析进度
-const progressRaw = read(path.join(stateDir, 'progress.md'))
-const num = (re) => {
-  const m = re.exec(progressRaw)
-  return m ? Number(m[1]) : 0
-}
-const progress = {
-  stage: num(/当前阶段[：:]\s*(\d+)/),
-  currentChapter: num(/当前章节[：:]\s*(\d+)/),
-  totalChapters: num(/总章节数[：:]\s*(\d+)/),
-  status: (/状态[：:]\s*([^\n]+)/.exec(progressRaw)?.[1]?.trim()) || '',
-}
-
-const dest = path.join(publicNovels, title)
-fs.mkdirSync(path.join(dest, 'state'), { recursive: true })
-fs.mkdirSync(path.join(dest, 'chapters'), { recursive: true })
-
-const stateFiles = []
-if (fs.existsSync(stateDir)) {
-  for (const f of fs.readdirSync(stateDir).filter((f) => f.endsWith('.md')).sort()) {
-    fs.copyFileSync(path.join(stateDir, f), path.join(dest, 'state', f))
-    stateFiles.push(f.replace(/\.md$/, ''))
+  const stateFiles = []
+  for (const file of fs.readdirSync(stateDir).filter((f) => f.endsWith('.md')).sort()) {
+    fs.copyFileSync(path.join(stateDir, file), path.join(dest, 'state', file))
+    stateFiles.push(file.replace(/\.md$/, ''))
   }
-}
-
-const chapters = []
-if (fs.existsSync(novelDir)) {
+  const chapters = []
   const publishable = (f) => /^chapter-\d+\.md$/.test(f) || f === 'copyright.md' || f === 'preface.md'
-  for (const f of fs.readdirSync(novelDir).filter(publishable).sort()) {
-    fs.copyFileSync(path.join(novelDir, f), path.join(dest, 'chapters', f))
-    chapters.push(f.replace(/\.md$/, ''))
+  for (const file of fs.readdirSync(novelDir).filter(publishable).sort()) {
+    fs.copyFileSync(path.join(novelDir, file), path.join(dest, 'chapters', file))
+    chapters.push(file.replace(/\.md$/, ''))
   }
+  fs.writeFileSync(path.join(dest, 'index.json'), JSON.stringify({ title, theme: title, cover: '#5b3a1e', archive, progress, stateFiles, chapters }, null, 2))
+  return { id: title, title, theme: title, cover: '#5b3a1e', archive, progress, chapterCount: chapters.length }
 }
 
-// 每本小说的 index.json
-fs.writeFileSync(
-  path.join(dest, 'index.json'),
-  JSON.stringify({ title, theme: title, cover: '#5b3a1e', archive, progress, stateFiles, chapters }, null, 2)
-)
-
-// 顶层 manifest：扫描所有小说
+fs.mkdirSync(publicNovels, { recursive: true })
 const novels = []
-if (fs.existsSync(publicNovels)) {
-  for (const d of fs.readdirSync(publicNovels)) {
-    if (d === 'index.json') continue
-    const p = path.join(publicNovels, d, 'index.json')
-    if (!fs.existsSync(p)) continue
-    let j
-    try {
-      j = JSON.parse(fs.readFileSync(p, 'utf8'))
-    } catch {
-      continue
-    }
-    novels.push({
-      id: j.title,
-      title: j.title,
-      theme: j.theme || '',
-      cover: j.cover || '#5b3a1e',
-      progress: j.progress || {},
-      chapterCount: (j.chapters || []).length,
-    })
+if (fs.existsSync(projectsDir)) {
+  for (const name of fs.readdirSync(projectsDir).sort()) {
+    const result = syncProject(path.join(projectsDir, name))
+    if (result) novels.push(result)
   }
 }
 fs.writeFileSync(path.join(publicNovels, 'index.json'), JSON.stringify(novels, null, 2))
-console.log(`墨庐 · 已同步《${title}》→ public/novels/，书库共 ${novels.length} 本`)
+console.log(`墨庐 · 已同步 ${novels.length} 个小说项目 → public/novels/`)

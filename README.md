@@ -26,23 +26,23 @@ https://hippohippo-ai.github.io/Inklodge/
 ### 第一步：立题
 
 ```bash
-bash scripts/new-novel.sh "你的主题"
+bash scripts/new-novel.sh "书名" "你的主题"
 ```
 
 例如：
 
 ```bash
-bash scripts/new-novel.sh "都市悬疑·失忆法医追查连环案"
+bash scripts/new-novel.sh "失忆法医" "都市悬疑·失忆法医追查连环案"
 ```
 
-也可以直接编辑 `state/theme.txt`。已完成的作品放进 `books/<书名>/`，根目录继续作为当前写作台。
+也可以直接编辑 `books/<书名>/state/theme.txt`。每本小说从创建起就是 `books/<书名>/` 下的独立项目，根目录只保存通用流程、模板和脚本。
 
 ### 第二步：请 Agent 开讲
 
 对 Agent 说：
 
 ```text
-按 WORKFLOW.md 开始写小说，主题见 state/theme.txt
+按 WORKFLOW.md 开始写小说，主题见 books/<书名>/state/theme.txt
 ```
 
 Agent 会依次走完：主题确认 → 大纲 → 人物 → 矛盾 → 章节 → 伏笔 → 时间线 → 知识矩阵 → 漏洞检查 → 写章节 → 章节总结 → 循环写作 → 润色 → 精校交付。
@@ -63,7 +63,7 @@ bash scripts/progress.sh
 按 WORKFLOW.md 恢复断点继续写
 ```
 
-Agent 会先读取 `state/progress.md` 与 `state/chapter-log.md`，再检查伏笔、时间线和知识矩阵，从上次停笔处接续。
+Agent 会先读取对应项目的 `state/progress.md` 与 `state/chapter-log.md`，再检查伏笔、时间线和知识矩阵，从上次停笔处接续。
 
 ## 网页阅读台
 
@@ -78,8 +78,8 @@ npm run preview    # 预览构建结果
 
 ### 书稿从哪里来
 
-- **墨庐藏书（bundled）**：根目录 `state/` + `novel/` 的当前作品。运行构建后，自动同步到 `public/novels/<书名>/`，网页端只读展示；`state/archive.json` 会一并登记作者、题词和卷数。
-- **已完稿档案**：整理到 `books/<书名>/novel/` 与 `books/<书名>/state/`；网页阅读副本仍放在 `public/novels/<书名>/`。
+- **墨庐藏书（bundled）**：`books/<书名>/` 下的独立项目。运行构建后，自动同步到 `public/novels/<书名>/`，网页端只读展示；项目内 `state/archive.json` 会一并登记作者、题词和卷数。
+- **已完稿档案**：仍保存在 `books/<书名>/`，与进行中的项目采用相同结构；网页阅读副本仍放在 `public/novels/<书名>/`。
 - **案头草稿（local）**：在网页里点击「开新书」创建，保存在浏览器 `localStorage`，可以直接编辑，也可以导入或导出 JSON。
 
 ### 部署到 GitHub Pages
@@ -101,29 +101,16 @@ npm run deploy
 
 ```text
 prompts/            13 个固定提示词，规定每个写作阶段怎么走
-state/              所有设定与进度，长篇小说的“记忆硬盘”
-  theme.txt         主题，通常只需改这一处
-  archive.json       说书人档案：作者、题词和卷数
-  requirements.md   用户要求的细化与全书总约束
-  outline.md        总大纲
-  characters.md     人物、目的、秘密与弧线
-  artifacts.md      道具与场景机关
-  conflicts.md      矛盾关系矩阵
-  chapters.md       章节规划
-  foreshadowing.md  伏笔暗线表
-  timeline.md       时间线
-  knowledge.md      知识矩阵，防止人物越界知情
-  plot-check.md     漏洞检查
-  chapter-log.md    每章总结，防止断点失忆
-  progress.md       当前阶段与章节进度
-  revisions.md      设定修订记录
-  final-check.md    最终精校报告
-novel/              当前书稿正文：chapter-01.md、chapter-02.md……
-books/              已完成作品的独立写作档案
-scripts/            开新书、查看进度、同步书库的脚本
+books/              每部小说一个独立项目
+  <书名>/novel/      该书正文
+  <书名>/state/      该书设定、总结与进度
+  <书名>/README.md   项目说明
+prompts/             所有小说共享的 13 个提示词
+ templates/state/    新项目使用的状态文件模板
+scripts/             开新书、查看进度、同步书库的脚本
 WORKFLOW.md         Agent 的完整操作总纲
 src/                React 网页源码
-public/novels/      构建后供网页读取的书稿数据
+public/novels/      构建后供网页读取的所有小说数据
 ```
 
 ## 想改设定
@@ -131,7 +118,7 @@ public/novels/      构建后供网页读取的书稿数据
 告诉 Agent：
 
 ```text
-修改 X 设定
+修改 books/<书名>/state/ 中的 X 设定
 ```
 
 Agent 应先把改动记入 `state/revisions.md`，再同步大纲、人物、章节、伏笔、时间线和知识矩阵，并检查正文影响；不会悄悄改完就算数。

@@ -12,6 +12,10 @@
        ⑨ F10 章题声明与旧题禁引 (自 ch141 起): 新章题必须先声明于卷纲(outline-vol7.md 管 141-164, outline-vol8.md 管 165-188, 随卷演进);
           正文禁回引卷六旧题(粮行的一笔/船坞的三十年等, 源: chapter-title-index.md);
           卷三—卷六现有章另做卷纲声明与实际章题一致性复核(仅报告漂移, 不算失败)
+       ⑩ F14 回声式对话纪律 (ch141+ 判失败; 存量仅报告): 机械回声(重复且无新信息)禁止,
+          戏剧节拍(重复后接展开)允许; F14A 相邻整句回声问答对, F14B 标记式重复密度≤2
+       ⑪ F16 金句家族纪律 (ch189+ 判失败; ch1-188 存量仅报告): 同一金句家族(语义同源变体)
+          单章合计≤2; 同一成员短语连续6段内≥2 或整章≥3 视为逐字连发, 禁止(书挡须相隔>6段)
 退出码: 0=全部通过, 1=有命中
 """
 import sys, re, unicodedata
@@ -42,7 +46,7 @@ FROZEN_ALLOW = {
     "西门收粮牌": {26: 1, 43: 1, 44: 1},
     "到了马嵬再想办法": {26: 1},
     "把布条塞回怀里": {26: 1},
-    "记人的账": {44: 1},  # ch44 卷末收束预言, 正典呼应 ch53 章题
+    "记人的账": {44: 1, 45: 1},  # ch44 卷末收束预言, ch45 开卷回响(与 ch53 章题同族), 正典呼应
     "药方上的名字已经被汗浸开": {24: 1},  # ch24 单章源句, 禁他章复用
     "改账的人在改命": {25: 1},  # ch25 单章源句(章眼), 禁他章复用
 }
@@ -141,6 +145,52 @@ F12_WORDS = ["纤维", "毛边", "撕口", "入纸", "浮红", "沉墨", "帘纹
 F12_CAP = 4
 # F13 桑葚符号化冻结: ch141+ 禁止"桑葚+炭枝/画圈/画小人"组合
 F13_BAN = ["炭枝", "画圈", "画小人"]
+# === F14 回声式对话纪律 (ch141+ 判失败; 存量仅报告) ===
+# 判定标准 —— 机械回声 vs 戏剧节拍 (源: 卷五 ch90-115 回声清洗审计 + 卷六 ch117-140 密度审计):
+#   · 机械回声(禁止) = 后一句原样复读前一句的尾词/整句, 且不含任何新信息, 纯复读:
+#       例: "反向的账？""反向的账。" / "全对上了。""全对上了。" / 短问答 "X？""X。"
+#   · 戏剧节拍(允许) = 重复之后紧跟展开(新信息/解释/行动), 或重复本身承担节奏功能:
+#       例: "一整槽。""一整槽。养马的人把槽扩了——" (重复+展开)
+#            "回来了。""回来了。" (戍卒归来的沉默留白, 属刻意节拍)
+#   判断口诀: 重复后接"新信息增量"=戏剧节拍, 可留; 重复后无任何增量=机械回声, 必改。
+# F14A 相邻整句回声: 相邻两段引号内正文完全相同(允许中间夹"XX说"式归属行) → 判失败(ch141+)。
+#     刻意留白的重复节拍须登记于 F14_ECHO_ALLOW {章号: [短语]}, 每章限1次。
+# F14B 标记式重复: "重复了一遍/又念了一遍/重复道" 单章≤2 (卷六实测密度 0.6/章);
+#     命中后段内须有新信息增量(重复词之外的续句), 否则按机械回声报告。
+#     写作纪律: 需要"重复+强调"时, 优先用变体(换人称/换标点/加修饰), 不要原字复读。
+F14_ECHO_ALLOW: dict[int, list[str]] = {
+    # 存量章已核验的"问答确认+紧跟展开"或"名称回指+新信息"节拍 (F14 判定口诀: 重复后接增量=戏剧节拍, 可留):
+    144: ["办完了"],     # “办完了？”/“办完了。”主事说，回报二月廿四递的… (确认+展开)
+    155: ["就这一页"],   # “就这一页？”/“就这一页。”宁红叶说，“别的不在草垛底下。” (确认+展开)
+    158: ["保奴", "待查"],  # 章眼名被裴弘度/书吏念出后展开评述 (名称回指+增量)
+    160: ["随军查账的", "不问来路"],  # 门岗问答确认 (前者纯确认属自然门岗对话; 后者接“牌上不写名字…”展开)
+    161: ["不明"],       # 门房写"不明"→裴弘度未见那道"不明", 同一物证笔迹回指(第二段带新信息展开)
+    166: ["能看清规律的人"],  # 段A尾旧档引语 → 段B“观天台从来不放过…” (叙事书挡+增量)
+    167: ["兵在河东"],   # “兵在河东。”她重复了一遍，“河东北边是回纥…” (显式重复标记+展开)
+}  # {章号: [允许整句重复的短语]}, 同章多处须逐条登记
+F14_MARKERS = ["重复了一遍", "又念了一遍", "重复道"]
+F14_MARKER_CAP = 2
+# === F16 金句家族纪律 (ch189+ 判失败; ch1-188 存量仅报告) ===
+# 判定标准 (源: 全库金句家族扫描审计 —— 卷四/五/六 1.3-1.4次/章热点, ch92 16行三锤链):
+#   · 家族密度: 同一金句家族(语义同源变体)单章合计 ≤2 次。金句只允许以三种形态存活:
+#     章题背书的主旨句 / 信件首尾书挡 / 单次人物台词。超过即"金句复读"(全员账房化来源)。
+#   · 逐字连发: 同一成员短语在连续 F16_CHAIN_WIN 段内原样出现 ≥2 次 → 机械连发, 禁止;
+#     同一成员短语整章 ≥3 次 → 无论距离一律判为锤句链(如 ch92 原 "名在纸上…就有人能查" 三锤)。
+#     例外: 恰 2 次且相距 >F16_CHAIN_WIN 段(信件首尾书挡, 如 ch146 严平信) = 戏剧节拍, 允许。
+#   · 写作纪律: 需要强调时用变体(换主语/换说法/换句式), 不要原字复读;
+#     确需超限须登记 F16_FAMILY_ALLOW {章号: {家族: 允许次数}}。
+F16_START = 189
+F16_FAMILIES = {
+    "账理生死": ["账是死的", "账是活的", "路是死的", "人是活的"],
+    "纸上落名": ["名在纸上", "账在纸上", "账在，人在", "账在，人就在", "人在，账在"],
+    "名字是死人的": ["名字是死人的", "名字是死的"],
+    "算得清否": ["算得清", "算不清"],
+    "账比人长": ["账比人走得快", "账比命长", "账比人长"],
+    "只算账": ["我只算账", "只算账，不算命", "算账的不算命"],
+}
+F16_FAMILY_CAP = 2
+F16_CHAIN_WIN = 6
+F16_FAMILY_ALLOW: dict[int, dict[str, int]] = {}  # {章号: {家族: 允许次数}} 超限登记
 
 def load_outline_declared(outline_file: str) -> dict[int, str]:
     """返回卷纲中声明过的 {章号: 章题}, 卷纲缺失或未声明返回空。"""
@@ -192,6 +242,33 @@ def dedup_windows(text: str, others: list[str], width: int, self_idx=None):
                     seen_spans.add(k)
                 break
     return hits
+
+def _echo_core(s: str) -> str:
+    """F14A 提取段落用于回声判定的核心正文: 取引号内正文(若有), 去首尾引号/空白/尾标点。"""
+    m = re.search(r"[“\"]([^”\"]*)[”\"]", s)
+    t = m.group(1) if m else s
+    return t.strip().strip("“”‘’\"'。！？!?，,、")
+
+def _family_counts(text: str) -> dict[str, int]:
+    """合并重叠 span 后统计各金句家族命中次数(子串重叠不重复计, 防"账是死的"嵌套于长句时双算)。"""
+    out = {}
+    for fam, phrases in F16_FAMILIES.items():
+        spans = []
+        for ph in phrases:
+            for m in re.finditer(re.escape(ph), text):
+                spans.append((m.start(), m.end()))
+        if not spans:
+            continue
+        spans.sort()
+        merged, cur = 0, None
+        for s, e in spans:
+            if cur is None or s >= cur:
+                merged += 1
+                cur = e
+            else:
+                cur = max(cur, e)
+        out[fam] = merged
+    return out
 
 def main():
     args = [int(a) for a in sys.argv[1:]]
@@ -342,6 +419,50 @@ def main():
             f12_cnt = sum(body.count(w) for w in F12_WORDS)
             if f12_cnt > 6:
                 print(f"  [F12·存量报告] 纸张鉴定词命中 {f12_cnt} 次 (仅报告, 供后续批次清理)")
+        # F14 回声式对话纪律: F14A 相邻整句回声问答对; F14B 标记式重复密度 (ch141+ 判失败)
+        f14_hits = []
+        paras = [p.strip() for p in body.split("\n") if p.strip()]
+        allow = F14_ECHO_ALLOW.get(n, [])
+        for i in range(len(paras) - 1):
+            core_a = _echo_core(paras[i])
+            core_b = _echo_core(paras[i + 1])
+            if core_a and core_b and len(core_a) >= 2 and core_b == core_a and not any(
+                    core_a == c for c in allow):
+                f14_hits.append(f"F14A 相邻整句回声「{core_a}」 (第{i+1}/{i+2}段)")
+        m_cnt = sum(body.count(m) for m in F14_MARKERS)
+        if m_cnt > F14_MARKER_CAP:
+            f14_hits.append(f"F14B 标记式重复×{m_cnt} (上限{F14_MARKER_CAP})")
+        if f14_hits:
+            if n >= 141:
+                fail += 1
+            print("  [F14·回声式对话]" + ("" if n >= 141 else " (存量, 仅报告)"))
+            for h in f14_hits[:10]:
+                print(f"    × {h}")
+        elif n >= 141:
+            print(f"  [F14·回声式对话] ✓ (标记式重复×{m_cnt} ≤ {F14_MARKER_CAP})")
+        # F16 金句家族纪律: 家族合计≤2; 逐字连发(连续6段内≥2 或 整章≥3) (ch189+ 判失败; 存量仅报告)
+        f16_hits = []
+        for fam, c in _family_counts(body).items():
+            allow = F16_FAMILY_ALLOW.get(n, {}).get(fam, F16_FAMILY_CAP)
+            if c > allow:
+                f16_hits.append(f"家族「{fam}」×{c} (上限{allow})")
+        paras2 = [p.strip() for p in body.split("\n") if p.strip()]
+        for fam, phrases in F16_FAMILIES.items():
+            for ph in phrases:
+                per = [p.count(ph) for p in paras2]
+                tot = sum(per)
+                if tot >= 3:
+                    f16_hits.append(f"逐字连发「{ph}」整章×{tot} (≥3 即锤句链)")
+                elif tot == 2 and any(sum(per[i:i + F16_CHAIN_WIN]) >= 2 for i in range(len(per))):
+                    f16_hits.append(f"逐字连发「{ph}」×2 落在连续{F16_CHAIN_WIN}段内 (书挡须相距>{F16_CHAIN_WIN}段)")
+        if f16_hits:
+            if n >= F16_START:
+                fail += 1
+            print("  [F16·金句家族]" + ("" if n >= F16_START else " (存量, 仅报告)"))
+            for h in f16_hits[:10]:
+                print(f"    × {h}")
+        elif n >= F16_START:
+            print("  [F16·金句家族] ✓")
         # F10 章题纪律: ①卷三—卷六 卷纲声明 vs 正典一致性(报告); ②自 ch141 起, 新章必须先声明于卷纲
         f10_hits = []
         if n < 141:
@@ -407,7 +528,7 @@ def main():
             for w, c in b_hits:
                 print(f"    • {w}  ×{c}")
         # (F8/F9/卷六词 命中已在各自块内 fail+=1 并打印; v6_issue 抑制误报 ✓)
-        if not v6_issue and not (f_hits or d_hits or f4_hits or f6_hits or f7_hits or x_hits or i_hits):
+        if not v6_issue and not (f_hits or d_hits or f4_hits or f6_hits or f7_hits or x_hits or i_hits or f16_hits):
             print("  ✓ 基线比对通过")
     # 卷级微型交易签名词报告 (每卷一次, 仅报告)
     if args and min(args) <= 140:

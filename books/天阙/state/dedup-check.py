@@ -9,7 +9,7 @@
        ⑥ F8 卷五标志性短语(F8, dedup-baseline-vol6.md: 冷金笺/第三支笔/竹简/销名/收笔带钩/归位/缺角)
        ⑦ F9 卷六"岸"意象落点(117/119/124/126/138 必含岸; 非落点章单章≤3)
        ⑧ 卷六B类词密度上限(待核销≤3/编号册≤2/凸点≤2/分名≤2/军道图≤1/盐账≤4)
-       ⑨ F10 章题声明与旧题禁引 (自 ch141 起): 新章题必须先声明于卷纲(outline-vol7.md 管 141-164, outline-vol8.md 管 165-188, outline-vol9.md 管 189-212, 随卷演进);
+       ⑨ F10 章题声明与旧题禁引 (自 ch141 起): 新章题必须先声明于卷纲(outline-vol7.md 管 141-164, outline-vol8.md 管 165-188, outline-vol9.md 管 189-212, outline-vol10.md 管 213-236, 随卷演进);
           正文禁回引卷六旧题(粮行的一笔/船坞的三十年等, 源: chapter-title-index.md);
           卷三—卷六现有章另做卷纲声明与实际章题一致性复核(仅报告漂移, 不算失败)
        ⑩ F14 回声式对话纪律 (ch141+ 判失败; 存量仅报告): 机械回声(重复且无新信息)禁止,
@@ -170,6 +170,26 @@ VOL9_ANCHORS = {
     "油布": 1,                         # 全卷每章≤1 (ch191 药案交接包装)
     "底册": {194: None, 198: None, 205: None, 209: None, 211: None, 212: None},
 }  # 底册=活档三件主线词: 落点章(194首现/198裴度判断/205章眼/209取回/211入火盆/212随身)不限, 其余卷九章 0 次
+# === F15·卷十回收链机械校验 (ch213-236, 与 outline-vol10 意象链检查表同步) ===
+# 每章至少命中任一组 token 之一, 防止写 ch213-236 时漏掉章眼意象。
+# 维护约定: 改 outline-vol10 意象链检查表或 foreshadowing 卷十区, 必须先同步本表。
+VOL10_REQ = {
+    213: [["秤"], ["分路"], ["碑"]], 214: [["行台"], ["朱印"]], 215: [["盲校"], ["太干净"]],
+    216: [["浮数"], ["仓里无"]], 217: [["一斗米"]], 218: [["九成仓"], ["官斛", "斛"]],
+    219: [["对粮"], ["底册"]], 220: [["样本"], ["空账"]], 221: [["算稿"], ["裴十三"]],
+    222: [["天阙有后"], ["一分为三"]], 223: [["忌铁器"], ["吃人的账"]], 224: [["空灶"], ["编"]],
+    225: [["假数"], ["闭环"]], 226: [["永不核销"], ["吃册"]], 227: [["牺牲一城"], ["大阵"]],
+    228: [["算得出天下"], ["竹简"]], 229: [["朱批"], ["抄副"]], 230: [["崩仓"], ["叫出名字", "名字"]],
+    231: [["十万"], ["没有名字"]], 232: [["十个"], ["名字"]], 233: [["断秤"], ["第一笔假数"]],
+    234: [["自首"], ["永不核销"]], 235: [["还账"], ["划回"]], 236: [["收秤"]],
+}
+# === F19 卷十器物/词频锚点 (ch213-236, 与 outline-vol10 意象密度硬约束12同步) ===
+# 语义: {词: {unlimited: 不限章集合, cap: 其余卷十章单章上限}}。
+# 防的是"天阙"作感叹词滥用、"永不核销"跨章连发。
+VOL10_CAPS = {
+    "天阙": {"unlimited": {222}, "cap": 1},       # ch222 正题揭晓章不限; 其余单章≤1
+    "永不核销": {"unlimited": {226, 234}, "cap": 0},  # 全卷≤2 (ch226/234 各一次); 其余 0(指代改写)
+}
 # === 第七卷起 (141+) 反内卷机械规则: F11-F13 (requirements.md 律五) ===
 # F11 微型交易禁令: "恶钱"单章≤1 (ch141+); 全书按卷做签名词报告(不判失败)
 F11_CAP_WORDS = ["恶钱"]
@@ -517,7 +537,8 @@ def main():
                         f10_hits.append(f"卷纲{of}声明《{declared[n]}》≠ 正典《{chapter_title(n)}》(请在卷纲同步正典章题)")
         else:
             # 141-164 → outline-vol7.md; 165-188 → outline-vol8.md (新卷章题声明文件随卷演进)
-            decl_file = "outline-vol7.md" if n <= 164 else ("outline-vol8.md" if n <= 188 else "outline-vol9.md")
+            decl_file = ("outline-vol7.md" if n <= 164 else ("outline-vol8.md" if n <= 188
+                         else ("outline-vol9.md" if n <= 212 else "outline-vol10.md")))
             decl_all = load_outline_declared(decl_file)
             if not decl_all:
                 f10_hits.append(f"{decl_file} 缺失或未声明任何章题——ch141+ 章题必须先声明于 state/{decl_file}（声明章题后再跑查重）")
@@ -546,7 +567,8 @@ def main():
                 print(f"    × {h}")
         # F15·卷七/卷八回收链必备意象 (ch141-188): 每章须命中 REQ 表各组 token 至少一次
         # 卷七表= VOL7_REQ(foreshadowing「卷七回收规划区」), 卷八表= VOL8_REQ(outline-vol8 章眼/器物锚点)
-        req_tbl = VOL9_REQ if 189 <= n <= 212 else (VOL8_REQ if 165 <= n <= 188 else VOL7_REQ)
+        req_tbl = (VOL10_REQ if 213 <= n <= 236 else
+                   (VOL9_REQ if 189 <= n <= 212 else (VOL8_REQ if 165 <= n <= 188 else VOL7_REQ)))
         if n in req_tbl:
             miss = []
             for grp in req_tbl[n]:
@@ -557,7 +579,7 @@ def main():
                 v6_issue = True
                 print("  [F15·回收章必备意象缺失]")
                 for m in miss:
-                    print(f"    × 缺「{m}」——本章回收章眼未落位(同步见 foreshadowing 卷七回收规划区 / outline-vol8/vol9 章眼)")
+                    print(f"    × 缺「{m}」——本章回收章眼未落位(同步见各卷 outline 章眼/意象链检查表)")
         # F17 卷九洛阳段器物锚点 (ch189-212, 与 dedup-baseline-vol9.md 同步): 锚点器物只在落点章出现
         if 189 <= n <= 212:
             f17_hits = []
@@ -578,6 +600,21 @@ def main():
                 print("  [F17·卷九洛阳段器物锚点超限]")
                 for ph, c, m in f17_hits:
                     print(f"    × {ph}  ×{c} (本章上限{m})——锚点器物仅在落点章作章眼, 其余卷九章须指代改写(见 dedup-baseline-vol9.md)")
+        # F19 卷十器物/词频锚点 (ch213-236, 与 outline-vol10 意象密度硬约束12同步)
+        if 213 <= n <= 236:
+            f19_hits = []
+            for ph, spec in VOL10_CAPS.items():
+                if n in spec["unlimited"]:
+                    continue
+                cnt = body.count(ph)
+                if cnt > spec["cap"]:
+                    f19_hits.append((ph, cnt, spec["cap"]))
+            if f19_hits:
+                fail += 1
+                v6_issue = True
+                print("  [F19·卷十器物/词频锚点超限]")
+                for ph, c, m in f19_hits:
+                    print(f"    × {ph} ×{c} (本章上限 {m})——见 outline-vol10 意象密度硬约束12 (指代改写)")
         # F18 裸回声问句纪律 (ch189+, 与卷九对白语气审计同步): 独立成行的 ≤3字 引号问句
         if n >= F18_START:
             f18_hits = []

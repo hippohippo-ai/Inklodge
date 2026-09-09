@@ -19,6 +19,10 @@
        ⑫ F17 卷九洛阳段器物锚点 (ch189-212, dedup-baseline-vol9.md): 两套编号/核销卷/折色/船耗/
        ⑬ F18 裸回声问句纪律 (ch189+, 卷九对白语气审计): ≤3字引号问句单章≤2, 防全员审讯腔
           死引/燎角/虚额/回禀稿/冷金笺/油布/底册 仅在落点章作章眼, 其余卷九章 0 次(指代改写)
+       ⑭ F20 榜单引用核验 (全书): 正文出现 宗师录/黑榜/八凶/第X席 时自动比对 state/rankings.md
+          席位与 state/chronology.md 生年×正文年份——F20S 台账自审(席位年龄↔生年)/F20a 席位配对
+          (裴十三=第十二席空缺)/F20b 年龄换算(生年+当前年)/F20c 黑榜榜首年份/F20d 八凶称号/
+          F20e 单章单榜≤2; 数据源运行时解析, 改 rankings.md/chronology.md 即生效, 无需同步本文件
 退出码: 0=全部通过, 1=有命中
 """
 import sys, re, unicodedata
@@ -255,6 +259,179 @@ F18_CAP = 2
 F18_GENERIC = {"什么", "为什么", "怎么", "谁", "哪儿", "哪里", "几时", "何时", "多久", "哪个",
               "干什么", "后来呢", "什么字", "什么话", "那", "这", "何处", "如何"}
 LQ, RQ, QM = "\u201c", "\u201d", "\uff1f"
+# === F20 榜单引用核验 (全书生效, 2026-09-09): 每章正文出现 宗师录/黑榜/八凶/第X席 引用时,
+# 自动比对 state/rankings.md 席位与 state/chronology.md 生年×正文年份的年龄换算
+# (宗师补种闭环核验机械化, 防写作时临时查表出错)。数据源运行时解析两份台账:
+# 改 rankings.md / chronology.md 即自动生效, 无需同步本文件。
+#   F20S 台账自审: rankings 宗师录各席 755 年龄 ↔ chronology 表三生年 (生年带"约"±1) 逐席验算
+#   F20a 席位配对: 「第X席」同句±邻窗出现榜单人物名 → X 必须等于其 rankings 席位;
+#       席号>12 或「宗师录…≠十二席」判失败; 裴十三=第十二席(空缺, 无人敢补)正典
+#   F20b 年龄换算: 榜单人物名紧邻「…岁」→ 数值必须落在本章候选年份(chronology 卷表)的
+#       生年+当前年(±1, 生年带约); 卷纲未登记章退化为 755—779 全域可行域(仅拦不可能年龄);
+#       回溯年龄(「十七岁那年」)须句内自带年份锚, 特例登记 RANK_AGE_ALLOW
+#   F20c 黑榜榜首年份: 黑榜+榜首/第一 同句具名 → 人名必须属于候选年份正典榜首
+#       (rankings 黑榜变化时间线: 755—762 慕容荒 / 763—775 李承洲 / 776—778 沈广农)
+#   F20d 八凶称号张冠李戴: 八凶姓名与他人称号同句(单称号句)判失败
+#   F20e 每章单榜提及 ≤2 (foreshadowing「榜单体系植入区」纪律机械化)
+RANK_VOL_YEARS = {1: (755, 755), 2: (756, 757), 3: (757, 757), 4: (757, 760), 5: (759, 760),
+                  6: (760, 761), 7: (762, 763), 8: (763, 763), 9: (764, 766), 10: (766, 770),
+                  11: (770, 772)}  # 与 chronology.md「卷一—卷十时间范围」表同步; 卷十一暂据 foreshadowing(770—772), chronology 卷表登记后校对
+RANK_FIRST = (("慕容荒", 755, 762), ("李承洲", 763, 775), ("沈广农", 776, 778))  # rankings「黑榜变化时间线」正典; 改 rankings 须同步
+RANK_AGE_ALLOW: dict[int, set[str]] = {}            # {章号: {"人名:岁值"}} 回溯年龄等特例豁免
+RANK_MENTION_ALLOW: dict[int, dict[str, int]] = {}  # {章号: {"宗师录"/"黑榜"/"八凶": 允许次数}} 存量超限豁免
+_AGE_RE = re.compile(r"(?:一百[零一二三四五六七八九十]{1,3}|\d{1,3}|[一二三四五六七八九十]{1,4})多?岁")
+_F20_CACHE: dict = {}
+
+def cn2num(s: str):
+    """中文数字→整数 (一~一百九十九 及阿拉伯数字); 解析失败返回 None。"""
+    s = s.strip()
+    if not s:
+        return None
+    if s.isdigit():
+        return int(s)
+    if s.startswith("十"):
+        s = "一" + s
+    total = 0
+    for seg in re.findall(r"[一二三四五六七八九]?百|零|[一二三四五六七八九]?十|[一二三四五六七八九]", s):
+        if seg == "零":
+            continue
+        if seg.endswith("百"):
+            total += ("一二三四五六七八九".index(seg[0]) + 1) * 100 if len(seg) == 2 else 100
+        elif seg.endswith("十"):
+            total += ("一二三四五六七八九".index(seg[0]) + 1) * 10 if len(seg) == 2 else 10
+        else:
+            total += "一二三四五六七八九".index(seg) + 1
+    return total or None
+
+def _rank_data():
+    """解析 state/rankings.md: (宗师录[(席词,人名,755岁)], 黑榜{人名:席词}, 八凶{人名:称号})。"""
+    if "seats" in _F20_CACHE:
+        return _F20_CACHE["seats"], _F20_CACHE["black"], _F20_CACHE["bafeng"]
+    seats, black, bafeng = [], {}, {}
+    p = ROOT / "state" / "rankings.md"
+    if p.exists():
+        for sec in re.split(r"^## ", norm(p.read_text(encoding="utf-8")), flags=re.M):
+            head = sec.split("\n", 1)[0]
+            if head.startswith("一、《天下宗师录》"):
+                for m in re.finditer(r"^\|\s*([一二三四五六七八九十]{1,2})\s*\|\s*([^|]+?)\s*\|\s*(\d{1,3})\s*\|", sec, flags=re.M):
+                    seats.append((m.group(1), m.group(2).replace("*", "").strip(), int(m.group(3))))
+            elif head.startswith("二、黑榜"):
+                for m in re.finditer(r"^\|\s*\*\*(第一|第二|第三|第四|第五|第六|第七|第八|第九|第十)\*\*\s*\|\s*([^|]+?)\s*\|", sec, flags=re.M):
+                    black[m.group(2).replace("*", "").strip()] = m.group(1)
+            elif head.startswith("三、八凶"):
+                for m in re.finditer(r"^\|\s*([^|*]+?)\s*\|\s*([^|*]+?)\s*\|", sec, flags=re.M):
+                    t, nm = m.group(1).strip(), m.group(2).strip()
+                    if t and nm and t != "称号" and nm != "姓名" and not set(t) <= set("-:： "):
+                        bafeng[nm] = t
+    _F20_CACHE.update(seats=seats, black=black, bafeng=bafeng)
+    return seats, black, bafeng
+
+def _birth_years():
+    """解析 state/chronology.md 表三: {人名: (生年, 是否约数)}。"""
+    if "births" in _F20_CACHE:
+        return _F20_CACHE["births"]
+    out = {}
+    p = ROOT / "state" / "chronology.md"
+    if p.exists():
+        for m in re.finditer(r"^\|\s*\*{0,2}([^|*]+?)\*{0,2}(?:（[^）]*）)?\s*\|\s*(约)?(\d{3})\s*\|", norm(p.read_text(encoding="utf-8")), flags=re.M):
+            out[m.group(1).strip()] = (int(m.group(3)), bool(m.group(2)))
+    _F20_CACHE["births"] = out
+    return out
+
+def _vol_year_cands(n: int) -> list:
+    """本章候选年份: chronology 卷表区间展开; 卷纲未登记章(卷十二+)退化为 755—779 全域。"""
+    for a, b, v in ((1, 20, 1), (21, 44, 2), (45, 68, 3), (69, 92, 4), (93, 116, 5), (117, 140, 6),
+                    (141, 164, 7), (165, 188, 8), (189, 212, 9), (213, 236, 10), (237, 260, 11)):
+        if a <= n <= b:
+            lo, hi = RANK_VOL_YEARS[v]
+            return list(range(lo, hi + 1))
+    return list(range(755, 780))
+
+def f20_selfaudit() -> list:
+    """F20S: rankings 宗师录各席 755 年龄 ↔ chronology 表三生年 逐席验算。"""
+    seats, _, _ = _rank_data()
+    births = _birth_years()
+    out = []
+    for seatw, nm, age in seats:
+        b = births.get(nm)
+        if not b:
+            out.append(f"「{nm}」(第{seatw}席) 在 chronology.md 表三无生年行——补台账后 F20b 年龄换算才可校验")
+            continue
+        by, approx = b
+        if abs((755 - by) - age) > (1 if approx else 0):
+            out.append(f"「{nm}」rankings.md 755年 {age} 岁 ≠ chronology 生年{by}{'(约)' if approx else ''}推算 {755 - by} 岁")
+    return out
+
+def f20_check(n: int, body: str):
+    """F20 单章核验, 返回 (fails, notes, used)。used=本章含榜单引用。"""
+    fails, notes = [], []
+    if not (("宗师录" in body) or ("黑榜" in body) or ("八凶" in body)
+            or re.search(r"第[一二三四五六七八九十]{1,2}席", body)):
+        return fails, notes, False
+    seats, black, bafeng = _rank_data()
+    births = _birth_years()
+    seat_of = {nm: cn2num(w) for w, nm, _ in seats}
+    seat_of["裴十三"] = 12  # 第十二席空缺正典: 裴十三殁后无人敢补
+    names = sorted({*seat_of, *black, *bafeng, "沈广农", "裴弘度"}, key=len, reverse=True)
+    cands = _vol_year_cands(n)
+    allow_age = RANK_AGE_ALLOW.get(n, set())
+    yr_span = f"{min(cands)}—{max(cands)}" if len(cands) > 1 else str(cands[0])
+    for w in ("宗师录", "黑榜", "八凶"):  # F20e 单章单榜≤2
+        c = body.count(w)
+        if c > RANK_MENTION_ALLOW.get(n, {}).get(w, 2):
+            fails.append(f"F20e 单章「{w}」提及 ×{c} (上限2——foreshadowing 榜单植入区纪律)")
+    for sent in [s for s in re.split(r"[。！？；…\n]+", body) if s.strip()]:
+        for m in re.finditer(r"第([一二三四五六七八九十]{1,2})席", sent):  # F20a 席位配对
+            x = cn2num(m.group(1))
+            if x is None:
+                continue
+            if x > 12:
+                fails.append(f"F20a 席位越界「第{m.group(1)}席」(宗师录只有十二席)——句:{sent.strip()[:26]}")
+                continue
+            win = sent[max(0, m.start() - 12): m.start()] + sent[m.end(): m.end() + 10]
+            for nm in names:
+                if nm in win and seat_of.get(nm) and seat_of[nm] != x:
+                    fails.append(f"F20a 席位配对冲突:「{nm}」rankings.md 第{seat_of[nm]}席, 正文作「第{m.group(1)}席」——句:{sent.strip()[:26]}")
+        for m in re.finditer(r"宗师录[^。！？\n]{0,10}?(十[一二三四五六七八九]?|二十|三十)席", sent):
+            if m.group(1) != "十二":
+                fails.append(f"F20a 宗师录席数「{m.group(1)}席」≠ 正典十二席——句:{sent.strip()[:26]}")
+        for nm in names:  # F20b 年龄换算
+            if nm not in sent or not births.get(nm):
+                continue
+            by, approx = births[nm]
+            lo, hi = min(y - by for y in cands), max(y - by for y in cands)
+            for occ in re.finditer(re.escape(nm), sent):
+                seg = sent[max(0, occ.start() - 6): occ.start()] + "|" + sent[occ.end(): occ.end() + 7]
+                for am in _AGE_RE.finditer(seg):
+                    v = cn2num(am.group(0)[:-1])  # 整段匹配(如"十六岁"/"70岁"/"八十多岁")剥尾字"岁"
+                    if v is None or not (3 <= v <= 150) or f"{nm}:{v}" in allow_age:
+                        continue
+                    if not (lo - (1 if approx else 0) <= v <= hi + (1 if approx else 0)):
+                        fails.append(f"F20b 年龄换算冲突:「{nm}」正文 {v} 岁 vs 生年{by}{'(约)' if approx else ''}→本章 {yr_span} 年应为 {lo}—{hi} 岁——句:{sent.strip()[:26]}")
+        if "黑榜" in sent and re.search(r"榜首|黑榜[^。！？\n]{0,6}第一|第一[^。！？\n]{0,4}黑榜", sent):  # F20c
+            named = False
+            for nm in names:
+                if nm in sent:
+                    named = True
+                    if not any(h == nm and a <= y <= b for h, a, b in RANK_FIRST for y in cands):
+                        canon = "/".join(f"{h}({a}—{b})" for h, a, b in RANK_FIRST)
+                        fails.append(f"F20c 黑榜榜首年份冲突: 正文将「{nm}」置于榜首, 本章 {yr_span} 年正典榜首 {canon}——句:{sent.strip()[:26]}")
+            if not named:
+                notes.append(f"F20c 黑榜榜首陈述未具名(机械核验仅拦具名冲突), 请自查与 rankings.md 正典一致——句:{sent.strip()[:26]}")
+        clauses = re.split(r"[，、：；—…（）()]+", sent)  # F20d 八凶称号: 分句级+相邻搭配判定(同句跨逗号不算, 防"韩魁往南去了，鬼算的折子…"误报)
+        for cl in clauses:
+            titles_in = [t for t in {t for t in bafeng.values()} if t in cl]
+            if len(titles_in) != 1:
+                continue
+            holder = next((nm for nm, t0 in bafeng.items() if t0 == titles_in[0]), "")
+            for nm in names:
+                if nm == holder or nm not in cl:
+                    continue
+                pair = re.escape(nm) + r"[^\u4e00-\u9fff]{0,2}" + re.escape(titles_in[0]) + r"|" + re.escape(titles_in[0]) + r"[^\u4e00-\u9fff]{0,2}" + re.escape(nm)
+                if re.search(pair, cl):
+                    tag = f"(称号={bafeng[nm]})" if nm in bafeng else "(非八凶人物)"
+                    fails.append(f"F20d 称号串名:「{titles_in[0]}」与「{nm}」{tag}相邻成搭配——句:{cl.strip()[:26]}")
+    return fails, notes, True
 
 def load_outline_declared(outline_file: str) -> dict[int, str]:
     """返回卷纲中声明过的 {章号: 章题}, 卷纲缺失或未声明返回空。"""
@@ -342,6 +519,15 @@ def main():
     # vol6: base = 前五卷全116章 + 已写卷六章(比 n 小), 用于跨卷 14字滑窗
     vol6_base = [load_ch(i) for i in range(1, 117)] if any(a >= 117 for a in args) else []
     fail = 0
+    # F20S 榜单台账自审 (rankings.md 席位年龄 ↔ chronology.md 生年, 每次运行一次)
+    f20s = f20_selfaudit()
+    if f20s:
+        fail += 1
+        print("[F20S·榜单台账自审]")
+        for h in f20s:
+            print(f"  × {h}")
+    else:
+        print("[F20S·榜单台账自审] ✓ (rankings 席位年龄 ↔ chronology 生年逐席一致)")
     for n in args:
         text = load_ch(n)
         body = re.sub(r"^#.*$", "", text, flags=re.M)
@@ -629,6 +815,19 @@ def main():
                 v6_issue = True
                 print(f"  [F18·裸回声问句] ×{len(f18_hits)} (上限{F18_CAP}) {f18_hits}")
                 print("    × 短回声问句(如「记法？」「样本？」)是审讯签名, 单章≤2; 其余改为完整问句(见审计: 活人→十万户的活人)")
+        # F20 榜单引用核验 (全书; 数据源=rankings.md/chronology.md 运行时解析)
+        f20_f, f20_notes, f20_used = f20_check(n, body)
+        if f20_f:
+            fail += 1
+            print("  [F20·榜单引用核验]")
+            for h in f20_f:
+                print(f"    × {h}")
+        if f20_notes:
+            print("  [F20·榜单引用·报告]")
+            for h in f20_notes:
+                print(f"    • {h}")
+        elif f20_used and not f20_f:
+            print("  [F20·榜单引用核验] ✓")
         # ③ intra-chapter 12-char windows
         i_hits = dedup_windows(body, [body], 12, self_idx=0)
         if i_hits:
@@ -643,7 +842,7 @@ def main():
             for w, c in b_hits:
                 print(f"    • {w}  ×{c}")
         # (F8/F9/卷六词 命中已在各自块内 fail+=1 并打印; v6_issue 抑制误报 ✓)
-        if not v6_issue and not (f_hits or d_hits or f4_hits or f6_hits or f7_hits or x_hits or i_hits or f16_hits):
+        if not v6_issue and not (f_hits or d_hits or f4_hits or f6_hits or f7_hits or x_hits or i_hits or f16_hits or f20_f):
             print("  ✓ 基线比对通过")
     # 卷级微型交易签名词报告 (每卷一次, 仅报告)
     if args and min(args) <= 140:

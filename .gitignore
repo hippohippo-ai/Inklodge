@@ -6,7 +6,12 @@ create_bundle.py
 project_num.txt
 books/create_bundle.py
 books/project_num.txt
-create_bundle.py
-project_num.txt
-project_num.txt
-create_bundle.py
+
+# ── 生成物：站点镜像 ─────────────────────────────────────────────
+# 唯一规范镜像位置：仓库根 public/novels/（由 scripts/sync.mjs 生成，
+#   npm run build 的 prebuild 会自动执行 node scripts/sync.mjs）。
+# 正文唯一可编辑源：books/<书名>/novel/ 与 books/<书名>/state/。
+# 镜像目录一律不得手改，也不得另建副本提交；以下规则拦截历史误同步
+# 产生的残留镜像路径（books/public、books/<书名>/public）。
+books/public/
+books/*/public/

@@ -76,6 +76,58 @@ npm run build      # 构建，并把当前写作台同步到 public/novels
 npm run preview    # 预览构建结果
 ```
 
+### 收尾自检
+
+每卷（或改完一批章节）收尾时跑一次三向一致性终检——源 `books/<书名>/` ↔ 镜像 `public/novels/<书名>/` ↔ 台账（卷纲声明与字数口径）：
+
+```bash
+npm run check                                    # 全部书目：章节 md5、state 镜像、index.json 覆盖、卷纲章题声明、字数台账、F23 跨章持有链
+npm run check -- --book 天阙 --vol 12            # 只查某书某卷（章范围取自 state/outline-volN.md 的章题声明）
+npm run check -- --book 天阙 --vol 12 --strict   # 卷收尾：单章低于 4000 字也判失败
+npm run verify                                   # 再顺带跑各书 state/dedup-check.py
+```
+
+镜像（`public/novels/`）由 `npm run build` 的 prebuild（`node scripts/sync.mjs`）生成，**不要手改镜像文件**；正文唯一可编辑源是 `books/<书名>/novel/` 与 `books/<书名>/state/`。
+
+### F23 跨章物件持有链（台账 `state/custody-chains.json`）
+
+同一件物证（木牌、民夫名单、簿外页、抄页、三册、出库单副联……）在**相邻几次出现的章节间**交接与分拆是否自洽，原先只能靠人工抽读；现在由一致脚本机械校验：
+
+```jsonc
+// books/<书名>/state/custody-chains.json
+{
+  "chains": [{
+    "id": "行军簿抄页",
+    "steps": [                                             // 按章号升序
+      { "ch": 253, "holder": "沈广农", "anchors": ["封进原来的油布套"], "handover": ["送回扬州"] },
+      { "ch": 258, "holder": "顾琰",   "anchors": ["抄页也已经沿水路南返"], "handover": ["沿水路南返"] },
+      { "ch": 260, "holder": "蒋默",   "anchors": ["抄页早已归蒋默"],       "handover": ["托船脚送来"] }
+    ],
+    "terminal": { "ch": 260, "why": "抄页归蒋默，只寄回空封皮", "forbid_after": ["抄页又回到沈广农"] }
+  }]
+}
+```
+
+三条规则：**F23A** 每步在所登记章内须命中 `anchors` 之一（否则“未落位”）；**F23B** 相邻两步持有者不同时，须在两步章内命中 `handover` 之一（否则“易主无交接”）；**F23C** 登记了 `terminal` 的链，终局章之后的章节不得命中 `forbid_after`（分拆/归档后又以整体出现）。登记了不存在的章号、台账非合法 JSON 均直接报错。编号互补：`dedup-check.py` 的 **F21** 管同章物件去向互斥、**F22** 管单章字数，跨章这一层为 **F23**。
+
+改链时必须同步这份台账；只改正文不改表，F23 会直接报错。
+
+各书的 `state/dedup-check.py` 已加入 **F22 单章字数口径**：每章打印一行 `[F22·字数]` 台账，单章低于 4000 字即拦截（新规则自 ch237 起判失败，更早的存量章仅报告；需全书拦截时用 `WORD_ENFORCE_FROM=1`）。全卷跑完另出一行合计/均值。
+
+```bash
+python books/天阙/state/dedup-check.py 237 238                    # 逐章台账 + 字数拦截
+WORD_ENFORCE_FROM=1 python books/天阙/state/dedup-check.py 219     # 连存量章一起拦截
+```
+
+### 预提交钩子
+
+```bash
+npm run hooks:install     # 安装（复制 scripts/pre-commit → .git/hooks/pre-commit）
+npm run hooks:uninstall   # 卸载
+```
+
+安装后每次提交会先跑两关：①三向一致性 + F23 跨章持有链（镜像过期／章题不符／索引漏列／持有链断裂即中止）；②本次提交涉及的正文章节的 `dedup-check.py`（含 F22 字数拦截）。跳过单次检查：`git commit --no-verify`。
+
 ### 书稿从哪里来
 
 - **墨庐藏书（bundled）**：`books/<书名>/` 下的独立项目。运行构建后，自动同步到 `public/novels/<书名>/`，网页端只读展示；项目内 `state/archive.json` 会一并登记作者、题词和卷数。
@@ -107,7 +159,7 @@ books/              每部小说一个独立项目
   <书名>/README.md   项目说明
 prompts/             所有小说共享的 13 个提示词
  templates/state/    新项目使用的状态文件模板
-scripts/             开新书、查看进度、同步书库的脚本
+scripts/             开新书、查看进度、同步书库、一致性终检的脚本
 WORKFLOW.md         Agent 的完整操作总纲
 src/                React 网页源码
 public/novels/      构建后供网页读取的所有小说数据

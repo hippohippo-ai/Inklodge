@@ -10,10 +10,10 @@
       "volumes": 14
     },
     "progress": {
-      "stage": 9,
-      "currentChapter": 1,
+      "stage": 11,
+      "currentChapter": 260,
       "totalChapters": 270,
-      "status": "大纲、人物与世界观已就绪，第1章《码头》初稿已落文，待按 WORKFLOW.md 继续写作"
+      "status": "第十一卷《三王天下》（ch237—260，24章）定稿；全书 260 章均达 4000 字口径（合计 1,101,839 字，均 4,238），`npm run check --strict` 全量转绿；第十二卷《记危》（ch261—284，773—775）卷纲框架稿完成，卷名与章数已定稿（24 章，全书 14 卷 332 章），待补 24 条章题声明后开写"
     },
     "chapterCount": 260
   },

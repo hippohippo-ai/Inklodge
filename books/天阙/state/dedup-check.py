@@ -23,9 +23,15 @@
           席位与 state/chronology.md 生年×正文年份——F20S 台账自审(席位年龄↔生年)/F20a 席位配对
           (裴十三=第十二席空缺)/F20b 年龄换算(生年+当前年)/F20c 黑榜榜首年份/F20d 八凶称号/
           F20e 单章单榜≤2; 数据源运行时解析, 改 rankings.md/chronology.md 即生效, 无需同步本文件
+       ⑮ F21 物件去向互斥 (登记章生效, 源: 卷十一终稿抽读 ch242 队别/ch260 民夫名单两处持有链断裂):
+          F21A 同一物件的正典去向链必须落位且断裂写法(两种去向并存)禁现; F21B 持有锚点声明后,
+          他人展示清单不得再含该物件; 刻意交接/分拆登记 F21_EXCL_ALLOW。新章加管: 登记 F21_STATES/F21_COLINES
+       ⑯ F22 单章字数口径 (全书台账; ch237+ 判失败, 之前仅报告):
+          去章题行(^#…)与全部空白统计(Python 的空白字符类含全角空格等 Unicode 空白, 与 scripts/consistency-check.mjs 同口径);
+          单章下限 4000 字, 低于即拦截(退出码1); 高于 5000 仅提示。每章打印一行台账, 全卷跑完另出合计/均值。
 退出码: 0=全部通过, 1=有命中
 """
-import sys, re, unicodedata
+import sys, os, re, unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent      # books/天阙
@@ -198,6 +204,25 @@ VOL11_REQ = {
     255: [["无罪"], ["虞凤池"]], 256: [["归册"], ["三千"]], 257: [["换河"], ["谢听潮"]],
     258: [["不赦"], ["不可原谅", "知过"]], 259: [["河声"], ["追缉"]], 260: [["北望"], ["民夫名单"]],
 }
+# === F21 物件去向互斥 (2026-09-10, 源于卷十一终稿抽读: ch242 秦小七队别/ch260 民夫名单两处持有链断裂) ===
+# F21A 顺序互斥: 按章登记物件的唯一正典去向链; 每段须命中, 且禁止出现登记的断裂写法(两种去向并存)。
+#   config: {章号: [(物件, 必含文案, [禁现断裂写法...]), ...]} —— 必含文案缺席或断裂写法出现均判失败。
+# F21B 展示互斥: 章内声明"持有者声明去向锚点"之后, 他人展示清单(摆了…/摊了…)不得再含该物件;
+#   config: {章号: [(持有者, 物件, [去向锚点...]), ...]} —— 锚点后展示清单含物件即判失败。
+#   豁免: F21_EXCL_ALLOW {章号: {物件: 允许展示次数}} 刻意交接/分拆登记。
+F21_STATES: dict[int, list[tuple[str, str, list[str]]]] = {
+    # ch242 正典: 秦小七 第五队→第七队 (只挪一次), 临时牌移交沈广农一次
+    242: [
+        ("秦小七", "从第五队挪到第七队", ["编进第五队", "编入第五队", "回到第五队"]),
+    ],
+}
+F21_COLINES: dict[int, list[tuple[str, str, list[str]]]] = {
+    # ch260 正典: 名单在药箱旁→衣襟→木匣顶(沈广农持), 终章黎明才分作两半——桑葚的四物展示不得含名单
+    260: [
+        ("沈广农", "民夫名单", ["放进自己的衣襟", "夹在衣襟内侧", "在怀中压紧"]),
+    ],
+}
+F21_EXCL_ALLOW: dict[int, dict[str, int]] = {}  # {章号: {物件: 允许他人展示次数}} 刻意交接登记
 # === F19 卷十器物/词频锚点 (ch213-236, 与 outline-vol10 意象密度硬约束12同步) ===
 # 语义: {词: {unlimited: 不限章集合, cap: 其余卷十章单章上限}}。
 # 防的是"天阙"作感叹词滥用、"永不核销"跨章连发。
@@ -270,6 +295,16 @@ F18_CAP = 2
 F18_GENERIC = {"什么", "为什么", "怎么", "谁", "哪儿", "哪里", "几时", "何时", "多久", "哪个",
               "干什么", "后来呢", "什么字", "什么话", "那", "这", "何处", "如何"}
 LQ, RQ, QM = "\u201c", "\u201d", "\uff1f"
+# === F22 单章字数口径 (全书台账; ch237+ 判失败): requirements.md 规定单章 4000—5000 字。
+# 统计口径 = 去章题行(^#…)后删全部空白(Python \s 含全角空格等 Unicode 空白),
+#   与 scripts/consistency-check.mjs 的 wordCount() 同口径, 两处改动须同步。
+# 存量章(低于下限但 < WORD_ENFORCE_FROM)仅打印报告不判失败——沿用 F3/F16 的"新规则自某章起"惯例。
+WORD_MIN = 4000
+WORD_MAX = 5000
+WORD_ENFORCE_FROM = int(os.environ.get("WORD_ENFORCE_FROM", "237"))  # 全量拦截: WORD_ENFORCE_FROM=1 python state/dedup-check.py …
+def word_count(text: str) -> int:
+    """单章字数: 去章题行与全部空白。"""
+    return len(re.sub(r"\s", "", re.sub(r"^#.*$", "", text, flags=re.M)))
 # === F20 榜单引用核验 (全书生效, 2026-09-09): 每章正文出现 宗师录/黑榜/八凶/第X席 引用时,
 # 自动比对 state/rankings.md 席位与 state/chronology.md 生年×正文年份的年龄换算
 # (宗师补种闭环核验机械化, 防写作时临时查表出错)。数据源运行时解析两份台账:
@@ -444,6 +479,41 @@ def f20_check(n: int, body: str):
                     fails.append(f"F20d 称号串名:「{titles_in[0]}」与「{nm}」{tag}相邻成搭配——句:{cl.strip()[:26]}")
     return fails, notes, True
 
+def f21_check(n: int, body: str):
+    """F21 单章物件去向互斥核验: 返回 [fails]。states=断裂写法/必含去向, colines=锚点后展示互斥。
+    自持 body 局部变量(不改外部名)——本文件 F18 块曾复用 body 名, 此处显式隔离防历史遮蔽回归。"""
+    fails = []
+    # F21A: 必含去向 + 断裂写法禁现 (同一物件同章两种去向互斥)
+    for obj, need, broken in F21_STATES.get(n, []):
+        if need not in body:
+            fails.append(f"F21A 物件「{obj}」正典去向未落位: 本章须含「{need}」——若剧情变更须先改本表")
+        for b in broken:
+            if b in body:
+                fails.append(f"F21A 物件「{obj}」去向断裂:「{b}」与登记去向「{need}」同章并存——同一物件同章两种去向互斥")
+    # F21B: 持有锚点之后, 他人展示清单不得再含该物件
+    for holder, obj, anchors in F21_COLINES.get(n, []):
+        j_last = -1
+        for a in anchors:
+            j = body.find(a)
+            if j >= 0:
+                j_last = max(j_last, j + len(a))
+        if j_last < 0:
+            continue
+        tail = body[j_last:]
+        shown = 0
+        for m in re.finditer(r"[摆摊]了([^。！？\n]{2,80})", tail):
+            if obj in m.group(1):
+                shown += 1
+                allow = F21_EXCL_ALLOW.get(n, {}).get(obj, 0)
+                if shown > allow:
+                    fails.append(f"F21B 展示互斥:「{holder}」声明「{anchors[-1]}」后, 展示清单仍含「{obj}」——持有链断裂; 若为刻意交接/分拆, 登记 F21_EXCL_ALLOW")
+                    break
+    return fails
+
+def f21_covered(n: int) -> bool:
+    """该章是否在 F21 覆盖范围内(用于打印 ✓ 行)。"""
+    return n in F21_STATES or n in F21_COLINES
+
 def load_outline_declared(outline_file: str) -> dict[int, str]:
     """返回卷纲中声明过的 {章号: 章题}, 卷纲缺失或未声明返回空。"""
     p = ROOT / "state" / outline_file
@@ -530,6 +600,7 @@ def main():
     # vol6: base = 前五卷全116章 + 已写卷六章(比 n 小), 用于跨卷 14字滑窗
     vol6_base = [load_ch(i) for i in range(1, 117)] if any(a >= 117 for a in args) else []
     fail = 0
+    wc_ledger = []   # F22 单章字数台账(本次运行范围)
     # F20S 榜单台账自审 (rankings.md 席位年龄 ↔ chronology.md 生年, 每次运行一次)
     f20s = f20_selfaudit()
     if f20s:
@@ -543,6 +614,19 @@ def main():
         text = load_ch(n)
         body = re.sub(r"^#.*$", "", text, flags=re.M)
         print(f"\n=== 第{n}章 ===")
+        # ⑯ F22 单章字数台账/拦截 (去章题行与空白; ch237+ 判失败)
+        wc = word_count(text)
+        wc_ledger.append(wc)
+        f22_hit = wc < WORD_MIN and n >= WORD_ENFORCE_FROM
+        if f22_hit:
+            fail += 1
+            print(f"  [F22·字数] {wc} 字 ✗ 低于下限 {WORD_MIN}")
+        elif wc < WORD_MIN:
+            print(f"  [F22·字数] {wc} 字 · 存量, 低于下限 {WORD_MIN} (自 ch{WORD_ENFORCE_FROM} 起判失败)")
+        elif wc > WORD_MAX:
+            print(f"  [F22·字数] {wc} 字 · 高于上限 {WORD_MAX} (仅提示)")
+        else:
+            print(f"  [F22·字数] {wc} 字 ✓")
         # ① frozen (body only: chapter titles are sanctioned by outline-vol3, e.g. ch53 《记人的账》)
         # ch63/68 sanctioned: the "第七" cross-volume loop (第七袋/第七仓/第七灯) may appear ONLY there
         sanctioned = {"第七袋", "第七仓"} if n in (27, 63, 68) else set()  # ch27 埋线, ch63/68 卷三回环
@@ -683,6 +767,7 @@ def main():
         # F14 回声式对话纪律: F14A 相邻整句回声问答对; F14B 标记式重复密度 (ch141+ 判失败)
         f14_hits = []
         paras = [p.strip() for p in body.split("\n") if p.strip()]
+        body_orig = body  # F21/F16 等后续规则引用整章正文; F18 块会改写局部 body(遮蔽), 提前留底
         allow = F14_ECHO_ALLOW.get(n, [])
         for i in range(len(paras) - 1):
             core_a = _echo_core(paras[i])
@@ -841,6 +926,15 @@ def main():
                 print(f"    • {h}")
         elif f20_used and not f20_f:
             print("  [F20·榜单引用核验] ✓")
+        # F21 物件去向互斥 (源自卷十一抽读两处持有链断裂的机械化; 登记章生效, 加章先登记 F21_STATES/F21_COLINES)
+        f21_f = f21_check(n, body_orig) if f21_covered(n) else []
+        if f21_f:
+            fail += 1
+            print("  [F21·物件去向互斥]")
+            for h in f21_f:
+                print(f"    × {h}")
+        elif f21_covered(n):
+            print("  [F21·物件去向互斥] ✓")
         # ③ intra-chapter 12-char windows
         i_hits = dedup_windows(body, [body], 12, self_idx=0)
         if i_hits:
@@ -855,8 +949,12 @@ def main():
             for w, c in b_hits:
                 print(f"    • {w}  ×{c}")
         # (F8/F9/卷六词 命中已在各自块内 fail+=1 并打印; v6_issue 抑制误报 ✓)
-        if not v6_issue and not (f_hits or d_hits or f4_hits or f6_hits or f7_hits or x_hits or i_hits or f16_hits or f20_f):
+        if not v6_issue and not f22_hit and not (f_hits or d_hits or f4_hits or f6_hits or f7_hits or x_hits or i_hits or f16_hits or f20_f or f21_f):
             print("  ✓ 基线比对通过")
+    # F22 单章字数台账合计 (本次运行范围)
+    if wc_ledger:
+        _tot = sum(wc_ledger)
+        print(f"\n[F22·字数台账] {len(wc_ledger)} 章合计 {_tot} 字, 均 {round(_tot / len(wc_ledger))} 字/章 (下限 {WORD_MIN}, 上限 {WORD_MAX})")
     # 卷级微型交易签名词报告 (每卷一次, 仅报告)
     if args and min(args) <= 140:
         vol_sig = {}

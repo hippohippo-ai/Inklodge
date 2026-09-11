@@ -1,0 +1,58 @@
+#!/bin/sh
+# 预提交门槛（安装：npm run hooks:install；跳过单次：git commit --no-verify；卸载：删掉本文件）
+#
+# ① 源／镜像／台账三向一致性 + F23 跨章物件持有链（scripts/consistency-check.mjs --min 0，不含字数）
+# ② 本次提交涉及的正文章节跑各书 state/dedup-check.py（含 F22 单章字数下限 4000 的拦截）
+#
+# 任一失败即中止提交；node/python 缺失时对应步骤跳过并提示，不会因为环境问题卡住提交。
+
+set -u
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+cd "$ROOT" || exit 0
+fail=0
+
+# ── ① 一致性（静默跑；失败时重跑一次显示细节） ──────────────────
+if command -v node >/dev/null 2>&1; then
+  if ! node "$ROOT/scripts/consistency-check.mjs" --min 0 --quiet >/dev/null 2>&1; then
+    echo "[pre-commit] 一致性检查未通过，详情：" >&2
+    node "$ROOT/scripts/consistency-check.mjs" --min 0 >&2 || true
+    echo "" >&2
+    echo "[pre-commit] 提交已中止。" >&2
+    echo "  · 镜像过期：npm run build 重新同步（镜像由 sync.mjs 生成，勿手改）" >&2
+    echo "  · 章题不符：先改卷纲 outline-volN.md 或正文章题，再重跑" >&2      echo "  · 索引漏列：npm run build 后重试" >&2
+    echo "  · F23 跨章持有链：改交接/分拆时同步 state/custody-chains.json（锚点与交接词）" >&2
+    fail=1
+  fi
+else
+  echo "[pre-commit] 未找到 node，跳过一致性检查" >&2
+fi
+
+# ── ② 本次提交的正文章节 → 各书 dedup-check.py（含 F22 字数拦截） ──
+PY=""
+for c in python python3; do
+  if command -v "$c" >/dev/null 2>&1; then PY="$c"; break; fi
+done
+if [ -n "$PY" ]; then
+  # -c core.quotePath=false: 否则中文路径会被 git 转义加引号，sed 匹配不上
+  staged=$(git -c core.quotePath=false diff --cached --name-only --diff-filter=ACMR)
+  books=$(printf '%s\n' "$staged" \
+          | sed -n 's#^\(books/[^/]*\)/novel/chapter-[0-9]*\.md$#\1#p' | sort -u)
+  for b in $books; do
+    script="$ROOT/$b/state/dedup-check.py"
+    [ -f "$script" ] || continue
+    nums=$(printf '%s\n' "$staged" \
+           | sed -n "s#^$b/novel/chapter-\([0-9]*\)\.md\$#\1#p" | tr '\n' ' ')
+    [ -n "$(printf '%s' "$nums" | tr -d ' ')" ] || continue
+    if ! PYTHONIOENCODING=utf-8 "$PY" "$script" $nums >&2; then
+      echo "" >&2
+      echo "[pre-commit] dedup-check 未通过（含 F22 单章字数下限 4000），提交已中止：$b" >&2
+      echo "  · 低于 4000 字：补一段具体后果动作（勿补抽象议论）后重跑" >&2
+      echo "  · 其他规则命中：按上方 × 行修正" >&2
+      fail=1
+    fi
+  done
+else
+  echo "[pre-commit] 未找到 python，跳过 dedup-check（字数拦截本次未生效）" >&2
+fi
+
+exit $fail

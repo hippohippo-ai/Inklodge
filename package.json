@@ -7,6 +7,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "check": "node scripts/consistency-check.mjs",
+    "check:strict": "node scripts/consistency-check.mjs --strict",
+    "verify": "node scripts/consistency-check.mjs --dedup",
+    "hooks:install": "node scripts/install-hooks.mjs",
+    "hooks:uninstall": "node scripts/install-hooks.mjs --uninstall",
     "preview": "vite preview",
     "prebuild": "node scripts/sync.mjs",
     "deploy": "npm run build && gh-pages -d dist"

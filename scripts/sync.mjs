@@ -46,6 +46,12 @@ function syncProject(projectDir) {
     fs.copyFileSync(path.join(stateDir, file), path.join(dest, 'state', file))
     stateFiles.push(file.replace(/\.md$/, ''))
   }
+  // 机械规则文件（dedup-check.py）与台账 JSON（custody-chains.json）同属 state 资产，一并镜像；
+  // 跳过 tmp_*.py 临时脚本与 __pycache__。镜像端 dedup-check.py 曾因此静默过期。
+  for (const file of fs.readdirSync(stateDir)
+    .filter((f) => /\.(py|json)$/.test(f) && !/^tmp_/.test(f) && f !== 'archive.json').sort()) {
+    fs.copyFileSync(path.join(stateDir, file), path.join(dest, 'state', file))
+  }
   const chapters = []
   const publishable = (f) => /^chapter-\d+\.md$/.test(f) || f === 'copyright.md' || f === 'preface.md'
   for (const file of fs.readdirSync(novelDir).filter(publishable).sort()) {

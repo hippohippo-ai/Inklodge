@@ -87,6 +87,8 @@ npm run check -- --book 天阙 --vol 12 --strict   # 卷收尾：单章低于 40
 npm run verify                                   # 再顺带跑各书 state/dedup-check.py
 ```
 
+> 卷纲先声明、正文未开写的章按**警告**处理（outline-vol12 等预登记是合法状态）；已写正文的章题不符才是失败。`--predecl` 可把「声明未开写」升为失败。
+
 镜像（`public/novels/`）由 `npm run build` 的 prebuild（`node scripts/sync.mjs`）生成，**不要手改镜像文件**；正文唯一可编辑源是 `books/<书名>/novel/` 与 `books/<书名>/state/`。
 
 ### F23 跨章物件持有链（台账 `state/custody-chains.json`）

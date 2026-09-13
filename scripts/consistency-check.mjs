@@ -5,8 +5,7 @@
 // 检查项：
 //   ① 章节源↔镜像 md5 逐字节一致（缺文件/内容不同即失败）
 //   ② state/*.md 源↔镜像一致，镜像多余文件单列警告
-//   ③ index.json 覆盖（chapters 列全、stateFiles 列全、与源数量一致）
-//   ④ 卷纲章题声明 vs 正文 H1 章题一致（声明章缺正文、章题不符即失败）
+//   ③ index.json 覆盖（chapters 列全、stateFiles 列全、与源数量一致） //   ④ 卷纲章题声明 vs 正文 H1 章题一致（章题不符即失败；「声明章缺正文」按警告处理——卷纲先声明后开写是本仓惯例，--predecl 时对回填范围内缺章升为失败）
 //   ⑤ 字数口径台账（去章题行与 Unicode 空白，与 state/dedup-check.py 同口径），
 //      单章低于 --min 默认只登记警告；加 --strict 升为失败（卷收尾用）
 //   ⑥ F23 跨章物件持有链（台账 state/custody-chains.json）：同一件物证在两次出现的章节间
@@ -49,6 +48,7 @@ const OPT = {
   python: flag('python', 'python'),
   json: argv.includes('--json'),
   quiet: argv.includes('--quiet'),
+  predecl: argv.includes('--predecl'),
   help: argv.includes('--help') || argv.includes('-h'),
 }
 
@@ -123,7 +123,7 @@ function loadCustodyChains(stateDir) {
   }
 }
 
-function checkCustodyChains({ stateDir, novelDir, targets, allMap, fail, warn, notes }) {
+function checkCustodyChains({ stateDir, novelDir, targets, allMap, declaredChapterNumbers = new Set(), fail, warn, notes }) {
   const { chains, error } = loadCustodyChains(stateDir)
   if (!chains.length && !error) return null
   if (error) { fail(error); return null }
@@ -133,6 +133,7 @@ function checkCustodyChains({ stateDir, novelDir, targets, allMap, fail, warn, n
   const inRange = new Set(targets)
   let steps = 0
   const skipped = []
+  const pending = []
 
   for (const chain of chains) {
     const id = chain.id || '(未命名链)'
@@ -141,7 +142,14 @@ function checkCustodyChains({ stateDir, novelDir, targets, allMap, fail, warn, n
     for (const st of list) {
       const n = Number(st.ch)
       if (!Number.isFinite(n)) { fail(`F23 链「${id}」有非法章号：${st.ch}`); continue }
-      if (!allSet.has(n)) { fail(`F23 链「${id}」登记的章不存在：ch${n}`); continue }
+      if (!allSet.has(n)) {
+        if (declaredChapterNumbers.has(n)) {
+          pending.push(`ch${n}`)
+          continue
+        }
+        fail(`F23 链「${id}」登记的章不存在：ch${n}`)
+        continue
+      }
       if (!inRange.has(n)) { skipped.push(`ch${n}`); continue }
       if (!Array.isArray(st.anchors) || !st.anchors.length) {
         fail(`F23 链「${id}」ch${n} 未登记持有锚点`)
@@ -195,6 +203,10 @@ function checkCustodyChains({ stateDir, novelDir, targets, allMap, fail, warn, n
   if (skipped.length) {
     const uniq = [...new Set(skipped)].sort((a, b) => Number(a.slice(2)) - Number(b.slice(2)))
     notes.push(`跨章持有链：${uniq.join('、')} 不在本次范围内（--vol 限定），相关链未全量校验`)
+  }
+  if (pending.length) {
+    const uniq = [...new Set(pending)].sort((a, b) => Number(a.slice(2)) - Number(b.slice(2)))
+    notes.push(`跨章持有链：${uniq.join('、')} 已在卷纲声明但正文尚未开写，待对应章落地后校验`)
   }
   return { chains: chains.length, steps }
 }
@@ -250,12 +262,17 @@ function checkBook(name) {
   }
 
   // —— ④ 声明 ↔ 正文章题 ——
+  // 「声明章缺正文」按警告处理：卷纲先声明后开写是本仓惯例（outline-vol12 等），只对已存在的正文校验章题
   const checkedVols = OPT.vol != null ? volumes.filter((v) => v.vol === OPT.vol) : volumes
   for (const v of checkedVols) {
     for (const [nStr, declTitle] of Object.entries(v.declared)) {
       const n = Number(nStr)
       const srcText = read(path.join(novelDir, `chapter-${n}.md`))
-      if (srcText == null) { fail(`卷纲 ${v.file} 声明第${n}章《${declTitle}》，正文文件不存在`); continue }
+      if (srcText == null) {
+        if (n <= allSet.size && !OPT.predecl) fail(`卷纲 ${v.file} 声明第${n}章《${declTitle}》，正文文件不存在`)
+        else warn(`卷纲 ${v.file} 已声明第${n}章《${declTitle}》（正文未开写）`)
+        continue
+      }
       const actual = chapterTitle(srcText)
       if (actual == null) { fail(`第${n}章 正文首行缺「第N章《…》」章题`); continue }
       if (actual !== declTitle) fail(`第${n}章 章题不符：卷纲《${declTitle}》 vs 正文《${actual}》`)
@@ -333,8 +350,9 @@ function checkBook(name) {
   }
 
   // —— ⑥ F23 跨章物件持有链（state/custody-chains.json）——
+  const declaredChapterNumbers = new Set(volumes.flatMap((v) => Object.keys(v.declared).map(Number)))
   const custody = checkCustodyChains({
-    stateDir, novelDir, targets, allMap, fail, warn, notes,
+    stateDir, novelDir, targets, allMap, declaredChapterNumbers, fail, warn, notes,
   }) || { chains: 0, steps: 0 }
 
   const wordTotal = chapters.reduce((s, c) => s + c.chars, 0)

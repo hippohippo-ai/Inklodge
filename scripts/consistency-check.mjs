@@ -10,6 +10,9 @@
 //      单章低于 --min 默认只登记警告；加 --strict 升为失败（卷收尾用）
 //   ⑥ F23 跨章物件持有链（台账 state/custody-chains.json）：同一件物证在两次出现的章节间
 //      交接/分拆是否自洽——A 每步须命中持有锚点；B 易主须有交接词；C 分拆/归档后再以整体出现即报错。
+//   ⑦ progress 台账语义：state/progress.md 的「当前阶段/当前章节/总章节数」↔ 正文实际章数
+//      （以及镜像 index.json 的 progress 是否与源同步）。字节比对拦不住语义漂移（如 ch284 已写、
+//       台账仍写 260），故单列一项；字段缺失时只警告、不判失败。
 //      （编号说明：state/dedup-check.py 的 F21 = 同章物件去向互斥、F22 = 单章字数口径；
 //        跨章这一层在一致脚本里编为 F23，避免与既有编号冲突。）
 //
@@ -18,6 +21,10 @@
 //   node scripts/consistency-check.mjs --book 天阙 --vol 11          # 只查天阙卷十一（ch237—260）
 //   node scripts/consistency-check.mjs --book 天阙 --vol 12 --strict # 卷收尾：字数也判失败
 //   node scripts/consistency-check.mjs --book 天阙 --vol 11 --dedup  # 顺带跑 state/dedup-check.py
+//   node scripts/consistency-check.mjs --dedup --legacy             # 另列出「存量·仅报告」的逐条详单
+//      dedup 输出分两档：判失败项逐条打印（带章号）；各规则「某章起才判失败」之前的存量命中只给
+//      按规则 / 按章号的计数摘要——它们在某些书里可达上百处（如天阙 140 处），与失败项混在一起打印
+//      会让「通过」的一跑看起来像「失败」。存量是历史存稿、非本轮改动引入，故只报告不判失败。
 //   node scripts/consistency-check.mjs --min 0                      # 只看一致性，不看字数
 //   node scripts/consistency-check.mjs --json                       # 机器可读输出
 //
@@ -45,6 +52,7 @@ const OPT = {
   min: flag('min') != null ? Number(flag('min')) : 4000,
   strict: argv.includes('--strict'),
   dedup: argv.includes('--dedup'),
+  legacy: argv.includes('--legacy'),
   python: flag('python', 'python'),
   json: argv.includes('--json'),
   quiet: argv.includes('--quiet'),
@@ -349,6 +357,42 @@ function checkBook(name) {
     if (beyond.length) warn(`${v.file} 声明了尚无正文的章：${beyond.join('、')}`)
   }
 
+  // —— ⑦ progress 台账语义（state/progress.md ↔ 实际章数；口径与 scripts/sync.mjs 一致）——
+  // ①—⑤ 只比字节与覆盖，所以「ch284 写完而 progress.md 仍写当前章节 260」这类语义漂移
+  // 以前拦不住（镜像 index.json 只是照抄 progress.md，抄错也“一致”）。此处补语义校验。
+  {
+    const progRaw = read(path.join(stateDir, 'progress.md'))
+    if (progRaw == null) {
+      warn('state/progress.md 不存在，跳过 progress 语义校验')
+    } else {
+      const pick = (re) => { const m = re.exec(progRaw); return m ? Number(m[1]) : null }
+      const pStage = pick(/当前阶段[：:]\s*(\d+)/)
+      const pCur = pick(/当前章节[：:]\s*(\d+)/)
+      const pTotal = pick(/总章节数[：:]\s*(\d+)/)
+      const actualMax = all.length ? Math.max(...all.map((c) => c.n)) : 0
+      const actualCount = all.length
+      if (pCur == null) {
+        warn('progress.md 无「当前章节：N」字段，跳过 progress 语义校验（sync.mjs 同样读不到该字段）')
+      } else {
+        if (pCur !== actualMax) {
+          fail(`progress.md 当前章节=${pCur} ≠ 正文实际最大章号 ${actualMax}（台账滞后：改 progress.md 后重跑 npm run build）`)
+        }
+        if (pTotal != null && pCur > pTotal) {
+          fail(`progress.md 当前章节=${pCur} 超过总章节数=${pTotal}`)
+        }
+        if (actualCount !== actualMax) {
+          warn(`正文章号不连续：${actualCount} 个章节文件，最大章号 ${actualMax}`)
+        }
+        let idxCur = null
+        try { idxCur = JSON.parse(read(idxPath))?.progress?.currentChapter ?? null } catch { /* ③ 已报 */ }
+        if (idxCur != null && idxCur !== pCur) {
+          fail(`镜像 index.json 当前章节=${idxCur} ≠ progress.md 当前章节=${pCur}（重跑 npm run build）`)
+        }
+        notes.push(`progress 语义: 当前章节 ${pCur}/${pTotal ?? '?'} · 阶段 ${pStage ?? '?'} · 实际章数 ${actualCount}`)
+      }
+    }
+  }
+
   // —— ⑥ F23 跨章物件持有链（state/custody-chains.json）——
   const declaredChapterNumbers = new Set(volumes.flatMap((v) => Object.keys(v.declared).map(Number)))
   const custody = checkCustodyChains({
@@ -357,6 +401,77 @@ function checkBook(name) {
 
   const wordTotal = chapters.reduce((s, c) => s + c.chars, 0)
   return { name, title, mirror, failures, warnings, notes, chapters, volumes, wordTotal, custody }
+}
+
+// ── dedup 输出解析：判失败项 / 存量报告 / 信息项 三档 ──────────────
+// dedup-check.py 对「新规则自某章起」的历史章节打 `  [F3·…] (存量, 仅报告)` + `    × …`。
+// 只看以 × 开头的行会同时丢掉 section 头（丢了「存量」标签与章号），故按 section 头分类：
+//   缩进 4 空格的 × / • 行归属其上方最近的 section 头：
+//     section 含「存量」        → 存量报告（历史存稿的规则命中，按设计不判失败）
+//     section 含「仅报告」或 • 行 → 信息项（如 B类「受控呼应（需登记）」清单、卷级词频报告）
+//     其余（顶层 F20S 自审块、带 ✗ 的 F22 字数行）→ 判失败
+function parseDedupOutput(stdout) {
+  const failures = []
+  const legacy = []
+  const info = []
+  let ch = null
+  let sec = ''
+  let mode = 'fail'   // 'fail' | 'legacy' | 'info'
+  for (const raw of String(stdout || '').split('\n')) {
+    const line = raw.replace(/\s+$/, '')
+    if (!line.trim()) continue
+    const mCh = /^===\s*第(\d+)章\s*===/.exec(line.trim())
+    if (mCh) { ch = Number(mCh[1]); sec = ''; mode = 'fail'; continue }
+    const mSec = /^\s*\[([^\]]+)\]\s*(.*)$/.exec(line)
+    if (mSec) {
+      sec = mSec[1].trim()
+      const rest = (mSec[2] || '').trim()
+      const hasLegacy = /存量/.test(sec) || /存量/.test(rest)
+      const hasInfo = /仅报告/.test(sec) || /仅报告/.test(rest)
+      mode = hasLegacy ? 'legacy' : (hasInfo ? 'info' : 'fail')
+      // section 头自带正文（如 [F12·存量报告] 命中 7 次）才算一条记录；
+      // 纯标签型（rest 只剩「(存量, 仅报告)」）不计，由随后的 × 行计数。
+      const restClean = rest
+        .replace(/[（(][^）)]*(?:存量|仅报告)[^）)]*[）)]/g, '')
+        .replace(/存量|仅报告/g, '')
+        .replace(/[，,、\s]/g, '')
+      const rec = { ch, rule: sec.split('·')[0], sec, text: `${sec} ${rest}` }
+      if (restClean && mode === 'legacy') legacy.push(rec)
+      else if (restClean && mode === 'info') info.push(rec)
+      else if (mode === 'fail' && /✗|失败|未声明/.test(rest)) failures.push(rec)
+      continue
+    }
+    const mHit = /^\s*([×✗•])\s*(.*)$/.exec(line)
+    if (!mHit) continue
+    const rec = { ch, rule: sec.split('·')[0] || '未归类', sec, text: mHit[2].trim() }
+    if (mHit[1] === '•' || mode === 'info') info.push(rec)
+    else if (mode === 'legacy') legacy.push(rec)
+    else failures.push(rec)
+  }
+  return { failures, legacy, info }
+}
+
+/** 按规则标签归组，多的在前（标签取 section 头「·」前一段，如 F3·高频意象超频 → F3）。 */
+function groupByRule(records) {
+  const m = new Map()
+  for (const x of records) {
+    if (!m.has(x.rule)) m.set(x.rule, [])
+    m.get(x.rule).push(x)
+  }
+  return [...m].sort((a, b) => b[1].length - a[1].length)
+}
+
+/** [1,2,3,5] → "ch1—3、ch5"；连续段数超过 max 时截断。 */
+function fmtRanges(nums, max = 10) {
+  const a = [...new Set(nums)].filter((n) => n != null).sort((x, y) => x - y)
+  const segs = []
+  for (let i = 0; i < a.length;) {
+    let j = i
+    while (j + 1 < a.length && a[j + 1] === a[j] + 1) j += 1
+    segs.push(i === j ? `ch${a[i]}` : `ch${a[i]}—${a[j]}`)
+    i = j + 1
+  }
+  return segs.length <= max ? segs.join('、') : `${segs.slice(0, max).join('、')}…（另 ${segs.length - max} 段）`
 }
 
 // ── 主流程 ──────────────────────────────────────────────────────────
@@ -422,15 +537,42 @@ if (OPT.dedup) {
     const res = spawnSync(OPT.python, [script, ...nums.map(String)], {
       cwd: ROOT, encoding: 'utf8', env: { ...process.env, PYTHONIOENCODING: 'utf-8' },
     })
-    const ok = res.status === 0
-    report.dedup.push({ book: r.name, chapters: nums.length, ok, status: res.status })
+    const { failures, legacy, info } = parseDedupOutput(res.stdout)
+    const ok = res.status === 0 && failures.length === 0
+    report.dedup.push({ book: r.name, chapters: nums.length, ok, status: res.status,
+      failures: failures.length, legacy: legacy.length, info: info.length })
     if (!ok) report.failures += 1
     if (!OPT.json && !OPT.quiet) {
       console.log(`\n════ ${r.name}｜dedup-check.py（${nums.length} 章）`)
-      const lines = (res.stdout || '').trim().split('\n')
-      const hits = lines.filter((l) => /^\s*[×✗]|失败|未声明/.test(l))
-      console.log(hits.length ? hits.map((l) => '  ' + l.trim()).join('\n') : '  ✓ 全部通过')
-      if (res.error) console.log(`  ✗ 无法调用 ${OPT.python}：${res.error.message}`)
+      if (res.error) {
+        console.log(`  ✗ 无法调用 ${OPT.python}：${res.error.message}`)
+      } else if (failures.length) {
+        for (const f of failures) console.log(`  ✗ ${f.ch != null ? `ch${f.ch} ` : ''}${f.text}`)
+      } else if (!ok) {
+        console.log(`  ✗ dedup-check.py 退出码 ${res.status}，但未解析出失败行——请单独跑该脚本看原始输出`)
+      } else {
+        console.log('  ✓ 无判失败项')
+      }
+      if (legacy.length) {
+        const legacyChs = legacy.map((x) => x.ch).filter((n) => n != null)
+        console.log(`  · 存量报告 ${legacy.length} 处 · ${new Set(legacyChs).size} 章`
+          + '——规则前章段，按设计仅报告、不判失败')
+        for (const [rule, list] of groupByRule(legacy)) {
+          const chs = list.map((x) => x.ch)
+          console.log(`      ${rule}｜${new Set(chs.filter((n) => n != null)).size} 章 / ${list.length} 处`
+            + `　${fmtRanges(chs)}`)
+        }
+        if (OPT.legacy) {
+          for (const x of legacy) console.log(`      ch${x.ch != null ? x.ch : '-'} ${x.sec} → ${x.text}`)
+        } else {
+          console.log('      逐条详单：npm run verify -- --legacy')
+        }
+      }
+      if (info.length) {
+        const chs = info.map((x) => x.ch).filter((n) => n != null)
+        console.log(`  · 信息项（非命中、不计失败）：${info.length} 处 · ${new Set(chs).size} 章　`
+          + groupByRule(info).map(([r, l]) => `${r} ${l.length}`).join('、'))
+      }
     }
   }
 }
@@ -438,9 +580,14 @@ if (OPT.dedup) {
 if (OPT.json) console.log(JSON.stringify(report, null, 2))
 else {
   const pass = report.failures === 0
+  const legacyTotal = report.dedup.reduce((s, d) => s + (d.legacy || 0), 0)
   console.log(`\n──────────────────────────────────────────`)
   console.log(pass
     ? `✓ 一致性终检通过：${report.books.length} 本，${report.books.reduce((s, b) => s + b.chapters.length, 0)} 章`
     : `✗ 一致性终检失败：${report.failures} 项失败，${report.warnings} 项警告`)
+  if (pass && legacyTotal) {
+    console.log(`  （另有 ${legacyTotal} 处 dedup 存量报告，全在各规则判失败起点之前的章段，不影响通过；`
+      + '逐条详单：npm run verify -- --legacy）')
+  }
 }
 process.exit(report.failures === 0 ? 0 : 1)

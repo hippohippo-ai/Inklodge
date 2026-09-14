@@ -15,3 +15,9 @@ books/project_num.txt
 # 产生的残留镜像路径（books/public、books/<书名>/public）。
 books/public/
 books/*/public/
+
+# ── 生成物：Python 字节码 ───────────────────────────────────────
+# books/<书名>/state/dedup-check.py 每次运行都会刷新 __pycache__/；
+# 它是本机解释器版本的产物，不参与任何检查，不进版本库。
+__pycache__/
+*.pyc

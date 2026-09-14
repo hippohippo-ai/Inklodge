@@ -31,6 +31,22 @@
        ⑯ F22 单章字数口径 (全书台账; ch237+ 判失败, 之前仅报告):
           去章题行(^#…)与全部空白统计(Python 的空白字符类含全角空格等 Unicode 空白, 与 scripts/consistency-check.mjs 同口径);
           单章下限 4000 字, 低于即拦截(退出码1); 高于 5000 仅提示。每章打印一行台账, 全卷跑完另出合计/均值。
+       ⑱ F24 章节体例与重复 (源: 2026-09-14 全书审阅):
+          F24a 章内重复段落(去空白后逐字相同且 ≥12 字) → 全书判失败 (已清零, 防回归);
+          F24b 否定矫正句「不是…(而是|是)」单章 >F24_NB_CAP(=3) → ch237+ 判失败, 更早仅按存量汇总报告;
+          F24c 跨章整段重复(≥16 字) → 仅报告 (刻意复现的书信/规程句不判失败)。
+       ⑲ F25 正典台词登记核销 (源: 2026-09-14 ch283 契约审计——5 条登记台词 4 条未用未划销,
+          而当时无任何机械规则覆盖该口径): F25a 逐条核销 foreshadowing.md 中表头为
+          「台词（正典，用后划销）」的登记表——每行台词须逐字出现于该节标题所示 chNNN 正文,
+          或在行尾标 〔未启用〕/〔弃用〕, 否则判失败; F25b 场面上限: 登记区可用一行
+          「章 chNNN｜场面边界「A」→「B」｜场内引号台词 ≤N 句｜场面本体 ≤M 字」声明,
+          机械切 A…B 校验(场上限只约束场面本体, 全章字数另按 F22)。
+       ⑳ F26 段落体例 (源: 2026-09-14 段落碎片化治理——卷十—十二均段跌回开卷水平):
+          按章分离“叙述段(不以 “ 开头)”与“引号段”, 对叙述段计均段长与 <20 字占比;
+          chF26_FROM(=219) 起, 均段 <F26_NAR_MEAN_MIN(=40) 或 <20字占比 >F26_NAR_LT20_MAX(=38)%
+          即判失败; 更早仅报告。**只约束叙述段**——引号段天然短行(实测均 12 字),
+          靠脚本合并会把 A 的台词挂到 B 名下, 属文本层问题, 不入机械规则。
+          归治工具: node scripts/coalesce-paragraphs.mjs（合并相邻叙述段，不改一字）。
 退出码: 0=全部通过, 1=有命中
 """
 import sys, os, re, unicodedata
@@ -317,6 +333,127 @@ LQ, RQ, QM = "\u201c", "\u201d", "\uff1f"
 WORD_MIN = 4000
 WORD_MAX = 5000
 WORD_ENFORCE_FROM = int(os.environ.get("WORD_ENFORCE_FROM", "237"))  # 全量拦截: WORD_ENFORCE_FROM=1 python state/dedup-check.py …
+# === F24 章节体例与重复 (源: 2026-09-14 全量审阅: 章内整段重复、否定矫正句超标) ===
+#   F24a 章内重复段落: 去空白后逐字相同且 ≥12 字 → 全书判失败 (2026-09-14 已清零, 防回归)
+#   F24b 否定矫正句「不是…(而是|是)」单章计数: ch237+ 超过上限判失败, 更早仅作存量报告
+#   F24c 跨章整段重复 (≥16 字): 仅报告, 不判失败 (刻意复现的书信/规程句合法)
+F24_NB_CAP = 3
+F24_NB_FROM = int(os.environ.get("F24_NB_FROM", "237"))
+F24_DUP_MIN = 12
+F24_CROSS_MIN = 16
+F24_NB_RE = re.compile(r"不是[^，。！？\n]{1,22}[，]?(?:而是|是)")
+# === F26 段落体例 (源: 2026-09-14 段落碎片化治理) ===
+#   叙述段(不以 “ 开头)均段长下限 / <20字占比上限。引号段不纳入(单行对白属文本层)。
+F26_FROM = int(os.environ.get("F26_FROM", "219"))
+F26_NAR_MEAN_MIN = 40
+F26_NAR_LT20_MAX = 38
+
+
+def f26_stats(body: str):
+    """返回 (叙述段数, 叙述段均段长, <20字占比%, 引号段占比%)。"""
+    paras = [p.strip() for p in body.split("\n") if p.strip()]
+    if not paras:
+        return (0, 0, 0, 0)
+    nar = [p for p in paras if not p.startswith("“")]
+    if not nar:
+        return (0, 0, 0, round(100 * (len(paras) - len(nar)) / len(paras)))
+    ls = [len(re.sub(r"\s", "", p)) for p in nar]
+    return (len(nar), round(sum(ls) / len(ls), 1),
+            round(100 * sum(1 for x in ls if x < 20) / len(ls)),
+            round(100 * (len(paras) - len(nar)) / len(paras)))
+
+def f24_cross_report(args, cap=20):
+    """F24c: 跨章整段完全重复 (仅报告)。"""
+    seen = {}
+    for m in args:
+        for p in [x.strip() for x in re.sub(r"^#.*$", "", load_ch(m), flags=re.M).split("\n") if x.strip()]:
+            k = re.sub(r"\s", "", p)
+            if len(k) >= F24_CROSS_MIN:
+                seen.setdefault(k, set()).add(m)
+    dups = sorted([(k, sorted(v)) for k, v in seen.items() if len(v) > 1], key=lambda x: -len(x[1]))
+    if not dups:
+        return
+    print(f"\n[F24c·跨章整段重复(仅报告)] {len(dups)} 处")
+    for k, v in dups[:cap]:
+        print(f"  · {v}: “{k[:36]}…”")
+    if len(dups) > cap:
+        print(f"  · (另 {len(dups) - cap} 处略)")
+# === F25 正典台词登记核销 (源: 2026-09-14 ch283 郭子仪契约审计) ===
+#   F25a 核销: foreshadowing.md 中表头为「台词（正典，用后划销）」的登记表, 每行台词必须
+#        逐字出现于节标题所示章号(chNNN)的正文, 或在行尾标 〔未启用〕/〔弃用〕;
+#        既没写、也没划销 = 契约静默失效, 判失败。
+#   F25b 场面上限: 登记区声明一行「章 ch283｜场面边界「A」→「B」｜场内引号台词 ≤8 句｜
+#        场面本体 ≤2000 字」——机械切出 A…B, 超上限判失败(上限只约束场面本体, 全章另按 F22)。
+F25_TBL_HEAD = "台词（正典，用后划销）"
+F25_UNUSED = ("〔未启用〕", "〔弃用〕", "〔未用〕")
+F25_SCENE_RE = re.compile(
+    r"章\s*ch(\d+)｜场面边界「(.+?)」→「(.+?)」｜场内引号台词\s*≤\s*(\d+)\s*句｜场面本体\s*≤\s*(\d+)\s*字")
+
+
+def f25_registry():
+    """解析 foreshadowing.md 的正典台词登记表与 F25b 机械登记行。"""
+    p = ROOT / "state" / "foreshadowing.md"
+    if not p.exists():
+        return [], []
+    rows, scenes, ch, in_tbl = [], [], None, False
+    for raw in p.read_text(encoding="utf-8").split("\n"):
+        line = raw.strip()
+        if line.startswith("#"):
+            m = re.search(r"ch(\d+)", line)
+            ch = int(m.group(1)) if m else None
+            in_tbl = False
+            continue
+        m = F25_SCENE_RE.search(line)
+        if m:
+            scenes.append((int(m.group(1)), m.group(2), m.group(3), int(m.group(4)), int(m.group(5))))
+            continue
+        if F25_TBL_HEAD in line:
+            in_tbl = True
+            continue
+        if not in_tbl:
+            continue
+        if not line.startswith("|"):
+            in_tbl = False
+            continue
+        cells = [c.strip() for c in line.strip("|").split("|")]
+        if not cells or set(cells[0]) <= set("-: "):
+            continue
+        q = re.findall(r"“([^”]+)”", cells[1] if len(cells) > 1 else "")
+        rows.append((ch, q[0] if q else None, any(k in line for k in F25_UNUSED)))
+    return rows, scenes
+
+
+def f25_check():
+    """F25 逐条核销 + 场面上限校验, 返回失败清单(空=通过)。"""
+    rows, scenes = f25_registry()
+    fails, used, unused = [], 0, 0
+    for r_ch, q, marked in rows:
+        if q is None:
+            if marked:
+                unused += 1
+            continue
+        if r_ch is None:
+            continue
+        if q in re.sub(r"^#.*$", "", load_ch(r_ch), flags=re.M):
+            used += 1
+        elif marked:
+            unused += 1
+        else:
+            fails.append(f"ch{r_ch} 登记台词既未入正文也未划销: “{q[:24]}…”")
+    for s_ch, a, b, cap_q, cap_w in scenes:
+        text = load_ch(s_ch)
+        if a not in text or b not in text or text.index(a) > text.rindex(b):
+            fails.append(f"ch{s_ch} 场面边界缺失或不按序: 「{a}」→「{b}」")
+            continue
+        scene = text[text.index(a):text.rindex(b)]
+        nq, nw = len(re.findall(r"“[^”]*”", scene)), len(re.sub(r"\s", "", scene))
+        if nq > cap_q:
+            fails.append(f"ch{s_ch} 场面内引号台词 {nq} 句 > 上限 {cap_q} 句")
+        if nw > cap_w:
+            fails.append(f"ch{s_ch} 场面本体 {nw} 字 > 上限 {cap_w} 字")
+    return fails, used, unused, len(scenes)
+
+
 def word_count(text: str) -> int:
     """单章字数: 去章题行与全部空白。"""
     return len(re.sub(r"\s", "", re.sub(r"^#.*$", "", text, flags=re.M)))
@@ -616,6 +753,8 @@ def main():
     vol6_base = [load_ch(i) for i in range(1, 117)] if any(a >= 117 for a in args) else []
     fail = 0
     wc_ledger = []   # F22 单章字数台账(本次运行范围)
+    f24b_legacy = []  # F24b 存量章(超过上限但早于 F24_NB_FROM), 汇总一行报告
+    f26_legacy = []   # F26 规则前章段(早于 F26_FROM 且未达新标), 汇总一行报告
     # F20S 榜单台账自审 (rankings.md 席位年龄 ↔ chronology.md 生年, 每次运行一次)
     f20s = f20_selfaudit()
     if f20s:
@@ -625,6 +764,15 @@ def main():
             print(f"  × {h}")
     else:
         print("[F20S·榜单台账自审] ✓ (rankings 席位年龄 ↔ chronology 生年逐席一致)")
+    # F25 正典台词登记核销 (登记表逐条: 已用 / 显式未启用 / 判失败; 场面上限切段校验)
+    f25_fails, f25_used, f25_unused, f25_scenes = f25_check()
+    if f25_fails:
+        fail += 1
+        print("[F25·正典台词登记核销]")
+        for _msg in f25_fails:
+            print(f"  × {_msg}")
+    else:
+        print(f"[F25·正典台词登记核销] ✓ (登记台词 {f25_used} 条已用 / {f25_unused} 条显式未启用; 场面上限 {f25_scenes} 处合规)")
     for n in args:
         text = load_ch(n)
         body = re.sub(r"^#.*$", "", text, flags=re.M)
@@ -642,6 +790,40 @@ def main():
             print(f"  [F22·字数] {wc} 字 · 高于上限 {WORD_MAX} (仅提示)")
         else:
             print(f"  [F22·字数] {wc} 字 ✓")
+        # ⑱ F24 章节体例与重复 (F24a 章内重复段落 / F24b 否定矫正句密度)
+        f24_dup = {}
+        for _p in [x.strip() for x in body.split("\n") if x.strip()]:
+            _k = re.sub(r"\s", "", _p)
+            if len(_k) >= F24_DUP_MIN:
+                f24_dup[_k] = f24_dup.get(_k, 0) + 1
+        f24_dup = {k: c for k, c in f24_dup.items() if c > 1}
+        if f24_dup:
+            fail += 1
+            print("  [F24a·章内重复段落]")
+            for k, c in f24_dup.items():
+                print(f"    × ×{c} “{k[:40]}…”")
+        f24_nb = len(F24_NB_RE.findall(body))
+        if f24_nb > F24_NB_CAP:
+            if n >= F24_NB_FROM:
+                fail += 1
+                print(f"  [F24b·否定矫正句] ×{f24_nb} ✗ 超过上限 {F24_NB_CAP}——至少一处改写为直陈句")
+            else:
+                f24b_legacy.append((n, f24_nb))
+        elif f24_nb:
+            print(f"  [F24b·否定矫正句] ×{f24_nb} ✓")
+        # ⑳ F26 段落体例 (叙述段均段长 / <20字占比; chF26_FROM 起判失败, 更早汇总一行报告)
+        _n26, _mean26, _lt26, _dq26 = f26_stats(body)
+        if _n26:
+            _f26_hit = _mean26 < F26_NAR_MEAN_MIN or _lt26 > F26_NAR_LT20_MAX
+            if n < F26_FROM:
+                if _f26_hit:
+                    f26_legacy.append((n, _mean26, _lt26))
+            elif _f26_hit:
+                fail += 1
+                print(f"  [F26·段落体例] 叙述段{_n26}段(占{100 - _dq26}%) 均{_mean26}字 / <20字{_lt26}% ✗"
+                      f" (下限 {F26_NAR_MEAN_MIN} 字 / <20字上限 {F26_NAR_LT20_MAX}%; 归治: node scripts/coalesce-paragraphs.mjs --from {n} --to {n})")
+            else:
+                print(f"  [F26·段落体例] 叙述段{_n26}段(占{100 - _dq26}%) 均{_mean26}字 / <20字{_lt26}% ✓")
         # ① frozen (body only: chapter titles are sanctioned by outline-vol3, e.g. ch53 《记人的账》)
         # ch63/68 sanctioned: the "第七" cross-volume loop (第七袋/第七仓/第七灯) may appear ONLY there
         sanctioned = {"第七袋", "第七仓"} if n in (27, 63, 68) else set()  # ch27 埋线, ch63/68 卷三回环
@@ -965,7 +1147,7 @@ def main():
             for w, c in b_hits:
                 print(f"    • {w}  ×{c}")
         # (F8/F9/卷六词 命中已在各自块内 fail+=1 并打印; v6_issue 抑制误报 ✓)
-        if not v6_issue and not f22_hit and not (f_hits or d_hits or f4_hits or f6_hits or f7_hits or x_hits or i_hits or f16_hits or f20_f or f21_f):
+        if not v6_issue and not f22_hit and not f24_dup and not (f_hits or d_hits or f4_hits or f6_hits or f7_hits or x_hits or i_hits or f16_hits or f20_f or f21_f):
             print("  ✓ 基线比对通过")
     # F22 单章字数台账合计 (本次运行范围)
     if wc_ledger:
@@ -983,6 +1165,21 @@ def main():
                     s += sum(t.count(w) for w in F11_SIG)
             vol_sig[vn] = s
         print("\n[F11·微型交易签名词按卷报告(仅报告)] " + " | ".join(f"卷{vn}:{s}" for vn, s in vol_sig.items()))
+    # F24b 存量汇总 (早于 F24_NB_FROM 的章只报告, 不判失败)
+    if f24b_legacy:
+        _tot24 = sum(c for _, c in f24b_legacy)
+        print(f"\n[F24b·否定矫正句(仅报告)] 早于 ch{F24_NB_FROM} 的 {len(f24b_legacy)} 章 / {_tot24} 处, 均 {round(_tot24 / len(f24b_legacy), 1)} 处/章 (自 ch{F24_NB_FROM} 起上限 {F24_NB_CAP} 判失败)")
+        print("  · 章目: " + "、".join(f"ch{n}×{c}" for n, c in f24b_legacy))
+    # F26 规则前章段汇总 (早于 F26_FROM 的碎片化存量, 仅报告)
+    if f26_legacy:
+        _means = [m for _, m, _ in f26_legacy]
+        _lts = [x for _, _, x in f26_legacy]
+        print(f"\n[F26·段落体例(仅报告)] 早于 ch{F26_FROM} 的 {len(f26_legacy)} 章叙述段未达新标"
+              f" (均段 {round(sum(_means) / len(_means), 1)} 字 / <20字 {round(sum(_lts) / len(_lts))}%;"
+              f" 自 ch{F26_FROM} 起下限 {F26_NAR_MEAN_MIN} 字 / <20字上限 {F26_NAR_LT20_MAX}%)")
+        print("  · 章目: " + "、".join(f"ch{n}×{m}" for n, m, _ in f26_legacy))
+    # F24c 跨章整段重复 (仅报告)
+    f24_cross_report(args)
     sys.exit(1 if fail else 0)
 
 if __name__ == "__main__":

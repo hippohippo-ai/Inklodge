@@ -26,8 +26,9 @@
        ⑮ F21 物件去向互斥 (登记章生效, 源: 卷十一终稿抽读 ch242 队别/ch260 民夫名单两处持有链断裂):
           F21A 同一物件的正典去向链必须落位且断裂写法(两种去向并存)禁现; F21B 持有锚点声明后,
           他人展示清单不得再含该物件; 刻意交接/分拆登记 F21_EXCL_ALLOW。新章加管: 登记 F21_STATES/F21_COLINES
-       ⑰ F15 卷十二回收链 (ch261-284, VOL12_REQ, 源: outline-vol12 第五章节拍): 逐章必备意象 token,
-          缺则判失败——卷纲声明、VOL12_REQ 与 foreshadowing 卷十二预登记区三方同步, 改任何一处须先改另两处
+       ⑰ F15 卷十二/卷十三回收链 (VOL12_REQ ch261-284, VOL13_REQ ch285-308; 源: 各卷 outline 第五章节拍):
+          逐章必备意象 token, 缺则判失败——卷纲声明、VOLxx_REQ 与 foreshadowing 卷预登记区三方同步,
+          改任何一处须先改另两处。卷十三表 2026-09-15 补齐 24 章(此前仅有 ch285 一条)
        ⑯ F22 单章字数口径 (全书台账; ch237+ 判失败, 之前仅报告):
           去章题行(^#…)与全部空白统计(Python 的空白字符类含全角空格等 Unicode 空白, 与 scripts/consistency-check.mjs 同口径);
           单章下限 4000 字, 低于即拦截(退出码1); 高于 5000 仅提示。每章打印一行台账, 全卷跑完另出合计/均值。
@@ -47,6 +48,12 @@
           均段 <F26_NAR_MEAN_MIN(=40) 或 <20字占比 >F26_NAR_LT20_MAX(=38)% 即判失败;
           未归治章段(45—218)仅汇总一行报告, 待逐段归治后再入册。
           环境变量 F26_FROM=N 可临时把 (N, 9999) 并进已归治区间(调试用)。
+       ㉒ F29 开口时刻纪律 (源: 2026-09-15 桑葚失语核订)——桑葚为心因性失语(非天生),
+          ch71(759)之前不得有台词(只能画/比划/写字/拉抽查); 766 ch30“不会说话”、ch36“无声疾患”
+          是当时事实。新增角色若有类似设定, 照此在 F29_ONSET 登记。
+       ㉑ F28 残障配额与去撞车 (源: 2026-09-15 作者裁定)——①配额: ch286 起不再新增残障人物,
+          章内出现残障身份/身体标记而该段不含既有角色白名单者判失败; ②去撞车: 「看不见…
+          (所以|因此|反而|却|才)…(听得|听出)」这类补偿超人句式判失败。口径详条 characters.md 一c。
           **只约束叙述段**——引号段天然短行(实测均 12—15 字),
           靠脚本合并会把 A 的台词挂到 B 名下, 属文本层问题, 不入机械规则。
           归治工具: node scripts/coalesce-paragraphs.mjs（合并相邻叙述段，不改一字;
@@ -239,6 +246,36 @@ VOL12_REQ = {
     279: [["作保"], ["调离"]], 280: [["交给第二个人"], ["分存"]], 281: [["信使"], ["病重"]],
     282: [["下一次观察名单"], ["活人"]], 283: [["节度使"], ["把柄"]], 284: [["下一榜"], ["核榜"]],
 }
+# === F15·卷十三回收链机械校验 (ch285-308, 与 outline-vol13 第五章节拍同步) ===
+# 维护约定: 改 outline-vol13 章眼须先同步本表。单组 token 即满足，降低误拦。
+# 2026-09-15 补齐 ch286-308（此前仅 ch285 一条, 等于该卷无机械章眼网）。
+# token 取自各章节拍的事件／物件／代价，正文落地后逐章校验；未开写章自动跳过。
+VOL13_REQ = {
+    285: [["首位", "第一"], ["核榜", "问榜"]],
+    286: [["让榜"], ["旧军牌", "军牌"]],
+    287: [["押解"], ["取信", "取信方式"]],
+    288: [["三套账", "三套"], ["均粮", "调阅"]],
+    289: [["传檄"], ["河西舵主"], ["合账"]],
+    290: [["会审"], ["簿外"], ["记过", "不交"]],
+    291: [["作保", "保人"], ["功牌"]],
+    292: [["线人册"], ["散网", "散伙"]],
+    293: [["抄家"], ["狱数"], ["查封"]],
+    294: [["连坐"], ["回执"]],
+    295: [["归乡", "返乡"], ["老马"]],
+    296: [["结局册"], ["目录", "三成残档"]],
+    297: [["封口", "封存"], ["皮囊目录", "皮囊"]],
+    298: [["不赦", "不可原谅"], ["不再通信", "通信"]],
+    299: [["药线"], ["周衡之"], ["药案"]],
+    300: [["观察名单"], ["阿青"]],
+    301: [["活口", "行凶者"], ["拦下"]],
+    302: [["点灯", "灯下"], ["收走", "被收"]],
+    303: [["底册"], ["扣下一页", "扣一页", "缺一页"]],
+    304: [["合封"], ["未核销"], ["记室"]],
+    305: [["称量"], ["吃人的账"], ["断潮刀", "封炉"]],
+    306: [["无纸", "只记在心里", "不落纸"], ["军报"]],
+    307: [["守夜"], ["陆青川"], ["不拔", "没有拔剑"]],
+    308: [["封榜"], ["779"]],
+}
 # === F21 物件去向互斥 (2026-09-10, 源于卷十一终稿抽读: ch242 秦小七队别/ch260 民夫名单两处持有链断裂) ===
 # F21A 顺序互斥: 按章登记物件的唯一正典去向链; 每段须命中, 且禁止出现登记的断裂写法(两种去向并存)。
 #   config: {章号: [(物件, 必含文案, [禁现断裂写法...]), ...]} —— 必含文案缺席或断裂写法出现均判失败。
@@ -355,6 +392,35 @@ if os.environ.get("F26_FROM"):
     F26_TREATED.append((int(os.environ["F26_FROM"]), 9999))
 F26_NAR_MEAN_MIN = 40
 F26_NAR_LT20_MAX = 38
+
+# === F29 开口时刻纪律 (源: 2026-09-15 桑葚失语/开口核订) ===
+#   桑葚为心因性失语(非天生): **ch71(759)之前不得有台词**——只能画/比划/写字/拉抽查。
+#   756 ch30“不会说话”、ch36“无声疾患”是当时事实; 759 ch71 起重新开口。
+F29_ONSET = {"桑葚": 71}
+#   排除“对/向/跟…桑葚说”这类“别人对她说话”的句子
+F29_SAY_RE = re.compile(
+    r"(?<![对向跟和与替给叫让催问求告带扶看喊])桑葚(?:说|问|答|喊|道)(?=[^。！？\n]{0,4}[“])|"
+    r"[”][^。！？\n]{0,12}(?<![对向跟和与替给叫让催问求告带扶看喊])桑葚(?:说|问|答|喊|道)")
+
+# === F28 残障配额与去撞车 (源: 2026-09-15 作者裁定; 详条 characters.md 一c) ===
+#   ①配额: ch286 起(卷十三/卷十四)不再新增残障人物——章内出现残障身份/身体标记,
+#          而该段不含既有残障角色白名单者判失败;
+#   ②去撞车: 「看不见…(所以|因此|反而|却|才)…(听得|听出|听觉|闻出)」这类
+#          "残障→感官补偿超人"句式判失败(不论有无既有角色)。
+#   调试: F28_FROM=N 可把起点提前(用于验证规则本身)。
+F28_FROM = int(os.environ.get("F28_FROM", "286"))
+F28_KEEP = ("阿青", "裴令仪", "慕容织", "虞凤池", "楚归藏", "桑葚", "凌虚", "孙驼子")
+F28_IDENT_RE = re.compile(
+    r"天生目盲|自幼失明|天生失明|天生聋|天生哑|聋哑|瞎子|盲女|盲童|盲仆|断臂|独臂|"
+    r"缺了(?:一只|一条)(?:手|腿|臂)|跛脚|天生跛")
+# 「残障→感官补偿超人」句式：两种语序都拦（①先写残障再写听得…更；②先写耳＿再写更…）
+_F28_DIS = r"(?:看不见|失明|瞎了|瞎子|目盲)"
+_F28_HEAR = r"(?:听得|听出|听见|听觉|听力|耳力|耳朵|耳目|耳)"
+_F28_CMP = r"(?:更|比|最|格外|尤其|灵|准|强|敏)"
+_F28_FILL = r"[^。！？\n]{0,14}"
+F28_CMP_RE = re.compile(
+    rf"(?:{_F28_DIS}{_F28_FILL}(?:所以|因此|反而|却|才|倒){_F28_FILL}{_F28_HEAR}{_F28_FILL}{_F28_CMP}|"
+    rf"{_F28_DIS}{_F28_FILL}(?:耳朵|听力|听觉|耳力){_F28_FILL}{_F28_CMP})")
 
 
 def f26_treated(n: int) -> bool:
@@ -771,6 +837,7 @@ def main():
     wc_ledger = []   # F22 单章字数台账(本次运行范围)
     f24b_legacy = []  # F24b 存量章(超过上限但早于 F24_NB_FROM), 汇总一行报告
     f26_legacy = []   # F26 未归治章段中未达新标的章, 汇总一行报告
+    f28_legacy = []   # F28 早章的残障标记存量(独臂/断臂/跛脚/盲女等), 汇总一行报告
     # F20S 榜单台账自审 (rankings.md 席位年龄 ↔ chronology.md 生年, 每次运行一次)
     f20s = f20_selfaudit()
     if f20s:
@@ -840,6 +907,35 @@ def main():
                       f" (下限 {F26_NAR_MEAN_MIN} 字 / <20字上限 {F26_NAR_LT20_MAX}%; 归治: node scripts/coalesce-paragraphs.mjs --from {n} --to {n})")
             else:
                 print(f"  [F26·段落体例] 叙述段{_n26}段(占{100 - _dq26}%) 均{_mean26}字 / <20字{_lt26}% ✓")
+        # ㉒ F29 开口时刻纪律 (桑葚 ch71 前不得有台词; 口径见 requirements.md F13)
+        for _who, _onset in F29_ONSET.items():
+            if n < _onset:
+                _f29 = [l.strip()[:60] for l in body.split("\n") if F29_SAY_RE.search(l)]
+                if _f29:
+                    fail += 1
+                    print(f"  [F29·开口时刻] {_who}在 ch{_onset} 之前不得有台词 (现 ch{n})")
+                    for _s in _f29[:3]:
+                        print(f"    × {_s}…")
+        # ㉑ F28 残障配额与去撞车 (ch286+ 判失败; 早章仅作存量汇总; 口径见 characters.md 一c)
+        f28_ident = []
+        for _p in [q.strip() for q in body.split("\n") if q.strip()]:
+            _m28 = F28_IDENT_RE.search(_p)
+            if _m28 and not any(k in _p for k in F28_KEEP):
+                f28_ident.append((_m28.group(0), _p[:40]))
+        f28_cmp = [m.group(0) for m in F28_CMP_RE.finditer(body)]
+        if f28_ident or f28_cmp:
+            if n >= F28_FROM:
+                fail += 1
+                print("  [F28·残障配额与去撞车]")
+                for _w, _sn in f28_ident[:5]:
+                    print(f"    × 新增残障标记「{_w}」且同段无既有角色: {_sn}…")
+                for _s in f28_cmp[:5]:
+                    print(f"    × 补偿模板句式: {_s}")
+                print("      (口径: 卷十三/十四不新增残障人物; 现有角色按通道唯一化写——见 characters.md 一c)")
+            else:
+                f28_legacy.append((n, len(f28_ident), len(f28_cmp)))
+        elif n >= F28_FROM:
+            print("  [F28·残障配额与去撞车] ✓")
         # ① frozen (body only: chapter titles are sanctioned by outline-vol3, e.g. ch53 《记人的账》)
         # ch63/68 sanctioned: the "第七" cross-volume loop (第七袋/第七仓/第七灯) may appear ONLY there
         sanctioned = {"第七袋", "第七仓"} if n in (27, 63, 68) else set()  # ch27 埋线, ch63/68 卷三回环
@@ -1034,7 +1130,7 @@ def main():
             # 141-164 → outline-vol7.md; 165-188 → outline-vol8.md (新卷章题声明文件随卷演进)
             decl_file = ("outline-vol7.md" if n <= 164 else ("outline-vol8.md" if n <= 188
                          else ("outline-vol9.md" if n <= 212 else ("outline-vol10.md" if n <= 236
-                         else ("outline-vol11.md" if n <= 260 else "outline-vol12.md")))))
+                         else ("outline-vol11.md" if n <= 260 else ("outline-vol12.md" if n <= 284 else "outline-vol13.md"))))))
             decl_all = load_outline_declared(decl_file)
             if not decl_all:
                 f10_hits.append(f"{decl_file} 缺失或未声明任何章题——ch141+ 章题必须先声明于 state/{decl_file}（声明章题后再跑查重）")
@@ -1063,10 +1159,11 @@ def main():
                 print(f"    × {h}")
         # F15·卷七/卷八回收链必备意象 (ch141-188): 每章须命中 REQ 表各组 token 至少一次
         # 卷七表= VOL7_REQ(foreshadowing「卷七回收规划区」), 卷八表= VOL8_REQ(outline-vol8 章眼/器物锚点)
-        req_tbl = (VOL12_REQ if 261 <= n <= 284 else
+        req_tbl = (VOL13_REQ if 285 <= n <= 308 else
+                   (VOL12_REQ if 261 <= n <= 284 else
                    (VOL11_REQ if 237 <= n <= 260 else
                    (VOL10_REQ if 213 <= n <= 236 else
-                   (VOL9_REQ if 189 <= n <= 212 else (VOL8_REQ if 165 <= n <= 188 else VOL7_REQ)))))
+                   (VOL9_REQ if 189 <= n <= 212 else (VOL8_REQ if 165 <= n <= 188 else VOL7_REQ))))))
         if n in req_tbl:
             miss = []
             for grp in req_tbl[n]:
@@ -1186,6 +1283,11 @@ def main():
         _tot24 = sum(c for _, c in f24b_legacy)
         print(f"\n[F24b·否定矫正句(仅报告)] 早于 ch{F24_NB_FROM} 的 {len(f24b_legacy)} 章 / {_tot24} 处, 均 {round(_tot24 / len(f24b_legacy), 1)} 处/章 (自 ch{F24_NB_FROM} 起上限 {F24_NB_CAP} 判失败)")
         print("  · 章目: " + "、".join(f"ch{n}×{c}" for n, c in f24b_legacy))
+    # F28 残障标记存量汇总 (早于 F28_FROM 的章只报告, 不判失败)
+    if f28_legacy:
+        _tot28 = sum(a + b for _, a, b in f28_legacy)
+        print(f"\n[F28·残障标记(仅报告)] 早于 ch{F28_FROM} 的 {len(f28_legacy)} 章 / {_tot28} 处新增残障标记（独臂/断臂/跛脚/盲女/聋哑等）——历史章, 不判失败；卷十三、卷十四起判失败")
+        print("  · 章目: " + "、".join(f"ch{n}×{a + b}" for n, a, b in f28_legacy))
     # F26 未归治章段的碎片化存量 (仅报告)
     if f26_legacy:
         _means = [m for _, m, _ in f26_legacy]

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-14T05:01:58.087Z",
+  "generatedAt": "2026-09-14T05:03:46.346Z",
   "repeatMin": 3,
   "repeatLen": 8,
   "books": {
@@ -996,83 +996,6 @@
           "unpaired": 2,
           "open": 4700,
           "close": 4702
-        },
-        {
-          "label": "全卷",
-          "vol": null,
-          "from": 1,
-          "to": 40,
-          "range": "ch1—40",
-          "src": "全书",
-          "f26": null,
-          "chapters": 40,
-          "chars": 199551,
-          "mean": 4988.8,
-          "minChars": 4061,
-          "maxChars": 9197,
-          "underFloor": 0,
-          "overCeil": 10,
-          "paraN": 7834,
-          "paraMean": 25.5,
-          "paraLt20": 59,
-          "narN": 4938,
-          "narMean": 27.3,
-          "narLt20": 57,
-          "quoteN": 2896,
-          "quoteMean": 22.4,
-          "quoteLt20": 62,
-          "quoteShare": 37,
-          "negation": 34,
-          "negationPer10k": 1.7,
-          "negationPerChapter": 0.85,
-          "dupHits": 16,
-          "dupPer10k": 0.8,
-          "topDup": [
-            [
-              "陶未明沉默了一会儿",
-              4
-            ],
-            [
-              "人群轰的一声炸开",
-              3
-            ],
-            [
-              "谢三更沉默了很久",
-              3
-            ],
-            [
-              "谢三更的脸色，变了",
-              3
-            ],
-            [
-              "赵无咎沉默了一会儿",
-              3
-            ]
-          ],
-          "ticHits": null,
-          "ticPer10k": 1.85,
-          "topTics": [
-            [
-              "本来",
-              18
-            ],
-            [
-              "反而",
-              6
-            ],
-            [
-              "并不",
-              5
-            ],
-            [
-              "其实",
-              4
-            ]
-          ],
-          "halfwidth": 69,
-          "unpaired": 2,
-          "open": 4700,
-          "close": 4702
         }
       ]
     },
@@ -1080,83 +1003,6 @@
       "volumes": [
         {
           "label": "全书",
-          "vol": null,
-          "from": 1,
-          "to": 40,
-          "range": "ch1—40",
-          "src": "全书",
-          "f26": null,
-          "chapters": 40,
-          "chars": 374698,
-          "mean": 9367.5,
-          "minChars": 7876,
-          "maxChars": 10735,
-          "underFloor": 0,
-          "overCeil": 40,
-          "paraN": 14926,
-          "paraMean": 25.1,
-          "paraLt20": 56,
-          "narN": 14926,
-          "narMean": 25.1,
-          "narLt20": 56,
-          "quoteN": 0,
-          "quoteMean": 0,
-          "quoteLt20": 0,
-          "quoteShare": 0,
-          "negation": 66,
-          "negationPer10k": 1.76,
-          "negationPerChapter": 1.65,
-          "dupHits": 277,
-          "dupPer10k": 7.39,
-          "topDup": [
-            [
-              "我心里头，咯噔一下",
-              12
-            ],
-            [
-              "是人记的，就能改",
-              7
-            ],
-            [
-              "孟婆说：我不知道",
-              6
-            ],
-            [
-              "白骨精，没有再说话",
-              6
-            ],
-            [
-              "地府的风，凉飕飕的",
-              5
-            ]
-          ],
-          "ticHits": null,
-          "ticPer10k": 1.84,
-          "topTics": [
-            [
-              "本来",
-              33
-            ],
-            [
-              "其实",
-              18
-            ],
-            [
-              "至少",
-              5
-            ],
-            [
-              "也就是说",
-              4
-            ]
-          ],
-          "halfwidth": 0,
-          "unpaired": 0,
-          "open": 0,
-          "close": 0
-        },
-        {
-          "label": "全卷",
           "vol": null,
           "from": 1,
           "to": 40,

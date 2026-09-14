@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-14T05:01:58.087Z",
+  "generatedAt": "2026-09-14T05:03:46.346Z",
   "repeatMin": 3,
   "repeatLen": 8,
   "books": {
@@ -922,83 +922,6 @@
       "volumes": [
         {
           "label": "全书",
-          "vol": null,
-          "from": 1,
-          "to": 40,
-          "range": "ch1—40",
-          "src": "全书",
-          "f26": null,
-          "chapters": 40,
-          "chars": 199551,
-          "mean": 4988.8,
-          "minChars": 4061,
-          "maxChars": 9197,
-          "underFloor": 0,
-          "overCeil": 10,
-          "paraN": 7834,
-          "paraMean": 25.5,
-          "paraLt20": 59,
-          "narN": 4938,
-          "narMean": 27.3,
-          "narLt20": 57,
-          "quoteN": 2896,
-          "quoteMean": 22.4,
-          "quoteLt20": 62,
-          "quoteShare": 37,
-          "negation": 34,
-          "negationPer10k": 1.7,
-          "negationPerChapter": 0.85,
-          "dupHits": 16,
-          "dupPer10k": 0.8,
-          "topDup": [
-            [
-              "陶未明沉默了一会儿",
-              4
-            ],
-            [
-              "人群轰的一声炸开",
-              3
-            ],
-            [
-              "谢三更沉默了很久",
-              3
-            ],
-            [
-              "谢三更的脸色，变了",
-              3
-            ],
-            [
-              "赵无咎沉默了一会儿",
-              3
-            ]
-          ],
-          "ticHits": null,
-          "ticPer10k": 1.85,
-          "topTics": [
-            [
-              "本来",
-              18
-            ],
-            [
-              "反而",
-              6
-            ],
-            [
-              "并不",
-              5
-            ],
-            [
-              "其实",
-              4
-            ]
-          ],
-          "halfwidth": 69,
-          "unpaired": 2,
-          "open": 4700,
-          "close": 4702
-        },
-        {
-          "label": "全卷",
           "vol": null,
           "from": 1,
           "to": 40,

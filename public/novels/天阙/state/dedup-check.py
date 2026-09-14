@@ -43,10 +43,14 @@
           机械切 A…B 校验(场上限只约束场面本体, 全章字数另按 F22)。
        ⑳ F26 段落体例 (源: 2026-09-14 段落碎片化治理——卷十—十二均段跌回开卷水平):
           按章分离“叙述段(不以 “ 开头)”与“引号段”, 对叙述段计均段长与 <20 字占比;
-          chF26_FROM(=219) 起, 均段 <F26_NAR_MEAN_MIN(=40) 或 <20字占比 >F26_NAR_LT20_MAX(=38)%
-          即判失败; 更早仅报告。**只约束叙述段**——引号段天然短行(实测均 12 字),
+          **已归治章段**(F26_TREATED=卷一二 ch1—44 + 卷十一二 ch219—284),
+          均段 <F26_NAR_MEAN_MIN(=40) 或 <20字占比 >F26_NAR_LT20_MAX(=38)% 即判失败;
+          未归治章段(45—218)仅汇总一行报告, 待逐段归治后再入册。
+          环境变量 F26_FROM=N 可临时把 (N, 9999) 并进已归治区间(调试用)。
+          **只约束叙述段**——引号段天然短行(实测均 12—15 字),
           靠脚本合并会把 A 的台词挂到 B 名下, 属文本层问题, 不入机械规则。
-          归治工具: node scripts/coalesce-paragraphs.mjs（合并相邻叙述段，不改一字）。
+          归治工具: node scripts/coalesce-paragraphs.mjs（合并相邻叙述段，不改一字;
+          跨段引文块 D1 护栏，书信/公文逐行排版不被合并）。
 退出码: 0=全部通过, 1=有命中
 """
 import sys, os, re, unicodedata
@@ -344,9 +348,21 @@ F24_CROSS_MIN = 16
 F24_NB_RE = re.compile(r"不是[^，。！？\n]{1,22}[，]?(?:而是|是)")
 # === F26 段落体例 (源: 2026-09-14 段落碎片化治理) ===
 #   叙述段(不以 “ 开头)均段长下限 / <20字占比上限。引号段不纳入(单行对白属文本层)。
-F26_FROM = int(os.environ.get("F26_FROM", "219"))
+#   已归治区间(闭区间): 2026-09-14 先治卷十一二 ch219—284, 同批再治卷一二 ch1—44。
+#   未列章段只报告不判失败——归治到位后把区间加进来即可(棘轮只增不减)。
+F26_TREATED = [(1, 44), (219, 284)]
+if os.environ.get("F26_FROM"):
+    F26_TREATED.append((int(os.environ["F26_FROM"]), 9999))
 F26_NAR_MEAN_MIN = 40
 F26_NAR_LT20_MAX = 38
+
+
+def f26_treated(n: int) -> bool:
+    return any(a <= n <= b for a, b in F26_TREATED)
+
+
+def f26_treated_label() -> str:
+    return "、".join(f"ch{a}—{b}" if a != b else f"ch{a}" for a, b in F26_TREATED)
 
 
 def f26_stats(body: str):
@@ -754,7 +770,7 @@ def main():
     fail = 0
     wc_ledger = []   # F22 单章字数台账(本次运行范围)
     f24b_legacy = []  # F24b 存量章(超过上限但早于 F24_NB_FROM), 汇总一行报告
-    f26_legacy = []   # F26 规则前章段(早于 F26_FROM 且未达新标), 汇总一行报告
+    f26_legacy = []   # F26 未归治章段中未达新标的章, 汇总一行报告
     # F20S 榜单台账自审 (rankings.md 席位年龄 ↔ chronology.md 生年, 每次运行一次)
     f20s = f20_selfaudit()
     if f20s:
@@ -811,11 +827,11 @@ def main():
                 f24b_legacy.append((n, f24_nb))
         elif f24_nb:
             print(f"  [F24b·否定矫正句] ×{f24_nb} ✓")
-        # ⑳ F26 段落体例 (叙述段均段长 / <20字占比; chF26_FROM 起判失败, 更早汇总一行报告)
+        # ⑳ F26 段落体例 (叙述段均段长 / <20字占比; F26_TREATED 已归治章段判失败, 其余汇总一行报告)
         _n26, _mean26, _lt26, _dq26 = f26_stats(body)
         if _n26:
             _f26_hit = _mean26 < F26_NAR_MEAN_MIN or _lt26 > F26_NAR_LT20_MAX
-            if n < F26_FROM:
+            if not f26_treated(n):
                 if _f26_hit:
                     f26_legacy.append((n, _mean26, _lt26))
             elif _f26_hit:
@@ -1170,14 +1186,16 @@ def main():
         _tot24 = sum(c for _, c in f24b_legacy)
         print(f"\n[F24b·否定矫正句(仅报告)] 早于 ch{F24_NB_FROM} 的 {len(f24b_legacy)} 章 / {_tot24} 处, 均 {round(_tot24 / len(f24b_legacy), 1)} 处/章 (自 ch{F24_NB_FROM} 起上限 {F24_NB_CAP} 判失败)")
         print("  · 章目: " + "、".join(f"ch{n}×{c}" for n, c in f24b_legacy))
-    # F26 规则前章段汇总 (早于 F26_FROM 的碎片化存量, 仅报告)
+    # F26 未归治章段的碎片化存量 (仅报告)
     if f26_legacy:
         _means = [m for _, m, _ in f26_legacy]
         _lts = [x for _, _, x in f26_legacy]
-        print(f"\n[F26·段落体例(仅报告)] 早于 ch{F26_FROM} 的 {len(f26_legacy)} 章叙述段未达新标"
+        print(f"\n[F26·段落体例(仅报告)] 未归治章段中 {len(f26_legacy)} 章叙述段未达新标"
               f" (均段 {round(sum(_means) / len(_means), 1)} 字 / <20字 {round(sum(_lts) / len(_lts))}%;"
-              f" 自 ch{F26_FROM} 起下限 {F26_NAR_MEAN_MIN} 字 / <20字上限 {F26_NAR_LT20_MAX}%)")
+              f" 已归治 {f26_treated_label()} 判失败，下限 {F26_NAR_MEAN_MIN} 字 / <20字上限 {F26_NAR_LT20_MAX}%)")
         print("  · 章目: " + "、".join(f"ch{n}×{m}" for n, m, _ in f26_legacy))
+        print("  · 归治: node scripts/coalesce-paragraphs.mjs --book 天阙 --from A --to B --target 70"
+              "（跑到不动点，即再跑报「改动 0 章」）")
     # F24c 跨章整段重复 (仅报告)
     f24_cross_report(args)
     sys.exit(1 if fail else 0)

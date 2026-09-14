@@ -19,6 +19,10 @@
  *      单行对白的碎片化属文本层面，须逐章改写，不能靠脚本。
  * 另有 M0：叙述段以「：」结尾 + 紧跟引号段 → 合并（冒号已明确引入对白）。
  *
+ * 护栏 D1（文档式引文块）：跨段引文（某段以「“」开头、段内无收尾「”」，
+ *   直到后面某段才出现收尾）整块不参与合并——书信／公文／名单在本项目里
+ *   是逐行排版的实物，合并会把行结构抹掉（例：ch18 裴弘度军令三行）。
+ *
  * 用法：
  *   node scripts/coalesce-paragraphs.mjs --book 天阙 --from 219 --to 284 --dry
  *   node scripts/coalesce-paragraphs.mjs --book 天阙 --from 219 --to 284
@@ -57,13 +61,36 @@ const hasOwnAttribution = (p) => {
 const SCENE_SHIFT = /^(?:同一夜|次日|第二天|当夜|夜裏|夜里|入夜|天亮|天明|后半夜|半月|数日后|三日后|晌午|午后|清晨|傍晚|[一二三四五六七八九十]{1,3}月|[0-9]{3,4}年)/;
 const isProtected = (p) => wc(p) <= 16 && SCENE_SHIFT.test(p);
 
+/** D1 护栏：跨段引文块的段落下标集合（含开引号段、中间段与收尾段）。
+ *  判据：某段以「“」开头且段内无「”」，后续直到出现「”」的段落全部属于同块。 */
+function quoteBlockIdx(paras) {
+  const inBlock = new Set();
+  let i = 0;
+  while (i < paras.length) {
+    const p = paras[i];
+    if (p.startsWith('“') && !p.includes('”')) {
+      let j = i + 1;
+      while (j < paras.length && !paras[j].includes('”')) j++;
+      if (j < paras.length) {           // 只有真正闭合的跨段引文才成块
+        for (let k = i; k <= j; k++) inBlock.add(k);
+        i = j + 1;
+        continue;
+      }
+    }
+    i++;
+  }
+  return inBlock;
+}
+
 function coalesce(paras, target) {
   const out = [];
   const merges = [];
   const last = paras.length - 1;
+  const dqBlock = quoteBlockIdx(paras);
   for (let i = 0; i < paras.length; i++) {
     const p = paras[i];
-    if (out.length && i !== last && !isProtected(p)) {
+    // D1: i 或 i-1 落在跨段引文块内 → 不合并（out[-1] 恒以原文第 i-1 段结尾）
+    if (out.length && i !== last && !isProtected(p) && !dqBlock.has(i) && !dqBlock.has(i - 1)) {
       const prev = out[out.length - 1];
       const pq = isQuote(prev), cq = isQuote(p);
       const pl = wc(prev);

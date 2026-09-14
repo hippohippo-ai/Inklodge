@@ -1,0 +1,1238 @@
+{
+  "generatedAt": "2026-09-14T05:01:58.087Z",
+  "repeatMin": 3,
+  "repeatLen": 8,
+  "books": {
+    "天阙": {
+      "volumes": [
+        {
+          "label": "卷1",
+          "vol": 1,
+          "from": 1,
+          "to": 20,
+          "range": "ch1—20",
+          "src": "outline.md",
+          "f26": true,
+          "chapters": 20,
+          "chars": 97737,
+          "mean": 4886.9,
+          "minChars": 4488,
+          "maxChars": 5159,
+          "underFloor": 0,
+          "overCeil": 5,
+          "paraN": 2716,
+          "paraMean": 36,
+          "paraLt20": 53,
+          "narN": 1138,
+          "narMean": 64.6,
+          "narLt20": 14,
+          "quoteN": 1578,
+          "quoteMean": 15.4,
+          "quoteLt20": 80,
+          "quoteShare": 58,
+          "negation": 35,
+          "negationPer10k": 3.58,
+          "negationPerChapter": 1.75,
+          "dupHits": 3,
+          "dupPer10k": 0.31,
+          "topDup": [
+            [
+              "”李承洲没有回答",
+              2
+            ],
+            [
+              "”沈广农没有回答",
+              1
+            ]
+          ],
+          "ticHits": null,
+          "ticPer10k": 2.15,
+          "topTics": [
+            [
+              "反而",
+              8
+            ],
+            [
+              "至少",
+              7
+            ],
+            [
+              "并不",
+              3
+            ],
+            [
+              "本来",
+              2
+            ]
+          ],
+          "halfwidth": 0,
+          "unpaired": 0,
+          "open": 2389,
+          "close": 2389
+        },
+        {
+          "label": "卷2",
+          "vol": 2,
+          "from": 21,
+          "to": 44,
+          "range": "ch21—44",
+          "src": "outline.md",
+          "f26": true,
+          "chapters": 24,
+          "chars": 106238,
+          "mean": 4426.6,
+          "minChars": 4002,
+          "maxChars": 5101,
+          "underFloor": 0,
+          "overCeil": 2,
+          "paraN": 2762,
+          "paraMean": 38.5,
+          "paraLt20": 53,
+          "narN": 1218,
+          "narMean": 68.4,
+          "narLt20": 14,
+          "quoteN": 1544,
+          "quoteMean": 14.9,
+          "quoteLt20": 83,
+          "quoteShare": 56,
+          "negation": 63,
+          "negationPer10k": 5.93,
+          "negationPerChapter": 2.63,
+          "dupHits": 2,
+          "dupPer10k": 0.19,
+          "topDup": [
+            [
+              "”沈广农没有回答",
+              1
+            ],
+            [
+              "李承洲没有立刻答",
+              1
+            ]
+          ],
+          "ticHits": null,
+          "ticPer10k": 1.69,
+          "topTics": [
+            [
+              "本来",
+              7
+            ],
+            [
+              "至少",
+              6
+            ],
+            [
+              "反而",
+              3
+            ],
+            [
+              "也就是说",
+              1
+            ]
+          ],
+          "halfwidth": 0,
+          "unpaired": 0,
+          "open": 2452,
+          "close": 2452
+        },
+        {
+          "label": "卷3",
+          "vol": 3,
+          "from": 45,
+          "to": 68,
+          "range": "ch45—68",
+          "src": "outline-vol3.md",
+          "f26": false,
+          "chapters": 24,
+          "chars": 100475,
+          "mean": 4186.5,
+          "minChars": 4003,
+          "maxChars": 4586,
+          "underFloor": 0,
+          "overCeil": 0,
+          "paraN": 1640,
+          "paraMean": 61.3,
+          "paraLt20": 24,
+          "narN": 1205,
+          "narMean": 68.8,
+          "narLt20": 17,
+          "quoteN": 435,
+          "quoteMean": 40.3,
+          "quoteLt20": 44,
+          "quoteShare": 27,
+          "negation": 90,
+          "negationPer10k": 8.96,
+          "negationPerChapter": 3.75,
+          "dupHits": 0,
+          "dupPer10k": 0,
+          "topDup": [],
+          "ticHits": null,
+          "ticPer10k": 2.79,
+          "topTics": [
+            [
+              "本来",
+              15
+            ],
+            [
+              "也就是说",
+              4
+            ],
+            [
+              "反而",
+              4
+            ],
+            [
+              "其实",
+              2
+            ]
+          ],
+          "halfwidth": 0,
+          "unpaired": 0,
+          "open": 879,
+          "close": 879
+        },
+        {
+          "label": "卷4",
+          "vol": 4,
+          "from": 69,
+          "to": 92,
+          "range": "ch69—92",
+          "src": "outline-vol4.md",
+          "f26": false,
+          "chapters": 24,
+          "chars": 104495,
+          "mean": 4354,
+          "minChars": 4015,
+          "maxChars": 4890,
+          "underFloor": 0,
+          "overCeil": 0,
+          "paraN": 2635,
+          "paraMean": 39.7,
+          "paraLt20": 35,
+          "narN": 1150,
+          "narMean": 49,
+          "narLt20": 20,
+          "quoteN": 1485,
+          "quoteMean": 32.4,
+          "quoteLt20": 48,
+          "quoteShare": 56,
+          "negation": 107,
+          "negationPer10k": 10.24,
+          "negationPerChapter": 4.46,
+          "dupHits": 33,
+          "dupPer10k": 3.16,
+          "topDup": [
+            [
+              "沈广农没有立刻答",
+              6
+            ],
+            [
+              "沈广农沉默了一瞬",
+              5
+            ],
+            [
+              "划掉，旁批：误记",
+              4
+            ],
+            [
+              "“李承恩，河东军籍，殁于征发之前",
+              3
+            ],
+            [
+              "孙驼子沉默了很久",
+              3
+            ]
+          ],
+          "ticHits": null,
+          "ticPer10k": 2.97,
+          "topTics": [
+            [
+              "本来",
+              9
+            ],
+            [
+              "至少",
+              9
+            ],
+            [
+              "反而",
+              7
+            ],
+            [
+              "其实",
+              3
+            ]
+          ],
+          "halfwidth": 0,
+          "unpaired": 0,
+          "open": 2782,
+          "close": 2782
+        },
+        {
+          "label": "卷5",
+          "vol": 5,
+          "from": 93,
+          "to": 116,
+          "range": "ch93—116",
+          "src": "outline-vol5.md",
+          "f26": false,
+          "chapters": 24,
+          "chars": 100028,
+          "mean": 4167.8,
+          "minChars": 4000,
+          "maxChars": 4980,
+          "underFloor": 0,
+          "overCeil": 0,
+          "paraN": 2172,
+          "paraMean": 46,
+          "paraLt20": 26,
+          "narN": 1273,
+          "narMean": 53.3,
+          "narLt20": 17,
+          "quoteN": 899,
+          "quoteMean": 35.9,
+          "quoteLt20": 39,
+          "quoteShare": 41,
+          "negation": 85,
+          "negationPer10k": 8.5,
+          "negationPerChapter": 3.54,
+          "dupHits": 13,
+          "dupPer10k": 1.3,
+          "topDup": [
+            [
+              "沈广农沉默了一会儿",
+              3
+            ],
+            [
+              "李承洲没有立刻答",
+              2
+            ],
+            [
+              "沈广农沉默了很久",
+              2
+            ],
+            [
+              "沈广农没有立刻答",
+              2
+            ],
+            [
+              "一个名字，两个人",
+              1
+            ]
+          ],
+          "ticHits": null,
+          "ticPer10k": 0.8,
+          "topTics": [
+            [
+              "本来",
+              4
+            ],
+            [
+              "至少",
+              2
+            ],
+            [
+              "反而",
+              1
+            ],
+            [
+              "并不",
+              1
+            ]
+          ],
+          "halfwidth": 0,
+          "unpaired": 0,
+          "open": 1900,
+          "close": 1900
+        },
+        {
+          "label": "卷6",
+          "vol": 6,
+          "from": 117,
+          "to": 140,
+          "range": "ch117—140",
+          "src": "outline-vol6.md",
+          "f26": false,
+          "chapters": 24,
+          "chars": 97994,
+          "mean": 4083.1,
+          "minChars": 4005,
+          "maxChars": 4440,
+          "underFloor": 0,
+          "overCeil": 0,
+          "paraN": 2193,
+          "paraMean": 44.7,
+          "paraLt20": 31,
+          "narN": 1397,
+          "narMean": 53.4,
+          "narLt20": 21,
+          "quoteN": 796,
+          "quoteMean": 29.3,
+          "quoteLt20": 49,
+          "quoteShare": 36,
+          "negation": 80,
+          "negationPer10k": 8.16,
+          "negationPerChapter": 3.33,
+          "dupHits": 13,
+          "dupPer10k": 1.33,
+          "topDup": [
+            [
+              "一个名字，两个人",
+              2
+            ],
+            [
+              "沈广农沉默了一会儿",
+              2
+            ],
+            [
+              "冷金笺，长安观天台才用的纸",
+              1
+            ],
+            [
+              "折痕处发硬，翻起来有细碎的响",
+              1
+            ],
+            [
+              "李承洲沉默了很久",
+              1
+            ]
+          ],
+          "ticHits": null,
+          "ticPer10k": 0.92,
+          "topTics": [
+            [
+              "反而",
+              3
+            ],
+            [
+              "本来",
+              3
+            ],
+            [
+              "并不",
+              2
+            ],
+            [
+              "其实",
+              1
+            ]
+          ],
+          "halfwidth": 0,
+          "unpaired": 0,
+          "open": 1440,
+          "close": 1440
+        },
+        {
+          "label": "卷7",
+          "vol": 7,
+          "from": 141,
+          "to": 164,
+          "range": "ch141—164",
+          "src": "outline-vol7.md",
+          "f26": false,
+          "chapters": 24,
+          "chars": 100024,
+          "mean": 4167.7,
+          "minChars": 4004,
+          "maxChars": 5576,
+          "underFloor": 0,
+          "overCeil": 1,
+          "paraN": 1797,
+          "paraMean": 55.7,
+          "paraLt20": 28,
+          "narN": 1290,
+          "narMean": 62.7,
+          "narLt20": 23,
+          "quoteN": 507,
+          "quoteMean": 37.8,
+          "quoteLt20": 40,
+          "quoteShare": 28,
+          "negation": 80,
+          "negationPer10k": 8,
+          "negationPerChapter": 3.33,
+          "dupHits": 15,
+          "dupPer10k": 1.5,
+          "topDup": [
+            [
+              "背面没有名字，只有一道旧划痕",
+              3
+            ],
+            [
+              "李承洲没有立刻答",
+              2
+            ],
+            [
+              "冷金笺，长安观天台才用的纸",
+              1
+            ],
+            [
+              "宁红叶没有立刻答",
+              1
+            ],
+            [
+              "折痕处发硬，翻起来有细碎的响",
+              1
+            ]
+          ],
+          "ticHits": null,
+          "ticPer10k": 2.4,
+          "topTics": [
+            [
+              "其实",
+              9
+            ],
+            [
+              "本来",
+              8
+            ],
+            [
+              "至少",
+              5
+            ],
+            [
+              "反而",
+              1
+            ]
+          ],
+          "halfwidth": 0,
+          "unpaired": 0,
+          "open": 1088,
+          "close": 1088
+        },
+        {
+          "label": "卷8",
+          "vol": 8,
+          "from": 165,
+          "to": 188,
+          "range": "ch165—188",
+          "src": "outline-vol8.md",
+          "f26": false,
+          "chapters": 24,
+          "chars": 100553,
+          "mean": 4189.7,
+          "minChars": 4000,
+          "maxChars": 4771,
+          "underFloor": 0,
+          "overCeil": 0,
+          "paraN": 2359,
+          "paraMean": 42.6,
+          "paraLt20": 36,
+          "narN": 1717,
+          "narMean": 47.7,
+          "narLt20": 32,
+          "quoteN": 642,
+          "quoteMean": 29.2,
+          "quoteLt20": 47,
+          "quoteShare": 27,
+          "negation": 89,
+          "negationPer10k": 8.85,
+          "negationPerChapter": 3.71,
+          "dupHits": 24,
+          "dupPer10k": 2.39,
+          "topDup": [
+            [
+              "秋前长安，灯下取",
+              4
+            ],
+            [
+              "“七连——李承恩",
+              3
+            ],
+            [
+              "你若要看，秋前长安，灯下取",
+              3
+            ],
+            [
+              "档案在我处，楚归藏要收",
+              3
+            ],
+            [
+              "宁红叶没有立刻答",
+              2
+            ]
+          ],
+          "ticHits": null,
+          "ticPer10k": 1.19,
+          "topTics": [
+            [
+              "本来",
+              4
+            ],
+            [
+              "其实",
+              3
+            ],
+            [
+              "反而",
+              2
+            ],
+            [
+              "事实上",
+              1
+            ]
+          ],
+          "halfwidth": 0,
+          "unpaired": 0,
+          "open": 1335,
+          "close": 1335
+        },
+        {
+          "label": "卷9",
+          "vol": 9,
+          "from": 189,
+          "to": 212,
+          "range": "ch189—212",
+          "src": "outline-vol9.md",
+          "f26": false,
+          "chapters": 24,
+          "chars": 98257,
+          "mean": 4094,
+          "minChars": 4001,
+          "maxChars": 4377,
+          "underFloor": 0,
+          "overCeil": 0,
+          "paraN": 1962,
+          "paraMean": 50.1,
+          "paraLt20": 28,
+          "narN": 1247,
+          "narMean": 57.9,
+          "narLt20": 23,
+          "quoteN": 715,
+          "quoteMean": 36.4,
+          "quoteLt20": 39,
+          "quoteShare": 36,
+          "negation": 136,
+          "negationPer10k": 13.84,
+          "negationPerChapter": 5.67,
+          "dupHits": 21,
+          "dupPer10k": 2.14,
+          "topDup": [
+            [
+              "楚归藏沉默了很久",
+              5
+            ],
+            [
+              "楚归藏没有立刻答",
+              4
+            ],
+            [
+              "他坐下来，端起粥碗，喝了一口",
+              3
+            ],
+            [
+              "再十年，若未入仕、未入道、未入盟，则天阙有后",
+              3
+            ],
+            [
+              "沈广农看了他一眼",
+              2
+            ]
+          ],
+          "ticHits": null,
+          "ticPer10k": 1.42,
+          "topTics": [
+            [
+              "其实",
+              6
+            ],
+            [
+              "本来",
+              4
+            ],
+            [
+              "反而",
+              2
+            ],
+            [
+              "至少",
+              2
+            ]
+          ],
+          "halfwidth": 0,
+          "unpaired": 0,
+          "open": 1498,
+          "close": 1498
+        },
+        {
+          "label": "卷10",
+          "vol": 10,
+          "from": 213,
+          "to": 236,
+          "range": "ch213—236",
+          "src": "outline-vol10.md",
+          "f26": true,
+          "chapters": 24,
+          "chars": 98051,
+          "mean": 4085.5,
+          "minChars": 4002,
+          "maxChars": 4321,
+          "underFloor": 0,
+          "overCeil": 0,
+          "paraN": 2441,
+          "paraMean": 40.2,
+          "paraLt20": 47,
+          "narN": 1333,
+          "narMean": 61.8,
+          "narLt20": 16,
+          "quoteN": 1108,
+          "quoteMean": 14.2,
+          "quoteLt20": 86,
+          "quoteShare": 45,
+          "negation": 88,
+          "negationPer10k": 8.97,
+          "negationPerChapter": 3.67,
+          "dupHits": 1,
+          "dupPer10k": 0.1,
+          "topDup": [
+            [
+              "裴令仪没有立刻答",
+              1
+            ]
+          ],
+          "ticHits": null,
+          "ticPer10k": 3.26,
+          "topTics": [
+            [
+              "至少",
+              15
+            ],
+            [
+              "反而",
+              7
+            ],
+            [
+              "本来",
+              4
+            ],
+            [
+              "其实",
+              3
+            ]
+          ],
+          "halfwidth": 0,
+          "unpaired": 0,
+          "open": 2172,
+          "close": 2172
+        },
+        {
+          "label": "卷11",
+          "vol": 11,
+          "from": 237,
+          "to": 260,
+          "range": "ch237—260",
+          "src": "outline-vol11.md",
+          "f26": true,
+          "chapters": 24,
+          "chars": 98356,
+          "mean": 4098.2,
+          "minChars": 4003,
+          "maxChars": 4371,
+          "underFloor": 0,
+          "overCeil": 0,
+          "paraN": 2507,
+          "paraMean": 39.2,
+          "paraLt20": 56,
+          "narN": 1158,
+          "narMean": 69.3,
+          "narLt20": 19,
+          "quoteN": 1349,
+          "quoteMean": 13.4,
+          "quoteLt20": 88,
+          "quoteShare": 54,
+          "negation": 55,
+          "negationPer10k": 5.59,
+          "negationPerChapter": 2.29,
+          "dupHits": 6,
+          "dupPer10k": 0.61,
+          "topDup": [
+            [
+              "李承洲没有阻止她",
+              3
+            ],
+            [
+              "”李承洲没有回答",
+              2
+            ],
+            [
+              "”沈广农没有回答",
+              1
+            ]
+          ],
+          "ticHits": null,
+          "ticPer10k": 6.1,
+          "topTics": [
+            [
+              "至少",
+              25
+            ],
+            [
+              "本来",
+              12
+            ],
+            [
+              "并不",
+              11
+            ],
+            [
+              "反而",
+              7
+            ]
+          ],
+          "halfwidth": 0,
+          "unpaired": 0,
+          "open": 2133,
+          "close": 2133
+        },
+        {
+          "label": "卷12",
+          "vol": 12,
+          "from": 261,
+          "to": 284,
+          "range": "ch261—284",
+          "src": "outline-vol12.md",
+          "f26": true,
+          "chapters": 24,
+          "chars": 101181,
+          "mean": 4215.9,
+          "minChars": 4005,
+          "maxChars": 4997,
+          "underFloor": 0,
+          "overCeil": 0,
+          "paraN": 3156,
+          "paraMean": 32.1,
+          "paraLt20": 63,
+          "narN": 1098,
+          "narMean": 64.4,
+          "narLt20": 17,
+          "quoteN": 2058,
+          "quoteMean": 14.8,
+          "quoteLt20": 87,
+          "quoteShare": 65,
+          "negation": 42,
+          "negationPer10k": 4.15,
+          "negationPerChapter": 1.75,
+          "dupHits": 0,
+          "dupPer10k": 0,
+          "topDup": [],
+          "ticHits": null,
+          "ticPer10k": 4.84,
+          "topTics": [
+            [
+              "至少",
+              24
+            ],
+            [
+              "本来",
+              11
+            ],
+            [
+              "反而",
+              10
+            ],
+            [
+              "并不",
+              3
+            ]
+          ],
+          "halfwidth": 0,
+          "unpaired": 0,
+          "open": 2875,
+          "close": 2875
+        },
+        {
+          "label": "全卷",
+          "vol": null,
+          "from": 1,
+          "to": 99,
+          "range": "ch1—99",
+          "src": "全书",
+          "f26": null,
+          "chapters": 284,
+          "chars": 1203389,
+          "mean": 4237.3,
+          "minChars": 4000,
+          "maxChars": 5576,
+          "underFloor": 0,
+          "overCeil": 8,
+          "paraN": 28340,
+          "paraMean": 42.5,
+          "paraLt20": 42,
+          "narN": 15224,
+          "narMean": 59.6,
+          "narLt20": 20,
+          "quoteN": 13116,
+          "quoteMean": 22.6,
+          "quoteLt20": 68,
+          "quoteShare": 46,
+          "negation": 950,
+          "negationPer10k": 7.89,
+          "negationPerChapter": 3.35,
+          "dupHits": 131,
+          "dupPer10k": 1.09,
+          "topDup": [
+            [
+              "沈广农没有立刻答",
+              13
+            ],
+            [
+              "李承洲没有立刻答",
+              8
+            ],
+            [
+              "沈广农沉默了一会儿",
+              7
+            ],
+            [
+              "沈广农沉默了很久",
+              6
+            ],
+            [
+              "楚归藏沉默了很久",
+              5
+            ]
+          ],
+          "ticHits": null,
+          "ticPer10k": 2.54,
+          "topTics": [
+            [
+              "至少",
+              96
+            ],
+            [
+              "本来",
+              83
+            ],
+            [
+              "反而",
+              55
+            ],
+            [
+              "其实",
+              28
+            ]
+          ],
+          "halfwidth": 0,
+          "unpaired": 0,
+          "open": 22943,
+          "close": 22943
+        }
+      ]
+    },
+    "留春信": {
+      "volumes": [
+        {
+          "label": "全书",
+          "vol": null,
+          "from": 1,
+          "to": 40,
+          "range": "ch1—40",
+          "src": "全书",
+          "f26": null,
+          "chapters": 40,
+          "chars": 199551,
+          "mean": 4988.8,
+          "minChars": 4061,
+          "maxChars": 9197,
+          "underFloor": 0,
+          "overCeil": 10,
+          "paraN": 7834,
+          "paraMean": 25.5,
+          "paraLt20": 59,
+          "narN": 4938,
+          "narMean": 27.3,
+          "narLt20": 57,
+          "quoteN": 2896,
+          "quoteMean": 22.4,
+          "quoteLt20": 62,
+          "quoteShare": 37,
+          "negation": 34,
+          "negationPer10k": 1.7,
+          "negationPerChapter": 0.85,
+          "dupHits": 16,
+          "dupPer10k": 0.8,
+          "topDup": [
+            [
+              "陶未明沉默了一会儿",
+              4
+            ],
+            [
+              "人群轰的一声炸开",
+              3
+            ],
+            [
+              "谢三更沉默了很久",
+              3
+            ],
+            [
+              "谢三更的脸色，变了",
+              3
+            ],
+            [
+              "赵无咎沉默了一会儿",
+              3
+            ]
+          ],
+          "ticHits": null,
+          "ticPer10k": 1.85,
+          "topTics": [
+            [
+              "本来",
+              18
+            ],
+            [
+              "反而",
+              6
+            ],
+            [
+              "并不",
+              5
+            ],
+            [
+              "其实",
+              4
+            ]
+          ],
+          "halfwidth": 69,
+          "unpaired": 2,
+          "open": 4700,
+          "close": 4702
+        },
+        {
+          "label": "全卷",
+          "vol": null,
+          "from": 1,
+          "to": 40,
+          "range": "ch1—40",
+          "src": "全书",
+          "f26": null,
+          "chapters": 40,
+          "chars": 199551,
+          "mean": 4988.8,
+          "minChars": 4061,
+          "maxChars": 9197,
+          "underFloor": 0,
+          "overCeil": 10,
+          "paraN": 7834,
+          "paraMean": 25.5,
+          "paraLt20": 59,
+          "narN": 4938,
+          "narMean": 27.3,
+          "narLt20": 57,
+          "quoteN": 2896,
+          "quoteMean": 22.4,
+          "quoteLt20": 62,
+          "quoteShare": 37,
+          "negation": 34,
+          "negationPer10k": 1.7,
+          "negationPerChapter": 0.85,
+          "dupHits": 16,
+          "dupPer10k": 0.8,
+          "topDup": [
+            [
+              "陶未明沉默了一会儿",
+              4
+            ],
+            [
+              "人群轰的一声炸开",
+              3
+            ],
+            [
+              "谢三更沉默了很久",
+              3
+            ],
+            [
+              "谢三更的脸色，变了",
+              3
+            ],
+            [
+              "赵无咎沉默了一会儿",
+              3
+            ]
+          ],
+          "ticHits": null,
+          "ticPer10k": 1.85,
+          "topTics": [
+            [
+              "本来",
+              18
+            ],
+            [
+              "反而",
+              6
+            ],
+            [
+              "并不",
+              5
+            ],
+            [
+              "其实",
+              4
+            ]
+          ],
+          "halfwidth": 69,
+          "unpaired": 2,
+          "open": 4700,
+          "close": 4702
+        }
+      ]
+    },
+    "高太公造反": {
+      "volumes": [
+        {
+          "label": "全书",
+          "vol": null,
+          "from": 1,
+          "to": 40,
+          "range": "ch1—40",
+          "src": "全书",
+          "f26": null,
+          "chapters": 40,
+          "chars": 374698,
+          "mean": 9367.5,
+          "minChars": 7876,
+          "maxChars": 10735,
+          "underFloor": 0,
+          "overCeil": 40,
+          "paraN": 14926,
+          "paraMean": 25.1,
+          "paraLt20": 56,
+          "narN": 14926,
+          "narMean": 25.1,
+          "narLt20": 56,
+          "quoteN": 0,
+          "quoteMean": 0,
+          "quoteLt20": 0,
+          "quoteShare": 0,
+          "negation": 66,
+          "negationPer10k": 1.76,
+          "negationPerChapter": 1.65,
+          "dupHits": 277,
+          "dupPer10k": 7.39,
+          "topDup": [
+            [
+              "我心里头，咯噔一下",
+              12
+            ],
+            [
+              "是人记的，就能改",
+              7
+            ],
+            [
+              "孟婆说：我不知道",
+              6
+            ],
+            [
+              "白骨精，没有再说话",
+              6
+            ],
+            [
+              "地府的风，凉飕飕的",
+              5
+            ]
+          ],
+          "ticHits": null,
+          "ticPer10k": 1.84,
+          "topTics": [
+            [
+              "本来",
+              33
+            ],
+            [
+              "其实",
+              18
+            ],
+            [
+              "至少",
+              5
+            ],
+            [
+              "也就是说",
+              4
+            ]
+          ],
+          "halfwidth": 0,
+          "unpaired": 0,
+          "open": 0,
+          "close": 0
+        },
+        {
+          "label": "全卷",
+          "vol": null,
+          "from": 1,
+          "to": 40,
+          "range": "ch1—40",
+          "src": "全书",
+          "f26": null,
+          "chapters": 40,
+          "chars": 374698,
+          "mean": 9367.5,
+          "minChars": 7876,
+          "maxChars": 10735,
+          "underFloor": 0,
+          "overCeil": 40,
+          "paraN": 14926,
+          "paraMean": 25.1,
+          "paraLt20": 56,
+          "narN": 14926,
+          "narMean": 25.1,
+          "narLt20": 56,
+          "quoteN": 0,
+          "quoteMean": 0,
+          "quoteLt20": 0,
+          "quoteShare": 0,
+          "negation": 66,
+          "negationPer10k": 1.76,
+          "negationPerChapter": 1.65,
+          "dupHits": 277,
+          "dupPer10k": 7.39,
+          "topDup": [
+            [
+              "我心里头，咯噔一下",
+              12
+            ],
+            [
+              "是人记的，就能改",
+              7
+            ],
+            [
+              "孟婆说：我不知道",
+              6
+            ],
+            [
+              "白骨精，没有再说话",
+              6
+            ],
+            [
+              "地府的风，凉飕飕的",
+              5
+            ]
+          ],
+          "ticHits": null,
+          "ticPer10k": 1.84,
+          "topTics": [
+            [
+              "本来",
+              33
+            ],
+            [
+              "其实",
+              18
+            ],
+            [
+              "至少",
+              5
+            ],
+            [
+              "也就是说",
+              4
+            ]
+          ],
+          "halfwidth": 0,
+          "unpaired": 0,
+          "open": 0,
+          "close": 0
+        }
+      ]
+    }
+  }
+}

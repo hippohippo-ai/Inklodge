@@ -32,6 +32,11 @@
        ⑯ F22 单章字数口径 (全书台账; ch237+ 判失败, 之前仅报告):
           去章题行(^#…)与全部空白统计(Python 的空白字符类含全角空格等 Unicode 空白, 与 scripts/consistency-check.mjs 同口径);
           单章下限 4000 字, 低于即拦截(退出码1); 高于 5000 仅提示。每章打印一行台账, 全卷跑完另出合计/均值。
+          **回改/新章豁免区(源: 2026-09-15 作者裁定——卷八、卷十一等已写卷的回改与 ch286 起的新章允许突破 5000):**
+          口径数据源为 state/word-budget.json(floor/ceilingDefault/ceilingExempt/newChaptersFrom/exemptRanges),
+          与 scripts/style-fingerprint.mjs 同读一表, 改表即生效。豁免章上限 ceilingExempt(默认 8000)
+          且**下限 4000 不放开**; 豁免章超 ceilingExempt 仍判失败(真超了应拆章, 不灌水)。
+          环境变量 WORD_MAX_EXEMPT=N 可临时覆盖豁免上限(调试用)。
        ⑱ F24 章节体例与重复 (源: 2026-09-14 全书审阅):
           F24a 章内重复段落(去空白后逐字相同且 ≥12 字) → 全书判失败 (已清零, 防回归);
           F24b 否定矫正句「不是…(而是|是)」单章 >F24_NB_CAP(=3) → ch237+ 判失败, 更早仅按存量汇总报告;
@@ -48,9 +53,10 @@
           均段 <F26_NAR_MEAN_MIN(=40) 或 <20字占比 >F26_NAR_LT20_MAX(=38)% 即判失败;
           未归治章段(45—218)仅汇总一行报告, 待逐段归治后再入册。
           环境变量 F26_FROM=N 可临时把 (N, 9999) 并进已归治区间(调试用)。
-       ㉒ F29 开口时刻纪律 (源: 2026-09-15 桑葚失语核订)——桑葚为心因性失语(非天生),
-          ch71(759)之前不得有台词(只能画/比划/写字/拉抽查); 766 ch30“不会说话”、ch36“无声疾患”
-          是当时事实。新增角色若有类似设定, 照此在 F29_ONSET 登记。
+       ㉓ F30 状态启用时刻 (源: 2026-09-15 角色状态时间线台账; 取代 F29 的硬编码表):
+          台账 state/character-onsets.json 逐角色登记 first_appearance / first_speech /
+          first_solo(人工); 早于首次出现或首次台词即判失败, 登记为 null(声明尚未登场)而
+          出现姓名则判失败(须先更新台账)。改台账即生效, 无需改本文件。
        ㉑ F28 残障配额与去撞车 (源: 2026-09-15 作者裁定)——①配额: ch286 起不再新增残障人物,
           章内出现残障身份/身体标记而该段不含既有角色白名单者判失败; ②去撞车: 「看不见…
           (所以|因此|反而|却|才)…(听得|听出)」这类补偿超人句式判失败。口径详条 characters.md 一c。
@@ -60,7 +66,7 @@
           跨段引文块 D1 护栏，书信/公文逐行排版不被合并）。
 退出码: 0=全部通过, 1=有命中
 """
-import sys, os, re, unicodedata
+import sys, os, re, json, unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent      # books/天阙
@@ -374,6 +380,22 @@ LQ, RQ, QM = "\u201c", "\u201d", "\uff1f"
 WORD_MIN = 4000
 WORD_MAX = 5000
 WORD_ENFORCE_FROM = int(os.environ.get("WORD_ENFORCE_FROM", "237"))  # 全量拦截: WORD_ENFORCE_FROM=1 python state/dedup-check.py …
+# F22 字数豁免区: 源 state/word-budget.json (与 scripts/style-fingerprint.mjs 同源)。
+#   豁免只放开上限(默认 5000→8000), 下限 4000 不放开; 缺表/表损坏时退化为"无豁免"。
+BUDGET = {}
+try:
+    BUDGET = json.loads((ROOT / "state" / "word-budget.json").read_text(encoding="utf-8"))
+except Exception:
+    BUDGET = {}
+WORD_MIN = int(BUDGET.get("floor", WORD_MIN))
+WORD_MAX = int(BUDGET.get("ceilingDefault", WORD_MAX))
+WORD_MAX_EXEMPT = int(os.environ.get("WORD_MAX_EXEMPT", str(BUDGET.get("ceilingExempt", 8000))))
+WORD_EXEMPT_FROM = int(BUDGET.get("newChaptersFrom", 10 ** 9))   # 新章起算点: 自该章起全部视为豁免
+WORD_EXEMPT_RANGES = [(int(a), int(b)) for a, b in (r.get("range", [0, 0]) for r in BUDGET.get("exemptRanges", []))]
+
+def word_exempt(n):
+    """F22 豁免判定: 新章(ch≥newChaptersFrom) 或命中 exemptRanges 之一。"""
+    return n >= WORD_EXEMPT_FROM or any(a <= n <= b for a, b in WORD_EXEMPT_RANGES)
 # === F24 章节体例与重复 (源: 2026-09-14 全量审阅: 章内整段重复、否定矫正句超标) ===
 #   F24a 章内重复段落: 去空白后逐字相同且 ≥12 字 → 全书判失败 (2026-09-14 已清零, 防回归)
 #   F24b 否定矫正句「不是…(而是|是)」单章计数: ch237+ 超过上限判失败, 更早仅作存量报告
@@ -393,14 +415,41 @@ if os.environ.get("F26_FROM"):
 F26_NAR_MEAN_MIN = 40
 F26_NAR_LT20_MAX = 38
 
-# === F29 开口时刻纪律 (源: 2026-09-15 桑葚失语/开口核订) ===
-#   桑葚为心因性失语(非天生): **ch71(759)之前不得有台词**——只能画/比划/写字/拉抽查。
-#   756 ch30“不会说话”、ch36“无声疾患”是当时事实; 759 ch71 起重新开口。
-F29_ONSET = {"桑葚": 71}
-#   排除“对/向/跟…桑葚说”这类“别人对她说话”的句子
-F29_SAY_RE = re.compile(
-    r"(?<![对向跟和与替给叫让催问求告带扶看喊])桑葚(?:说|问|答|喊|道)(?=[^。！？\n]{0,4}[“])|"
-    r"[”][^。！？\n]{0,12}(?<![对向跟和与替给叫让催问求告带扶看喊])桑葚(?:说|问|答|喊|道)")
+# === F30 状态启用时刻 (源: 2026-09-15 角色状态时间线台账 state/character-onsets.json) ===
+#   ① first_appearance: 早于该章出现姓名或 aliases 之一 → 判失败;
+#   ② first_appearance 为 null(台账声明“至最新章尚未登场”) → 姓名出现即判失败(须先更新台账);
+#   ③ first_speech: 早于该章出现台词归属(排除“对/向/跟…X说”这类“别人对他说话”) → 判失败。
+#   first_solo 为人工字段, 机械不校验。
+#   演进: **F29(桑葚硬编码“ch71 前不得有台词”)已并入本表**——编号 F29 保留为历史引用,
+#   判据同源、台账驱动(桑葚 first_speech=71); 改本表即生效, 不再改本文件。
+ONSET_PATH = ROOT / "state" / "character-onsets.json"
+_ONSET_CACHE = None
+
+
+def f30_onsets():
+    """读取角色状态启用时刻台账; 缺失/损坏时返回空表(不阻塞全书检查)。"""
+    global _ONSET_CACHE
+    if _ONSET_CACHE is None:
+        try:
+            with open(ONSET_PATH, encoding="utf-8") as f:
+                _ONSET_CACHE = json.load(f).get("characters", [])
+        except Exception:
+            _ONSET_CACHE = []
+    return _ONSET_CACHE
+
+
+_F30_SAY_CACHE = {}
+
+
+def f30_say_re(name: str):
+    """台词归属检测: “…”X说 / X说：“…” 两类; 排除旁述“对X说”。"""
+    if name not in _F30_SAY_CACHE:
+        n = re.escape(name)
+        lb = r"(?<![对向跟和与替给叫让催问求告带扶看喊教拉推拍])"
+        _F30_SAY_CACHE[name] = re.compile(
+            lb + n + r"(?:说|问|答|喊|道)(?=[^。！？\n]{0,4}[“])|"
+            r"[”][^。！？\n]{0,12}" + lb + n + r"(?:说|问|答|喊|道)")
+    return _F30_SAY_CACHE[name]
 
 # === F28 残障配额与去撞车 (源: 2026-09-15 作者裁定; 详条 characters.md 一c) ===
 #   ①配额: ch286 起(卷十三/卷十四)不再新增残障人物——章内出现残障身份/身体标记,
@@ -835,6 +884,7 @@ def main():
     vol6_base = [load_ch(i) for i in range(1, 117)] if any(a >= 117 for a in args) else []
     fail = 0
     wc_ledger = []   # F22 单章字数台账(本次运行范围)
+    wc_exempt = 0    # F22 豁免区命中章数(回改/新章)
     f24b_legacy = []  # F24b 存量章(超过上限但早于 F24_NB_FROM), 汇总一行报告
     f26_legacy = []   # F26 未归治章段中未达新标的章, 汇总一行报告
     f28_legacy = []   # F28 早章的残障标记存量(独臂/断臂/跛脚/盲女等), 汇总一行报告
@@ -863,14 +913,25 @@ def main():
         # ⑯ F22 单章字数台账/拦截 (去章题行与空白; ch237+ 判失败)
         wc = word_count(text)
         wc_ledger.append(wc)
+        _exempt = word_exempt(n)
+        _ceil = WORD_MAX_EXEMPT if _exempt else WORD_MAX
+        if _exempt and wc > WORD_MAX:
+            wc_exempt += 1
         f22_hit = wc < WORD_MIN and n >= WORD_ENFORCE_FROM
+        f22_over = _exempt and wc > _ceil
+        f22_fail = f22_hit or f22_over
         if f22_hit:
             fail += 1
             print(f"  [F22·字数] {wc} 字 ✗ 低于下限 {WORD_MIN}")
         elif wc < WORD_MIN:
             print(f"  [F22·字数] {wc} 字 · 存量, 低于下限 {WORD_MIN} (自 ch{WORD_ENFORCE_FROM} 起判失败)")
+        elif f22_over:
+            fail += 1
+            print(f"  [F22·字数] {wc} 字 ✗ 高于豁免上限 {_ceil} (回改/新章豁免区, 但超此限应拆章而非灌水)")
+        elif _exempt and wc > WORD_MAX:
+            print(f"  [F22·字数] {wc} 字 ✓ 豁免(回改/新章, 豁免上限 {_ceil})")
         elif wc > WORD_MAX:
-            print(f"  [F22·字数] {wc} 字 · 高于上限 {WORD_MAX} (仅提示)")
+            print(f"  [F22·字数] {wc} 字 · 高于上限 {WORD_MAX} (仅提示; 未列入 word-budget.json 豁免区)")
         else:
             print(f"  [F22·字数] {wc} 字 ✓")
         # ⑱ F24 章节体例与重复 (F24a 章内重复段落 / F24b 否定矫正句密度)
@@ -907,14 +968,29 @@ def main():
                       f" (下限 {F26_NAR_MEAN_MIN} 字 / <20字上限 {F26_NAR_LT20_MAX}%; 归治: node scripts/coalesce-paragraphs.mjs --from {n} --to {n})")
             else:
                 print(f"  [F26·段落体例] 叙述段{_n26}段(占{100 - _dq26}%) 均{_mean26}字 / <20字{_lt26}% ✓")
-        # ㉒ F29 开口时刻纪律 (桑葚 ch71 前不得有台词; 口径见 requirements.md F13)
-        for _who, _onset in F29_ONSET.items():
-            if n < _onset:
-                _f29 = [l.strip()[:60] for l in body.split("\n") if F29_SAY_RE.search(l)]
-                if _f29:
+        # ㉓ F30 状态启用时刻 (台账 state/character-onsets.json; 口径见 requirements.md F30)
+        for _rec in f30_onsets():
+            _who = _rec.get("name") or ""
+            _als = _rec.get("aliases") or []
+            _hits_name = [w for w in [_who] + list(_als) if w and w in body]
+            if not _hits_name:
+                continue
+            _fa = _rec.get("first_appearance")
+            if _fa is None:
+                fail += 1
+                print(f"  [F30·状态启用时刻] 台账登记「{_who}」尚未登场（至最新章零出场），本章却出现"
+                      f"——先更新 state/character-onsets.json 再写")
+            elif n < _fa:
+                fail += 1
+                print(f"  [F30·状态启用时刻] 「{_who}」首次出现在 ch{_fa}，本章 ch{n} 提前出现"
+                      f"（命中：{'、'.join(_hits_name)}）")
+            _fs = _rec.get("first_speech")
+            if _fs and n < _fs:
+                _say = [l.strip()[:60] for l in body.split("\n") if f30_say_re(_who).search(l)]
+                if _say:
                     fail += 1
-                    print(f"  [F29·开口时刻] {_who}在 ch{_onset} 之前不得有台词 (现 ch{n})")
-                    for _s in _f29[:3]:
+                    print(f"  [F30·状态启用时刻] 「{_who}」首次台词在 ch{_fs}，本章 ch{n} 出现台词归属")
+                    for _s in _say[:3]:
                         print(f"    × {_s}…")
         # ㉑ F28 残障配额与去撞车 (ch286+ 判失败; 早章仅作存量汇总; 口径见 characters.md 一c)
         f28_ident = []
@@ -1260,12 +1336,13 @@ def main():
             for w, c in b_hits:
                 print(f"    • {w}  ×{c}")
         # (F8/F9/卷六词 命中已在各自块内 fail+=1 并打印; v6_issue 抑制误报 ✓)
-        if not v6_issue and not f22_hit and not f24_dup and not (f_hits or d_hits or f4_hits or f6_hits or f7_hits or x_hits or i_hits or f16_hits or f20_f or f21_f):
+        if not v6_issue and not f22_fail and not f24_dup and not (f_hits or d_hits or f4_hits or f6_hits or f7_hits or x_hits or i_hits or f16_hits or f20_f or f21_f):
             print("  ✓ 基线比对通过")
     # F22 单章字数台账合计 (本次运行范围)
     if wc_ledger:
         _tot = sum(wc_ledger)
-        print(f"\n[F22·字数台账] {len(wc_ledger)} 章合计 {_tot} 字, 均 {round(_tot / len(wc_ledger))} 字/章 (下限 {WORD_MIN}, 上限 {WORD_MAX})")
+        print(f"\n[F22·字数台账] {len(wc_ledger)} 章合计 {_tot} 字, 均 {round(_tot / len(wc_ledger))} 字/章 "
+              f"(下限 {WORD_MIN}, 上限 {WORD_MAX}; 回改/新章豁免上限 {WORD_MAX_EXEMPT}, 本次高于上限且属豁免区 {wc_exempt} 章)")
     # 卷级微型交易签名词报告 (每卷一次, 仅报告)
     if args and min(args) <= 140:
         vol_sig = {}

@@ -8,6 +8,9 @@
 //   重复话术  全书范围内出现 ≥N 次的整句（≥8 字）在每卷的密度 + 该卷高频句；另有固定解释腔词表
 //   引号体例  半角双引号（应为 0）、中文引号配对（开引号数 == 闭引号数）、引号段占比
 //   字数口径  去章题行与 Unicode 空白，单章 ≥4000、≤5000（F22 口径）
+//             【回改/新章豁免】豁免区与豁免上限读 `books/<书>/state/word-budget.json`
+//             （与 dedup-check.py 同一张表）：豁免章计入 exemptN，不受 5000 约束；
+//             overCeil 只统计「非豁免」章，另外单列 overExempt（豁免章超豁免上限，也应拦截）。
 //
 // 用法：
 //   node scripts/style-fingerprint.mjs                          # 全部书目、全部卷，打印看板
@@ -107,7 +110,7 @@ function analyzeChapter(n, text, dupSentences) {
   }
 }
 
-function rollup(chapters) {
+function rollup(chapters, budget) {
   const chars = chapters.reduce((s, c) => s + c.chars, 0)
   const sum = (k) => chapters.reduce((s, c) => s + c[k], 0)
   const wmean = (num, den) => (den ? +(num / den).toFixed(1) : 0)
@@ -123,8 +126,10 @@ function rollup(chapters) {
     chapters: chapters.length, chars, mean: mean(chapters.map((c) => c.chars)),
     minChars: chapters.length ? Math.min(...chapters.map((c) => c.chars)) : 0,
     maxChars: chapters.length ? Math.max(...chapters.map((c) => c.chars)) : 0,
-    underFloor: chapters.filter((c) => c.chars < 4000).length,
-    overCeil: chapters.filter((c) => c.chars > 5000).length,
+    underFloor: chapters.filter((c) => c.chars < budget.floor).length,
+    overCeil: chapters.filter((c) => !c.exempt && c.chars > budget.ceilingDefault).length,
+    exemptN: chapters.filter((c) => c.exempt).length,
+    overExempt: chapters.filter((c) => c.exempt && c.chars > budget.ceilingExempt).length,
     paraN: sum('paraN'), paraMean: wmean(chapters.reduce((s, c) => s + c.paraN * c.paraMean, 0), sum('paraN')),
     paraLt20: pct(sum('paraLt20') && sum('paraN') ? chapters.reduce((s, c) => s + c.paraN * c.paraLt20, 0) / 100 : 0, sum('paraN')),
     narN: sum('narN'), narMean: wmean(narW, sum('narN')),
@@ -166,6 +171,19 @@ function volumeMap(stateDir) {
   }
   return map.sort((a, b) => a.from - b.from)
 }
+// F22 字数豁免区（源：state/word-budget.json，与 dedup-check.py 同读一表）
+function wordBudget(stateDir) {
+  const j = readJson(path.join(stateDir, 'word-budget.json'))
+  const floor = j?.floor ?? 4000
+  const ceilingDefault = j?.ceilingDefault ?? 5000
+  const ceilingExempt = j?.ceilingExempt ?? ceilingDefault
+  const from = j?.newChaptersFrom ?? Number.POSITIVE_INFINITY
+  const ranges = (j?.exemptRanges || []).map((r) => r.range).filter((r) => Array.isArray(r) && r.length === 2)
+  return {
+    floor, ceilingDefault, ceilingExempt, ranges: ranges.length, from,
+    isExempt: (n) => n >= from || ranges.some(([a, b]) => n >= a && n <= b),
+  }
+}
 function f26Treated(stateDir) {
   const src = read(path.join(stateDir, 'dedup-check.py'))
   if (!src) return null
@@ -203,8 +221,13 @@ for (const proj of projects) {
   }
   const dupSentences = new Set([...sentenceCount].filter(([, c]) => c >= OPT.repeatMin).map(([s]) => s))
 
+  const budget = wordBudget(proj.state)
   const per = new Map()
-  for (const [n, text] of texts) per.set(n, analyzeChapter(n, text, dupSentences))
+  for (const [n, text] of texts) {
+    const c = analyzeChapter(n, text, dupSentences)
+    c.exempt = budget.isExempt(n)
+    per.set(n, c)
+  }
 
   // 卷段
   let ranges = volumeMap(proj.state)
@@ -227,10 +250,10 @@ for (const proj of projects) {
     const enforced = treated ? cs.some((c) => treated.some(([a, b]) => c.chapter >= a && c.chapter <= b)) : null
     vols.push({
       label: r.vol ? `卷${r.vol}` : ranges.length > 1 ? `段${seg}` : '全书', vol: r.vol, from: r.from, to: r.to,
-      range: `ch${r.from}—${r.to}`, src: r.src, f26: enforced, ...rollup(cs),
+      range: `ch${r.from}—${r.to}`, src: r.src, f26: enforced, ...rollup(cs, budget),
     })
   }
-  const all = rollup([...per.values()])
+  const all = rollup([...per.values()], budget)
   // 有多个卷段时补一行整本汇总；整本一卷就不重复第二遍
   if (OPT.vol == null && ranges.length > 1) vols.push({ label: '全卷', vol: null, from: chapters[0].n, to: chapters[chapters.length - 1].n, range: `ch${chapters[0].n}—${chapters[chapters.length - 1].n}`, src: '全书', f26: null, ...all })
 
@@ -249,7 +272,7 @@ for (const proj of projects) {
     const DEG = [
       ['paraLt20', 'up', 2, true], ['narMean', 'down', 3, true], ['narLt20', 'up', 3, false],
       ['quoteMean', 'down', 2, true], ['negationPer10k', 'up', 2, true], ['dupPer10k', 'up', 2, true],
-      ['halfwidth', 'up', 0, true], ['unpaired', 'up', 0, true], ['underFloor', 'up', 0, true], ['overCeil', 'up', 0, true],
+      ['halfwidth', 'up', 0, true], ['unpaired', 'up', 0, true], ['underFloor', 'up', 0, true], ['overCeil', 'up', 0, true], ['overExempt', 'up', 0, true],
     ]
     const drift = new Map()
     for (const [k, worse, tol] of DEG) {
@@ -275,11 +298,11 @@ for (const proj of projects) {
       `     ${String(v.negationPer10k).padStart(5)}${mark('negationPer10k')}` +
       `        ${String(v.dupPer10k).padStart(5)}${mark('dupPer10k')}` +
       `      ${String(v.halfwidth).padStart(2)}/${String(v.unpaired).padStart(2)}${mark('halfwidth')}${mark('unpaired')}` +
-      `   ${v.underFloor}/${v.overCeil}${mark('underFloor')}${mark('overCeil')}${f26}`)
+      `   ${v.underFloor}/${v.overCeil}${mark('underFloor')}${mark('overCeil')}${v.exemptN ? `（豁免${v.exemptN}章${v.overExempt ? `，超限${v.overExempt}${mark('overExempt')}` : ''}）` : ''}${f26}`)
   }
   // 明细：最长/最短章、重复话术与解释腔 top
   const byChars = [...per.values()].sort((a, b) => a.chars - b.chars || a.chapter - b.chapter)
-  lines.push(`  · 字数：最短 ch${byChars[0].chapter}（${byChars[0].chars} 字）／最长 ch${byChars[byChars.length - 1].chapter}（${byChars[byChars.length - 1].chars} 字）／低于下限 ${all.underFloor} 章／超上限 ${all.overCeil} 章`)
+  lines.push(`  · 字数：最短 ch${byChars[0].chapter}（${byChars[0].chars} 字）／最长 ch${byChars[byChars.length - 1].chapter}（${byChars[byChars.length - 1].chars} 字）／低于下限 ${all.underFloor} 章／超上限 ${all.overCeil} 章${all.exemptN ? `（另有回改/新章豁免 ${all.exemptN} 章，豁免上限 ${budget.ceilingExempt}，超豁免上限 ${all.overExempt} 章）` : ''}`)
   const bookDup = new Map()
   for (const c of per.values()) for (const s of c.dupSeen) bookDup.set(s, (bookDup.get(s) || 0) + 1)
   const topDupBook = [...bookDup].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 6)
@@ -305,6 +328,7 @@ if (OPT.json) {
   console.log(JSON.stringify(report, null, 2))
 } else {
   lines.push('')
+  lines.push('说明：字数口径的「回改/新章豁免区」读 state/word-budget.json（与 dedup-check.py 同源）：豁免章不计入 overCeil，另计 overExempt（超过豁免上限）。')
   lines.push('说明：段落体例与字数口径与 state/dedup-check.py（F26／F22）同源；「重复话术」按全书尺度统计整句（≥' + OPT.repeatLen + ' 字）出现 ≥' + OPT.repeatMin + ' 次者；▲▼ 为与 state/style-fingerprint.json 的差值，⚠ 表示超过漂移阈值（<20字占比 +2pp、叙述均段 −3 字、引号均段 −2 字、否定句/万字 +2、重复话术/万字 +2、半角或未配对引号 +1、越界章 +1）。')
   console.log(lines.join('\n'))
 }

@@ -1,0 +1,119 @@
+{
+  "book": "天阙",
+  "updated": "2026-09-15",
+  "rule": "F30·状态启用时刻（dedup-check.py）。① first_appearance：早于该章出现『姓名或 aliases 之一』即判失败（退出码 1）；② first_appearance 为 null = 台账声明『截至最新章尚未登场』，正文一旦出现即判失败（须先更新本表再写）；③ first_speech：早于该章出现台词归属（排除『对／向／跟…X说』这类『别人对 X 说』）即判失败；④ first_named 与 first_solo 为人工字段，机械不校验（写作用），其中 first_solo = 首次不经指派、自己决定并影响情节的一件事，无此类场合则留 null 并在 notes 说明。测量方法：姓名在 novel/chapter-*.md 全文检索（含 aliases），台词按『“…”X说』与『X说：“…”』两类归属句，排除旁述误报。改本表须同时核对 chapter-log.md 与 characters.md 对应条目。",
+  "characters": [
+    {
+      "name": "桑葚",
+      "aliases": [],
+      "first_appearance": 30,
+      "first_speech": 71,
+      "first_named": 30,
+      "first_solo": 68,
+      "evidence": {
+        "appearance": "ch30 宁红叶：她叫桑葚。不会说话。",
+        "speech": "ch71 “你们为什么不把钱放衣袋？”（心因性失语，759 卷四重新开口）",
+        "solo": "ch68 南门外，她用炭条在告示墙根画圈示警，未见指派"
+      },
+      "notes": "心因性失语（非天生哑）：ch71 之前不得有台词——F29 的桑葚硬编码表已并入本表（编号 F29 保留为历史引用）。ch32 原有提前台词已于 2026-09-15 改为捏腕＋手指叉向洞口的无声表达。口径见 requirements.md F13 与 characters.md 桑葚条。"
+    },
+    {
+      "name": "沈念",
+      "aliases": [],
+      "first_appearance": 30,
+      "first_speech": 73,
+      "first_named": 30,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch30 初现为遗孤婴儿（宁红叶背上）",
+        "speech": "ch73 “他不哭。他在划碗。”",
+        "solo": ""
+      },
+      "notes": "至 ch285 无独立行动——其线为被护送、被托付（ch30 婴儿→剑南避乱→卷十四自立约），first_solo 留空待卷十四登记。年龄锚点：生约 756（chronology 表三）。"
+    },
+    {
+      "name": "李虎",
+      "aliases": [],
+      "first_appearance": 279,
+      "first_speech": null,
+      "first_named": 279,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "**计划回改，尚未落地**：ch279《作保》（775，15 岁）——李承洲为旧部作保那一章，义子站在身侧；落地前 ch1—285 全文检索仍为 0 次（证据字段待回改后回填）",
+        "speech": "",
+        "solo": ""
+      },
+      "notes": "**2026-09-15 作者裁定：首现由卷十四提前到卷十二**（旧值 null＝『卷十四人物』，与 characters.md 原始口径『15 岁（775 年出场，生于760年）』互相矛盾）。年龄锚点：生760（chronology 表三新增行）⇒ 770=10、773=13、**775=15**、776=16、777=17、778=18、779=19。落点（详 outline-vol12 第九节＝唯一依据）：ch279 首现（≤600 字）→ ch284 卷末回响（≤250 字）→ 卷十三 ch295 实质同场／ch298 帐外与沈广农唯一接触（对质本身仍『无第三人在场』）→ 卷十四 ch311《交权》收束（随隐黄河）。**本表已把首现章写死为 279，回改落地前任何章不得提前出现『李虎』二字；落地后回填 evidence。**"
+    },
+    {
+      "name": "阿青",
+      "aliases": [],
+      "first_appearance": 162,
+      "first_speech": 174,
+      "first_named": 162,
+      "first_solo": 197,
+      "evidence": {
+        "appearance": "ch162 顾琰口述：阿青在星斗阁（未正面出场）",
+        "speech": "ch174 “进来坐。”",
+        "solo": "ch197 主动把攒了十年的线从门缝递出，建立与顾琰的传信通道"
+      },
+      "notes": "弱视口径（2026-09-15 由全盲改为弱视不识字，见 characters.md 一c）：看得见光和影子、看不清字。听力只写『听得勤、听得准』，禁写『看不见所以听得更细』（F28 去撞车句式）。"
+    },
+    {
+      "name": "裴令仪",
+      "aliases": ["裴小姐"],
+      "first_appearance": 111,
+      "first_speech": 154,
+      "first_named": 154,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch111 九叔口中“裴小姐”（天衡分署校册），沈广农认出是裴弘度之女——本表把未具名的『裴小姐』计为首次出现",
+        "speech": "ch154 “这一栏，是户部填的，还是坊正填的？”",
+        "solo": ""
+      },
+      "notes": "首次具名为 ch154（此前只以『裴小姐』出现，故 first_appearance=111、first_named=154）。first_solo 留空：前期『校册』属受派差事，独立决断待后卷确认。年龄锚点：生 735（755 年 20 岁）。"
+    },
+    {
+      "name": "孙驼子",
+      "aliases": [],
+      "first_appearance": 35,
+      "first_speech": 35,
+      "first_named": 35,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch35 天刚亮，难民营外来了个瘀腿老人；他自报姓名“孙驼子”",
+        "speech": "ch35 “盐换药。”",
+        "solo": ""
+      },
+      "notes": "first_solo 留空（他的行动多为随队向导）。**F30 首例：** 旧稿 ch34 曾两次提前提到“孙驼子”（粮车段落与黑牌段落），但他到 ch35 才登场—— 2026-09-15 已改为不具名写“孩子腕上那截黑布线”，并把“腰间三圈半”的展示移到 ch35 他登场的同一处（motif 不失）；之后 ch49／ch57／ch63 的三圈半回环不变。命名纪律：一律写『孙驼子』，不给姓。"
+    },
+    {
+      "name": "谢沉璧",
+      "aliases": [],
+      "first_appearance": 42,
+      "first_speech": 66,
+      "first_named": 42,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch42 河东军府史官身份出场",
+        "speech": "ch66 军府对答首次出声",
+        "solo": ""
+      },
+      "notes": "first_solo 留空（她的独立决断集中在卷十一合读段，可在收尾时补登 ch254 前后的『不交』）。"
+    },
+    {
+      "name": "蒋默",
+      "aliases": [],
+      "first_appearance": 195,
+      "first_speech": 195,
+      "first_named": 195,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch195 藏脉首领出场（送待抄册子，进门先看案上）",
+        "speech": "ch195 “我的档，我自己抄。不用别人代笔。”",
+        "solo": ""
+      },
+      "notes": "first_solo 留空（藏脉的规矩是沉默随档，其独立动作在卷十四 ch315 交档）。命名纪律：写『蒋默』；与凌虚、周衡之同属观天台但通道不同。"
+    }
+  ]
+}

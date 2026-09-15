@@ -14,6 +14,7 @@
     "status": "①`dedup-check.py` 的 **VOL13_REQ 由 1 条补到 24 条**（此前等于本卷无章眼网），F10 路由 285—308→`outline-vol13.md` 已就绪；②`custody-chains.json` 新增五条卷十三链——同党册附页（285→287）、柳七线人册（292→297）、观察者结局册（280→296）、元载狱案卷（293→294）、空账底册（303），并把郭子仪名单链延伸到 **287／306 无纸化终局**（terminal 禁「名单又抄成纸本」）；未开写章按 pending 记录，落地后自动校验（F23 现 16 条／25 步 ✓）；③`foreshadowing.md` 新建「卷十三预登记区（ch285—308）」，含卷十二承接表、**七条新增伏笔**（登顶榜文抄件、元载狱案卷、线人册余半、阿青出走、底账底册被扣一页、名单无纸化口诀、九幽传剑前夜）、榜单排期、年龄速查与正典场面登记位；④`outline-vol13.md` 状态由「开写稿·待核定」改为**开写中**，写明 ch285 已落地（4,301 字）与**卷名《登顶》为唯一待裁决项**及其四处同步口径；⑤24 题对全书 284 题查重确认**全唯一**。验证：`npm run build` 通过、`npm run verify` exit 0（F23 16 条／25 步；卷十三 1 章已校、其余 23 章 pending）。**未提交 Git。**"
   },
   "stateFiles": [
+    "appearance-plan",
     "artifacts",
     "chapter-log",
     "chapter-title-index",
@@ -22,6 +23,7 @@
     "chronology",
     "conflicts",
     "darklines",
+    "decision-sheet",
     "dedup-baseline-vol3",
     "dedup-baseline-vol6",
     "dedup-baseline-vol9",
@@ -52,6 +54,7 @@
     "relations",
     "requirements",
     "revisions",
+    "task-list",
     "timeline",
     "weapons",
     "worldbuilding"

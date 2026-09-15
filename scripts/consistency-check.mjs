@@ -10,6 +10,8 @@
 //      单章低于 --min 默认只登记警告；加 --strict 升为失败（卷收尾用）
 //   ⑥ F23 跨章物件持有链（台账 state/custody-chains.json）：同一件物证在两次出现的章节间
 //      交接/分拆是否自洽——A 每步须命中持有锚点；B 易主须有交接词；C 分拆/归档后再以整体出现即报错。
+//   ⑧ F31 人物卡排期闭环（state/characters.md × outline-vol13/14 × appearance-plan.md §十二）：
+//      每张人物卡必须回答“排入哪一卷”或“为什么不回”（不回需登记豁免/已故/待裁决），否则判失败。
 //   ⑦ progress 台账语义：state/progress.md 的「当前阶段/当前章节/总章节数」↔ 正文实际章数
 //      （以及镜像 index.json 的 progress 是否与源同步）。字节比对拦不住语义漂移（如 ch284 已写、
 //       台账仍写 260），故单列一项；字段缺失时只警告、不判失败。
@@ -219,6 +221,53 @@ function checkCustodyChains({ stateDir, novelDir, targets, allMap, declaredChapt
   return { chains: chains.length, steps }
 }
 
+// ── ⑧ F31 人物卡排期闭环 ───────────────────────────────────────────
+// 台账：books/<书名>/state/characters.md 的人物卡（### / #### 小标题里的姓名）
+//   规则：每张人物卡必须"已分类"——姓名（或该小标题内的同一人名变体）出现在
+//     · outline-vol13.md / outline-vol14.md（＝已排期），或
+//     · state/appearance-plan.md（含 §十二 终审表：不回／已故／真缺口／待裁决）
+//   未分类 ⇒ 新増了人物卡却没有回答"他出现在哪一卷、或为什么不出现" → 判失败。
+//   标题里含下列词的属分类性/群组标题，不是人卡；说明性词组（已故/岁出场…）不计。
+const CARD_GROUP_RE = /(人物|纪律|关系网|补档|谱系|姓名考|矩阵|圈层|首领|传人|四卫|藩镇|附：|第[一二三]代|丐帮|青城派|崆峒派|海沙帮|河东军|剑南军|夜行司|观天台|烛微阁|八凶|宗师录|朝堂|市井|名单|军中|本节|传说)/
+const CARD_TOKEN_SKIP = new Set(['已故', '新増', '随卷更新', '校订条', '岁出场', '双主角'])
+function characterCards(text) {
+  const out = []
+  // 注意：必须按 CRLF 切行——JS 的 `$` 在非多行模式下不匹行尾的 \r，
+  // 直接 split('\n') 会让 CRLF 版 characters.md（本书即如此）一张卡也拓不到。
+  for (const raw of String(text || '').split(/\r?\n/)) {
+    const m = /^#{3,4}\s+(.*)$/.exec(raw)
+    if (!m) continue
+    const head = m[1].trim().replace(/^\d+[a-z]?[.、]\s*/, '')
+    if (head.includes('：') || CARD_GROUP_RE.test(head)) continue
+    const toks = [...head.matchAll(/[\u4e00-\u9fff]{2,6}/g)].map((x) => x[0])
+      .filter((t) => !CARD_TOKEN_SKIP.has(t))
+    if (!toks.length || out.some((c) => c.head === head)) continue
+    out.push({ head, toks })
+  }
+  return out
+}
+function checkCharacterCards({ stateDir, fail, warn, notes }) {
+  const cardsText = read(path.join(stateDir, 'characters.md'))
+  const plan = read(path.join(stateDir, 'appearance-plan.md'))
+  if (!cardsText) { notes.push('F31 人物卡排期闭环：本书无 state/characters.md，不适用'); return { cards: 0, unclassified: 0 } }
+  if (plan == null) {
+    // 排期闭环只在维护「出场编排表」的书里生效（当前为《天阙》）；其余书目不能用该规则拦。
+    notes.push('F31 人物卡排期闭环：本书无 state/appearance-plan.md，规则不适用（先建立编排表再启用）')
+    return { cards: 0, unclassified: 0 }
+  }
+  const scheduled = ['outline-vol13.md', 'outline-vol14.md']
+    .map((f) => read(path.join(stateDir, f)) || '').join('\n')
+  const cards = characterCards(cardsText)
+  const unclassified = cards
+    .filter((c) => !c.toks.some((t) => scheduled.includes(t) || (plan || '').includes(t)))
+    .map((c) => c.head)
+  if (unclassified.length) {
+    fail(`F31 人物卡未分类（${unclassified.length} 张）：${unclassified.join('、')}`
+      + '　→ 每张人物卡必须排入卷十三/十四卷纲，或在 state/appearance-plan.md §十二 终审表登记"不回／已故／待裁决"')
+  }
+  return { cards: cards.length, unclassified: unclassified.length }
+}
+
 // ── 单本检查 ────────────────────────────────────────────────────────
 function checkBook(name) {
   const bookDir = path.join(BOOKS_DIR, name)
@@ -399,8 +448,11 @@ function checkBook(name) {
     stateDir, novelDir, targets, allMap, declaredChapterNumbers, fail, warn, notes,
   }) || { chains: 0, steps: 0 }
 
+  // —— ⑧ F31 人物卡排期闭环（state/characters.md × 卷十三/十四卷纲 × appearance-plan.md）——
+  const cards = checkCharacterCards({ stateDir, fail, warn, notes })
+
   const wordTotal = chapters.reduce((s, c) => s + c.chars, 0)
-  return { name, title, mirror, failures, warnings, notes, chapters, volumes, wordTotal, custody }
+  return { name, title, mirror, failures, warnings, notes, chapters, volumes, wordTotal, custody, cards }
 }
 
 // ── dedup 输出解析：判失败项 / 存量报告 / 信息项 三档 ──────────────
@@ -518,6 +570,9 @@ for (const b of books) {
     if (r.custody?.chains) {
       const ok = r.failures.every((f) => !f.startsWith('F23'))
       console.log(`\n  F23 跨章持有链：${r.custody.chains} 条 / ${r.custody.steps} 步 ${ok ? '✓' : '✗'}`)
+    }
+    if (r.cards) {
+      console.log(`  F31 人物卡排期闭环：${r.cards.cards} 张 / 未分类 ${r.cards.unclassified} ${r.cards.unclassified ? '✗' : '✓'}`)
     }
     for (const n of r.notes) console.log(`  · ${n}`)
     for (const w of r.warnings) console.log(`  ! 警告 ${w}`)

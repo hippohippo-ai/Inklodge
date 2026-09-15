@@ -268,6 +268,92 @@ function checkCharacterCards({ stateDir, fail, warn, notes }) {
   return { cards: cards.length, unclassified: unclassified.length }
 }
 
+// ── ⑨ F32 双榜席位首现闭环 ────────────────────────────────────
+// 台账：state/rankings.md（《天下宗师录》十二席 / 黑榜十人 / 八凶八人）
+//   规则：每一位席位人物必须"首现闭环"——
+//     · 正文 ch1—285 内实际出现（按章计数，不看台账声明），或
+//     · 在 appearance-plan.md §14.3「前置植入表」内一行，且该行的前置锚点落在已写卷。
+//   另报均衡比：正文 ≤1 章的席位数（＝"只能靠末两卷首次出现"的那一批），>6 仅警告。
+//   背景：名单在台账里是满的，在正文里可能是空的——而这类故障不在任何一张表里。
+const SEAT_NAME_SKIP = new Set(['姓名', '空缺', '代号', '—', '-'])
+const SEAT_HEAD_SKIP = new Set(['席位', '排名', '称号', '年份', '人物', '姓名'])
+const CN_NUM = { 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9, 十: 10, 十一: 11, 十二: 12 }
+function seatHolders(rankingsText) {
+  const cut = String(rankingsText || '').indexOf('## 四、白玉京')
+  const lines = (cut > 0 ? String(rankingsText).slice(0, cut) : String(rankingsText || '')).split(/\r?\n/)
+  const out = []
+  let inTable = false
+  for (const raw of lines) {
+    const tr = raw.trim()
+    if (!tr || tr.startsWith('#')) { inTable = false; continue } // 空行或新小节：表格结束
+    if (!tr.startsWith('|')) continue // 说明行、引用块（三个名单的表头与数据行之间都有注释行）
+    const cells = raw.split('|').slice(1, -1).map((c) => c.replace(/\*\*/g, '').trim())
+    if (cells.length < 2) continue
+    if (cells[1] === '姓名') { inTable = true; continue } // 表头：三个名单同构，第 2 格是姓名
+    if (SEAT_HEAD_SKIP.has(cells[0])) continue
+    if (!inTable) continue
+    const nm = cells[1]
+    if (!nm || SEAT_NAME_SKIP.has(nm) || !/^[\u4e00-\u9fff]{2,5}$/.test(nm)) continue
+    if (!out.includes(nm)) out.push(nm)
+  }
+  return out
+}
+function plantedSeatNames(plan) {
+  const t = String(plan || '')
+  const i = t.indexOf('### 14.3')
+  if (i < 0) return new Set()
+  const j = t.indexOf('### 14.4', i)
+  const sec = t.slice(i, j > 0 ? j : undefined)
+  const ok = new Set()
+  for (const raw of sec.split(/\r?\n/)) {
+    if (!/^\s*\|/.test(raw)) continue
+    const cells = raw.split('|').slice(1, -1).map((c) => c.replace(/\*\*/g, '').trim())
+    if (cells.length < 7) continue // 档|人物|席位|现计划|前置锚点|依据|后段
+    const anchor = cells[4]
+    if (!anchor) continue
+    let qualified = /已在案|已落地|已排|已就位/.test(anchor)
+    if ([...anchor.matchAll(/ch\s*(\d+)/g)].some((m) => Number(m[1]) <= 285)) qualified = true
+    for (const m of anchor.matchAll(/卷([一二三四五六七八九十]+)/g)) {
+      const v = CN_NUM[m[1]]
+      if (v && v <= 12) qualified = true
+    }
+    if (!qualified) continue
+    for (const nm of (cells[1].match(/[\u4e00-\u9fff]{2,5}/g) || [])) ok.add(nm)
+  }
+  return ok
+}
+function checkSeatOnsets({ stateDir, novelDir, allMap, fail, warn, notes }) {
+  const rank = read(path.join(stateDir, 'rankings.md'))
+  if (!rank) { notes.push('F32 双榜席位首现闭环：本书无 state/rankings.md，不适用'); return { seats: 0, unclosed: [], thin: 0 } }
+  const plan = read(path.join(stateDir, 'appearance-plan.md'))
+  if (plan == null) {
+    notes.push('F32 双榜席位首现闭环：本书无 state/appearance-plan.md，规则不适用')
+    return { seats: 0, unclosed: [], thin: 0 }
+  }
+  const seats = seatHolders(rank)
+  const planted = plantedSeatNames(plan)
+  const text = new Map()
+  for (const [n, file] of allMap) {
+    if (n > 285) continue
+    text.set(n, read(path.join(novelDir, file)) || '')
+  }
+  const unclosed = []
+  let thin = 0
+  for (const nm of seats) {
+    const hits = [...text.entries()].filter(([, s]) => s.includes(nm)).map(([n]) => n)
+    if (hits.length <= 1) thin += 1
+    if (!hits.length && !planted.has(nm)) unclosed.push(nm)
+  }
+  if (unclosed.length) {
+    fail(`F32 双榜席位未闭环（${unclosed.length} 位）：${unclosed.join('、')}`
+      + '　→ 每位席位人物要么在正文 ch1—285 内出现，要么在 appearance-plan.md §14.3 登记带已写卷锚点的前置植入行')
+  }
+  if (thin > 6) {
+    warn(`F32 双榜席位首现均衡：${seats.length} 席中正文 ≤1 章者 ${thin} 位（目标 ≤6）——其余只能靠末两卷首次具名`)
+  }
+  return { seats: seats.length, unclosed, thin }
+}
+
 // ── 单本检查 ────────────────────────────────────────────────────────
 function checkBook(name) {
   const bookDir = path.join(BOOKS_DIR, name)
@@ -451,8 +537,11 @@ function checkBook(name) {
   // —— ⑧ F31 人物卡排期闭环（state/characters.md × 卷十三/十四卷纲 × appearance-plan.md）——
   const cards = checkCharacterCards({ stateDir, fail, warn, notes })
 
+  // —— ⑨ F32 双榜席位首现闭环（state/rankings.md × 正文 × appearance-plan.md §14.3）——
+  const seats = checkSeatOnsets({ stateDir, novelDir, allMap, fail, warn, notes })
+
   const wordTotal = chapters.reduce((s, c) => s + c.chars, 0)
-  return { name, title, mirror, failures, warnings, notes, chapters, volumes, wordTotal, custody, cards }
+  return { name, title, mirror, failures, warnings, notes, chapters, volumes, wordTotal, custody, cards, seats }
 }
 
 // ── dedup 输出解析：判失败项 / 存量报告 / 信息项 三档 ──────────────
@@ -573,6 +662,9 @@ for (const b of books) {
     }
     if (r.cards) {
       console.log(`  F31 人物卡排期闭环：${r.cards.cards} 张 / 未分类 ${r.cards.unclassified} ${r.cards.unclassified ? '✗' : '✓'}`)
+      if (r.seats && r.seats.seats) {
+        console.log(`  F32 双榜席位首现闭环：${r.seats.seats} 席 / 未闭环 ${r.seats.unclosed.length} ${r.seats.unclosed.length ? '✗' : '✓'}　· 正文 ≤1 章者 ${r.seats.thin}（目标 ≤6）`)
+      }
     }
     for (const n of r.notes) console.log(`  · ${n}`)
     for (const w of r.warnings) console.log(`  ! 警告 ${w}`)

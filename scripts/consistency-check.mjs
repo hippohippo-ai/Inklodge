@@ -10,6 +10,10 @@
 //      单章低于 --min 默认只登记警告；加 --strict 升为失败（卷收尾用）
 //   ⑥ F23 跨章物件持有链（台账 state/custody-chains.json）：同一件物证在两次出现的章节间
 //      交接/分拆是否自洽——A 每步须命中持有锚点；B 易主须有交接词；C 分拆/归档后再以整体出现即报错。
+//   ⑩ F33 人物首现台账闭环（state/character-onsets.json × 正文）：
+//      ①台账声明的首现章必须真的查得到其人（防“台账先行、正文空转”）；
+//      ②首次具名仍在末两卷的人数超阈值即警告（作者口径：不要都挤在卷十三／十四）。
+//      与 F30 分工：F30 管“不得早于台账出现”，F33 管“不得晚于／落空台账声明”。
 //   ⑧ F31 人物卡排期闭环（state/characters.md × outline-vol13/14 × appearance-plan.md §十二）：
 //      每张人物卡必须回答“排入哪一卷”或“为什么不回”（不回需登记豁免/已故/待裁决），否则判失败。
 //   ⑦ progress 台账语义：state/progress.md 的「当前阶段/当前章节/总章节数」↔ 正文实际章数
@@ -354,6 +358,47 @@ function checkSeatOnsets({ stateDir, novelDir, allMap, fail, warn, notes }) {
   return { seats: seats.length, unclosed, thin }
 }
 
+// ── ⑩ F33 人物首现台账闭环（state/character-onsets.json × 正文）──────
+//   台账（F30 读它做“不得提前出现”的校验）里写下的 first_appearance，本项做两件反向校验：
+//     a) 声明落在已写章的，该章正文必须真的查得到这个人——否则是“台账上写了、正文里没落”
+//        的假闭环（声明而未落者单列警告，不判失败：如李虎 ch279 属已裁决待回改）；
+//     b) 统计首次具名仍在末两卷（≥ ch286）的人数——作者口径是“不要都挤在卷十三／十四卷纲”，
+//        超阈值即警告（首现本身可以晚，但全堆在末尾必须看得见）。
+//   与 F30 分工：F30 管“不得早于台账出现”，F33 管“不得晚于/落空台账声明”。
+const ONSET_LATE_FROM = 286
+const ONSET_LATE_MAX = 10
+function checkOnsetLedger({ stateDir, novelDir, allMap, fail, warn, notes }) {
+  const raw = read(path.join(stateDir, 'character-onsets.json'))
+  if (!raw) { notes.push('F33 人物首现台账：本书无 state/character-onsets.json，规则不适用'); return null }
+  let list = []
+  try { list = JSON.parse(raw).characters || [] } catch (e) {
+    fail(`F33 人物首现台账解析失败：${e.message}`)
+    return null
+  }
+  const late = []      // 首现仍在末两卷（或未定）
+  const pending = []   // 声明了已写章，但该章正文查无其名
+  let verified = 0
+  for (const c of list) {
+    const n = c.first_appearance
+    const toks = [c.name, ...(c.aliases || [])]
+    if (n == null || n >= ONSET_LATE_FROM) { late.push(`${c.name}(${n == null ? '未定' : `ch${n}`})`); continue }
+    const file = allMap.get(n)
+    if (!file) continue                       // 该章不在本次检查范围内（--vol 限定）
+    const t = read(path.join(novelDir, file)) || ''
+    if (toks.some((x) => t.includes(x))) verified += 1
+    else pending.push(`${c.name}(声明 ch${n})`)
+  }
+  if (pending.length) {
+    warn(`F33 台账声明首现章查无其名（${pending.length} 人）：${pending.join('、')}`
+      + '　→ 要么把名字落进该章，要么改 first_appearance（含已裁决待回改项时属预期）')
+  }
+  if (late.length > ONSET_LATE_MAX) {
+    warn(`F33 人物首现前移：${list.length} 人中 ${late.length} 人首次具名仍在末两卷（目标 ≤${ONSET_LATE_MAX}）：${late.join('、')}`)
+  }
+  notes.push(`F33 人物首现台账：${list.length} 人 · 末两卷首现 ${late.length}（目标 ≤${ONSET_LATE_MAX}）· 声明章已核 ${verified} · 待落 ${pending.length}`)
+  return { entries: list.length, late: late.length, pending: pending.length, verified }
+}
+
 // ── 单本检查 ────────────────────────────────────────────────────────
 function checkBook(name) {
   const bookDir = path.join(BOOKS_DIR, name)
@@ -540,8 +585,11 @@ function checkBook(name) {
   // —— ⑨ F32 双榜席位首现闭环（state/rankings.md × 正文 × appearance-plan.md §14.3）——
   const seats = checkSeatOnsets({ stateDir, novelDir, allMap, fail, warn, notes })
 
+  // —— ⑩ F33 人物首现台账闭环（state/character-onsets.json × 正文）——
+  const onsets = checkOnsetLedger({ stateDir, novelDir, allMap, fail, warn, notes })
+
   const wordTotal = chapters.reduce((s, c) => s + c.chars, 0)
-  return { name, title, mirror, failures, warnings, notes, chapters, volumes, wordTotal, custody, cards, seats }
+  return { name, title, mirror, failures, warnings, notes, chapters, volumes, wordTotal, custody, cards, seats, onsets }
 }
 
 // ── dedup 输出解析：判失败项 / 存量报告 / 信息项 三档 ──────────────
@@ -664,6 +712,9 @@ for (const b of books) {
       console.log(`  F31 人物卡排期闭环：${r.cards.cards} 张 / 未分类 ${r.cards.unclassified} ${r.cards.unclassified ? '✗' : '✓'}`)
       if (r.seats && r.seats.seats) {
         console.log(`  F32 双榜席位首现闭环：${r.seats.seats} 席 / 未闭环 ${r.seats.unclosed.length} ${r.seats.unclosed.length ? '✗' : '✓'}　· 正文 ≤1 章者 ${r.seats.thin}（目标 ≤6）`)
+      }
+      if (r.onsets) {
+        console.log(`  F33 人物首现台账：${r.onsets.entries} 人 · 末两卷首现 ${r.onsets.late}（目标 ≤10）${r.onsets.late > 10 ? ' ✗' : ' ✓'} · 声明章已核 ${r.onsets.verified} · 待落 ${r.onsets.pending}`)
       }
     }
     for (const n of r.notes) console.log(`  · ${n}`)

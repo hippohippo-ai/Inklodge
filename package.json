@@ -10,6 +10,7 @@
     "check": "node scripts/consistency-check.mjs",
     "check:strict": "node scripts/consistency-check.mjs --strict",
     "verify": "node scripts/consistency-check.mjs --dedup",
+    "cadence": "node scripts/character-cadence.mjs --book 天阙 --max-gap 100 --tail 100",
     "style": "node scripts/style-fingerprint.mjs",
     "style:diff": "node scripts/style-fingerprint.mjs --diff --fail-on-drift",
     "style:save": "node scripts/style-fingerprint.mjs --save",

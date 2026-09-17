@@ -4,7 +4,8 @@
 // 用途：每卷收尾一键跑，替代此前手工做的三向比对。
 // 检查项：
 //   ① 章节源↔镜像 md5 逐字节一致（缺文件/内容不同即失败）
-//   ② state/*.md 源↔镜像一致，镜像多余文件单列警告
+//   ② state/*.md 源↔镜像一致，镜像多余文件单列警告；脚本直接读的结构化台账（life-windows/custody-chains/
+//      character-onsets/word-budget）也按字节比对——否则脚本核的是旧账
 //   ③ index.json 覆盖（chapters 列全、stateFiles 列全、与源数量一致） //   ④ 卷纲章题声明 vs 正文 H1 章题一致（章题不符即失败；「声明章缺正文」按警告处理——卷纲先声明后开写是本仓惯例，--predecl 时对回填范围内缺章升为失败）
 //   ⑤ 字数口径台账（去章题行与 Unicode 空白，与 state/dedup-check.py 同口径），
 //      单章低于 --min 默认只登记警告；加 --strict 升为失败（卷收尾用）
@@ -16,6 +17,9 @@
 //      与 F30 分工：F30 管“不得早于台账出现”，F33 管“不得晚于／落空台账声明”。
 //   ⑧ F31 人物卡排期闭环（state/characters.md × outline-vol13/14 × appearance-plan.md §十二）：
 //      每张人物卡必须回答“排入哪一卷”或“为什么不回”（不回需登记豁免/已故/待裁决），否则判失败。
+//   ⑪ F35 在世窗口闭环（state/life-windows.json × 卷→年表 × chronology.md §一）：
+//      档案声明了卒年／命运节点的角色，其落点章换算出的年份必须在在世窗口内（本人出场不得晚于卒年；
+//      文书/口述类 L0 载体只受生年约束），并逐卷比对 volume_years 与 chronology.md 卷表。
 //   ⑦ progress 台账语义：state/progress.md 的「当前阶段/当前章节/总章节数」↔ 正文实际章数
 //      （以及镜像 index.json 的 progress 是否与源同步）。字节比对拦不住语义漂移（如 ch284 已写、
 //       台账仍写 260），故单列一项；字段缺失时只警告、不判失败。
@@ -281,7 +285,8 @@ function checkCharacterCards({ stateDir, fail, warn, notes }) {
 //   背景：名单在台账里是满的，在正文里可能是空的——而这类故障不在任何一张表里。
 const SEAT_NAME_SKIP = new Set(['姓名', '空缺', '代号', '—', '-'])
 const SEAT_HEAD_SKIP = new Set(['席位', '排名', '称号', '年份', '人物', '姓名'])
-const CN_NUM = { 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9, 十: 10, 十一: 11, 十二: 12 }
+const CN_NUM = { 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9, 十: 10,
+  十一: 11, 十二: 12, 十三: 13, 十四: 14 }
 function seatHolders(rankingsText) {
   const cut = String(rankingsText || '').indexOf('## 四、白玉京')
   const lines = (cut > 0 ? String(rankingsText).slice(0, cut) : String(rankingsText || '')).split(/\r?\n/)
@@ -399,6 +404,114 @@ function checkOnsetLedger({ stateDir, novelDir, allMap, fail, warn, notes }) {
   return { entries: list.length, late: late.length, pending: pending.length, verified }
 }
 
+// ── ⑪ F35 在世窗口闭环（state/life-windows.json × 卷→年表 × 正文落点）──
+//   凡档案声明了生年／卒年／命运节点的角色，其落点章换算出的年份必须落在在世窗口内：
+//     ①落点年 < 生年 → 失败（任何载体）；
+//     ②本人出场（kind 缺省 / in_person）而落点年 > min(卒年, 书末年) → 失败；
+//     ③文书·名册·军报（document）与口述·转述·尸首（reported）＝ L0 载体，死后可续现，只受①约束；
+//     ④跨年卷的落点建议自带 year；未标 year 时按“卷首年 > 卒年”判失败、卷末年越界仅警告；
+//     ⑤volume_years 与 chronology.md §一 的卷表逐卷比对（年号或章范围不符即失败，该表未收录的卷只登记）。
+//   与既有项分工：F32/F33 管“有没有出现”，F35 管“出现得是不是时候”。
+const LIFE_L0 = new Set(['document', 'reported'])
+function checkLifeWindows({ stateDir, targets, volumes, fail, warn, notes }) {
+  const raw = read(path.join(stateDir, 'life-windows.json'))
+  if (!raw) { notes.push('F35 在世窗口闭环：本书无 state/life-windows.json，规则不适用'); return null }
+  let data
+  try { data = JSON.parse(raw) } catch (e) {
+    fail(`F35 在世窗口台账解析失败：${e.message}`)
+    return null
+  }
+  const endYear = Number(data.book_end_year ?? 779)
+  // 卷→年：chapters 形如 "237-260"
+  const span = new Map()
+  for (const v of data.volume_years || []) {
+    const m = /^(\d+)\s*[-—–]\s*(\d+)$/.exec(String(v.chapters || '').trim())
+    if (!m) continue
+    const fy = Number(v.from); const ty = Number(v.to ?? v.from)
+    for (let n = Number(m[1]); n <= Number(m[2]); n++) span.set(n, { from: fy, to: ty, vol: v.vol })
+  }
+  const ov = new Map(Object.entries(data.chapter_year_overrides || {}).map(([k, x]) => [Number(k), Number(x)]))
+  const targetSet = new Set(targets)
+  let judged = 0; let undated = 0; let upper = 0
+  const lowerBad = []; const overBad = []; const softBad = []; const noSpan = []
+  for (const p of data.people || []) {
+    const ceil = p.death_year != null ? Math.min(Number(p.death_year), endYear) : endYear
+    const floor = p.birth_year != null ? Number(p.birth_year) : null
+    const steps = [
+      ...(p.landed || []).map((x) => ({ ...x, phase: '已落' })),
+      ...(p.planned || []).map((x) => ({ ...x, phase: '计划' })),
+    ]
+    // land_range：只登记“首现—末现”跨度的（无逐年落点）
+    if (p.landed_range) {
+      for (const k of ['first', 'last']) {
+        if (p.landed_range[k] != null) steps.push({ chapter: p.landed_range[k], phase: `跨度·${k === 'first' ? '首' : '末'}` })
+      }
+    }
+    for (const st of steps) {
+      if (st.chapter == null) { upper += 1; continue }   // 只写卷次、未定章：由卷表另判
+      const ch = Number(st.chapter)
+      if (!targetSet.has(ch)) continue
+      const s = span.get(ch)
+      if (!s) { noSpan.push(`ch${ch}（${p.name}）`); continue }
+      judged += 1
+      const declared = st.year != null ? Number(st.year) : null
+      const lo = declared ?? s.from
+      const hi = declared ?? s.to
+      const l0 = LIFE_L0.has(String(st.kind || 'in_person'))
+      if (floor != null && lo < floor) {
+        lowerBad.push(`${p.name} ch${ch}（${st.phase}${l0 ? '·载体' : ''}）→ ${lo} 年 < 生年 ${floor}`)
+      } else if (!l0) {
+        if (lo > ceil) {
+          overBad.push(`${p.name} ch${ch}（${st.phase}）→ ${hi === lo ? `${lo} 年` : `${lo}—${hi} 年`} > 在世上限 ${ceil}`
+            + `${p.death_year == null ? '（书末年）' : '（卒年）'}`)
+        } else if (hi > ceil) {
+          softBad.push(`${p.name} ch${ch}（${st.phase}）→ 卷末年 ${hi} 越上限 ${ceil}（跨年卷未标 year，仅警告）`)
+        }
+      }
+    }
+  }
+  if (lowerBad.length) fail(`F35 落点早于生年（${lowerBad.length} 处）：${lowerBad.join('；')}`)
+  if (overBad.length) fail(`F35 在世窗口越上限——本人在卒年之后仍被写成在场（${overBad.length} 处）：${overBad.join('；')}`
+    + '　→ 要么改落点，要么把该处改成 document／reported 载体')
+  if (softBad.length) warn(`F35 跨年卷落点未标 year（${softBad.length} 处，仅警告）：${softBad.join('；')}`)
+  if (noSpan.length) {
+    warn(`F35 落点章不在 volume_years 覆盖范围内，无法换算年份（${noSpan.length} 处）：${noSpan.join('、')}`)
+  }
+  // ⑤ volume_years ↔ chronology.md §一 卷表
+  const chrono = read(path.join(stateDir, 'chronology.md'))
+  let chronoVols = 0
+  const mismatch = []
+  const covered = new Set((data.volume_years || []).map((x) => Number(x.vol)))
+  if (chrono) {
+    for (const line of String(chrono).split(/\r?\n/)) {
+      const m = /^\|\s*(十[一二三四]|[一二三四五六七八九十])\s*\|\s*ch(\d+)\s*[—–\-]\s*(\d+)\s*\|([^|]*)\|/.exec(line)
+      if (!m) continue
+      const vol = CN_NUM[m[1]]
+      const v = (data.volume_years || []).find((x) => Number(x.vol) === vol)
+      if (!v) { mismatch.push(`卷${vol} 见于 chronology 卷表、life-windows 未收录`); continue }
+      chronoVols += 1
+      const range = `${m[2]}-${m[3]}`
+      if (String(v.chapters).replace(/\s/g, '') !== range) {
+        mismatch.push(`卷${vol} 章范围不一致：chronology ch${m[2]}—${m[3]} vs life-windows ${v.chapters}`)
+      }
+      const ys = [...m[4].matchAll(/\d{3}/g)].map((x) => Number(x[0]))
+      if (ys.length) {
+        const cf = Math.min(...ys); const ct = Math.max(...ys)
+        if (Number(v.from) !== cf || Number(v.to ?? v.from) !== ct) {
+          mismatch.push(`卷${vol} 年号不一致：chronology ${cf}—${ct} vs life-windows ${v.from}—${v.to ?? v.from}`)
+        }
+      }
+    }
+    if (mismatch.length) fail(`F35 卷→年表与 chronology.md §一 不一致（${mismatch.length} 处）：${mismatch.join('；')}`)
+  }
+  const uncovered = (volumes || []).map((v) => v.vol).filter((vol) => !covered.has(vol))
+  notes.push(`F35 在世窗口：${(data.people || []).length} 人 · 落点已判 ${judged} · 未来卷未定章 ${upper}`
+    + ` · 窗口越界 ${overBad.length} · chronology 卷表比对 ${chronoVols} 卷`
+    + (uncovered.length ? ` · 未覆盖卷：${uncovered.join('、')}` : ''))
+  return { people: (data.people || []).length, judged, lowerBad: lowerBad.length,
+    overBad: overBad.length, softBad: softBad.length, undated: upper, mismatch: mismatch.length }
+}
+
 // ── 单本检查 ────────────────────────────────────────────────────────
 function checkBook(name) {
   const bookDir = path.join(BOOKS_DIR, name)
@@ -505,6 +618,16 @@ function checkBook(name) {
       .filter((f) => f.endsWith('.md') && !stateFiles.includes(f))
     if (extra.length) warn(`镜像 state 有源端已无的文件：${extra.join('、')}`)
   }
+  // 结构化台账（脚本直接读的几份）同样按字节比对：改了台账忘了同步镜像，
+  // 会让 F23/F33/F35 读的是旧账——这类漂移 .md 比对拦不住。
+  const jsonLedgers = ['life-windows.json', 'custody-chains.json', 'character-onsets.json', 'word-budget.json']
+  for (const f of jsonLedgers) {
+    const src = path.join(stateDir, f)
+    if (!isFile(src)) continue
+    const dst = path.join(mirror, 'state', f)
+    if (!isFile(dst)) { fail(`state 镜像缺 ${f}（重跑 node scripts/sync.mjs）`); continue }
+    if (md5(src) !== md5(dst)) fail(`state/${f} 源↔镜像 md5 不一致`)
+  }
 
   // —— ③ index.json 覆盖 ——
   const idxPath = path.join(mirror, 'index.json')
@@ -588,8 +711,11 @@ function checkBook(name) {
   // —— ⑩ F33 人物首现台账闭环（state/character-onsets.json × 正文）——
   const onsets = checkOnsetLedger({ stateDir, novelDir, allMap, fail, warn, notes })
 
+  // —— ⑪ F35 在世窗口闭环（state/life-windows.json × 卷→年表 × 正文落点）——
+  const windows = checkLifeWindows({ stateDir, targets, volumes, fail, warn, notes })
+
   const wordTotal = chapters.reduce((s, c) => s + c.chars, 0)
-  return { name, title, mirror, failures, warnings, notes, chapters, volumes, wordTotal, custody, cards, seats, onsets }
+  return { name, title, mirror, failures, warnings, notes, chapters, volumes, wordTotal, custody, cards, seats, onsets, windows }
 }
 
 // ── dedup 输出解析：判失败项 / 存量报告 / 信息项 三档 ──────────────
@@ -716,6 +842,11 @@ for (const b of books) {
       if (r.onsets) {
         console.log(`  F33 人物首现台账：${r.onsets.entries} 人 · 末两卷首现 ${r.onsets.late}（目标 ≤10）${r.onsets.late > 10 ? ' ✗' : ' ✓'} · 声明章已核 ${r.onsets.verified} · 待落 ${r.onsets.pending}`)
       }
+    }
+    if (r.windows) {
+      const bad = r.windows.overBad + r.windows.lowerBad + r.windows.mismatch
+      console.log(`  F35 在世窗口闭环：${r.windows.people} 人 / 落点已判 ${r.windows.judged} ${bad ? '✗' : '✓'}`
+        + `　· 越上限 ${r.windows.overBad} · 早于生年 ${r.windows.lowerBad} · 卷表不符 ${r.windows.mismatch}`)
     }
     for (const n of r.notes) console.log(`  · ${n}`)
     for (const w of r.warnings) console.log(`  ! 警告 ${w}`)

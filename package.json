@@ -18,7 +18,9 @@
     "hooks:uninstall": "node scripts/install-hooks.mjs --uninstall",
     "preview": "vite preview",
     "prebuild": "node scripts/sync.mjs",
-    "deploy": "npm run build && gh-pages -d dist"
+    "deploy": "npm run build && gh-pages -d dist",
+    "life:board": "node scripts/life-window-board.mjs",
+    "life:board:outline": "node scripts/life-board-outline.mjs"
   },
   "dependencies": {
     "marked": "^12.0.2",

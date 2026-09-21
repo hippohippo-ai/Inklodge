@@ -1,1028 +1,1040 @@
 {
-  "book": "天阙",
-  "updated": "2026-09-17",
-  "source": "decision-sheet.md §七（在世窗口表，T-D1 命运闭环台账）；卷→年映射与 chronology.md 同源",
-  "rule": "F35·在世窗口闭环（scripts/consistency-check.mjs）：①本人出场（kind=in_person）的落点不得晚于卒/节点年；②任何落点不得早于生年；③登记的未来落点（planned）同样过窗口；④跨年卷的落点须标 year，否则只按「卷首年＞卒年」判失败、其余仅警告；⑤volume_years 与 chronology.md §一 卷表逐年比对。kind：in_person＝本人当场（默认）／document＝文书·名册·军报·抄件／reported＝他人口述·转述·尸首遗物（后两类＝L0 载体，死后可继续出现，不受窗口上限约束）。",
-  "book_last_chapter": 332,
-  "book_end_year": 779,
-  "last_two_vols": {
-    "from_chapter": 286,
-    "from_vol": 13,
-    "note": "末两卷（286—332）只做归来／再会／补席／退场，不做第一次出现（F32/F33 口径）"
+ "book": "天阙",
+ "updated": "2026-09-17",
+ "source": "decision-sheet.md §七（在世窗口表，T-D1 命运闭环台账）；卷→年映射与 chronology.md 同源",
+ "rule": "F35·在世窗口闭环（scripts/consistency-check.mjs）：①本人出场（kind=in_person）的落点不得晚于卒/节点年；②任何落点不得早于生年；③登记的未来落点（planned）同样过窗口；④跨年卷的落点须标 year，否则只按「卷首年＞卒年」判失败、其余仅警告；⑤volume_years 与 chronology.md §一 卷表逐年比对。kind：in_person＝本人当场（默认）／document＝文书·名册·军报·抄件／reported＝他人口述·转述·尸首遗物（后两类＝L0 载体，死后可继续出现，不受窗口上限约束）。",
+ "book_last_chapter": 332,
+ "book_end_year": 779,
+ "last_two_vols": {
+  "from_chapter": 286,
+  "from_vol": 13,
+  "note": "末两卷（286—332）只做归来／再会／补席／退场，不做第一次出现（F32/F33 口径）"
+ },
+ "volume_years": [
+  {
+   "vol": 1,
+   "chapters": "1-20",
+   "from": 755,
+   "to": 755,
+   "source": "chronology.md §一 卷表"
   },
-  "volume_years": [
-    {
-      "vol": 1,
-      "chapters": "1-20",
-      "from": 755,
-      "to": 755,
-      "source": "chronology.md §一 卷表"
-    },
-    {
-      "vol": 2,
-      "chapters": "21-44",
-      "from": 756,
-      "to": 757,
-      "source": "chronology.md §一 卷表"
-    },
-    {
-      "vol": 3,
-      "chapters": "45-68",
-      "from": 757,
-      "to": 757,
-      "source": "chronology.md §一 卷表"
-    },
-    {
-      "vol": 4,
-      "chapters": "69-92",
-      "from": 757,
-      "to": 760,
-      "source": "chronology.md §一 卷表（含借名者弧 759 末—760 冬）"
-    },
-    {
-      "vol": 5,
-      "chapters": "93-116",
-      "from": 759,
-      "to": 760,
-      "source": "chronology.md §一 卷表"
-    },
-    {
-      "vol": 6,
-      "chapters": "117-140",
-      "from": 760,
-      "to": 761,
-      "source": "chronology.md §一 卷表"
-    },
-    {
-      "vol": 7,
-      "chapters": "141-164",
-      "from": 762,
-      "to": 763,
-      "source": "chronology.md §一 卷表"
-    },
-    {
-      "vol": 8,
-      "chapters": "165-188",
-      "from": 763,
-      "to": 763,
-      "source": "chronology.md §一 卷表"
-    },
-    {
-      "vol": 9,
-      "chapters": "189-212",
-      "from": 764,
-      "to": 766,
-      "source": "chronology.md §一 卷表"
-    },
-    {
-      "vol": 10,
-      "chapters": "213-236",
-      "from": 766,
-      "to": 770,
-      "source": "chronology.md §一 卷表"
-    },
-    {
-      "vol": 11,
-      "chapters": "237-260",
-      "from": 770,
-      "to": 772,
-      "source": "chronology.md §一 卷表"
-    },
-    {
-      "vol": 12,
-      "chapters": "261-284",
-      "from": 773,
-      "to": 775,
-      "source": "outline-vol12.md 卷首“时间范围：773 年春—775 年冬”；chronology.md 三·附“773—775（十二）”"
-    },
-    {
-      "vol": 13,
-      "chapters": "285-308",
-      "from": 776,
-      "to": 778,
-      "source": "outline-vol12.md 卷首（卷十三＝ch285—308，776—778）；chronology.md 三·附“776—778（十三）”"
-    },
-    {
-      "vol": 14,
-      "chapters": "309-332",
-      "from": 779,
-      "to": 779,
-      "source": "outline-vol12.md 卷首（卷十四＝ch309—332，779）；chronology.md 三·附“779（十四）”"
-    }
-  ],
-  "chapter_year_overrides": {
-    "73": 757,
-    "167": 763,
-    "177": 763,
-    "178": 763,
-    "183": 763,
-    "186": 763,
-    "207": 765,
-    "211": 766,
-    "212": 766,
-    "219": 768,
-    "238": 770,
-    "240": 770,
-    "241": 770,
-    "242": 770,
-    "243": 770,
-    "244": 770,
-    "245": 770,
-    "246": 770,
-    "247": 770,
-    "248": 770,
-    "249": 770,
-    "250": 770,
-    "251": 770,
-    "252": 770,
-    "255": 771,
-    "257": 771,
-    "260": 772,
-    "261": 773,
-    "264": 773,
-    "267": 773,
-    "279": 775,
-    "283": 775,
-    "284": 775
+  {
+   "vol": 2,
+   "chapters": "21-44",
+   "from": 756,
+   "to": 757,
+   "source": "chronology.md §一 卷表"
   },
-  "people": [
+  {
+   "vol": 3,
+   "chapters": "45-68",
+   "from": 757,
+   "to": 757,
+   "source": "chronology.md §一 卷表"
+  },
+  {
+   "vol": 4,
+   "chapters": "69-92",
+   "from": 757,
+   "to": 760,
+   "source": "chronology.md §一 卷表（含借名者弧 759 末—760 冬）"
+  },
+  {
+   "vol": 5,
+   "chapters": "93-116",
+   "from": 759,
+   "to": 760,
+   "source": "chronology.md §一 卷表"
+  },
+  {
+   "vol": 6,
+   "chapters": "117-140",
+   "from": 760,
+   "to": 761,
+   "source": "chronology.md §一 卷表"
+  },
+  {
+   "vol": 7,
+   "chapters": "141-164",
+   "from": 762,
+   "to": 763,
+   "source": "chronology.md §一 卷表"
+  },
+  {
+   "vol": 8,
+   "chapters": "165-188",
+   "from": 763,
+   "to": 763,
+   "source": "chronology.md §一 卷表"
+  },
+  {
+   "vol": 9,
+   "chapters": "189-212",
+   "from": 764,
+   "to": 766,
+   "source": "chronology.md §一 卷表"
+  },
+  {
+   "vol": 10,
+   "chapters": "213-236",
+   "from": 766,
+   "to": 770,
+   "source": "chronology.md §一 卷表"
+  },
+  {
+   "vol": 11,
+   "chapters": "237-260",
+   "from": 770,
+   "to": 772,
+   "source": "chronology.md §一 卷表"
+  },
+  {
+   "vol": 12,
+   "chapters": "261-284",
+   "from": 773,
+   "to": 775,
+   "source": "outline-vol12.md 卷首“时间范围：773 年春—775 年冬”；chronology.md 三·附“773—775（十二）”"
+  },
+  {
+   "vol": 13,
+   "chapters": "285-308",
+   "from": 776,
+   "to": 778,
+   "source": "outline-vol12.md 卷首（卷十三＝ch285—308，776—778）；chronology.md 三·附“776—778（十三）”"
+  },
+  {
+   "vol": 14,
+   "chapters": "309-332",
+   "from": 779,
+   "to": 779,
+   "source": "outline-vol12.md 卷首（卷十四＝ch309—332，779）；chronology.md 三·附“779（十四）”"
+  }
+ ],
+ "chapter_year_overrides": {
+  "73": 757,
+  "167": 763,
+  "177": 763,
+  "178": 763,
+  "183": 763,
+  "186": 763,
+  "207": 765,
+  "211": 766,
+  "212": 766,
+  "219": 768,
+  "238": 770,
+  "240": 770,
+  "241": 770,
+  "242": 770,
+  "243": 770,
+  "244": 770,
+  "245": 770,
+  "246": 770,
+  "247": 770,
+  "248": 770,
+  "249": 770,
+  "250": 770,
+  "251": 770,
+  "252": 770,
+  "255": 771,
+  "257": 771,
+  "260": 772,
+  "261": 773,
+  "264": 773,
+  "267": 773,
+  "279": 775,
+  "283": 775,
+  "284": 775
+ },
+ "people": [
+  {
+   "name": "守真真人",
+   "aliases": [
+    "守真"
+   ],
+   "birth_year": 700,
+   "death_year": null,
+   "node": "770 率弟子出山抗吐蕃、左肩中箭后闭关；779 交掌教遗训后退隐（T-A1 裁决，圆寂移至 779 之后）",
+   "status": "已落地",
+   "landed": [
     {
-      "name": "守真真人",
-      "aliases": [
-        "守真"
-      ],
-      "birth_year": 700,
-      "death_year": null,
-      "node": "770 率弟子出山抗吐蕃、左肩中箭后闭关；779 交掌教遗训后退隐（T-A1 裁决，圆寂移至 779 之后）",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 122,
-          "year": 760,
-          "note": "宗门入世一句话（卷六）——本人在场"
-        },
-        {
-          "chapter": 246,
-          "year": 770,
-          "kind": "reported",
-          "note": "ch246《撤民》短札：出山、左肩中箭、已闭关（本人不出场、不拔剑）"
-        }
-      ],
-      "planned": [
-        {
-          "chapter": 305,
-          "note": "卷十三《称量》——78 岁，与空明／苏映寒同场"
-        },
-        {
-          "chapter": 319,
-          "note": "卷十四《留席》——79 岁，退隐前交遗训"
-        }
-      ],
-      "notes": "窗口上限＝779（终卷）。旧口径 773 圆寂已作废，故卷十三／十四可写；不得写他圆寂于正文范围内。"
+     "chapter": 122,
+     "year": 760,
+     "note": "宗门入世一句话（卷六）——本人在场"
     },
     {
-      "name": "陆明远",
-      "birth_year": 720,
-      "death_year": 763,
-      "node": "758 叛出宗门（改口述）；763 战死河北、临终托剑回太白",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 183,
-          "year": 763,
-          "kind": "document",
-          "note": "ch183《拔营》河北战报一笔＋剑归太白（✅ 2026-09-16）"
-        }
-      ],
-      "planned": [
-        {
-          "vol": 4,
-          "note": "758 叛出只作守真／重辉口述，不回改、不新增场面"
-        }
-      ],
-      "notes": "叛出（758）与战死（763）都在窗口内；不得让他为救长安作战（他在河北）。"
+     "chapter": 246,
+     "year": 770,
+     "kind": "reported",
+     "note": "ch246《撤民》短札：出山、左肩中箭、已闭关（本人不出场、不拔剑）"
     },
     {
-      "name": "萧若水",
-      "birth_year": 736,
-      "death_year": 763,
-      "node": "763 战死嘉山（“太白剑宗，不退！”）",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 183,
-          "year": 763,
-          "kind": "document",
-          "note": "与陆明远同一战报；喊话全书只许一次"
-        }
-      ],
-      "planned": [],
-      "notes": "窗口上限＝763。"
-    },
-    {
-      "name": "净远",
-      "birth_year": 695,
-      "death_year": 763,
-      "node": "756 率二十武僧下山、757 参战；763 夏战死河北",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 186,
-          "year": 763,
-          "kind": "document",
-          "note": "ch186《划痕》军府辕门外落讣：弟子怀中名册首名（本人不出场）"
-        }
-      ],
-      "planned": [],
-      "notes": "窗口上限＝763；塔与碑留卷十三 ch299／ch328（那时写的是“塔”，不是他活着）。"
-    },
-    {
-      "name": "慧寂",
-      "birth_year": 670,
-      "death_year": 763,
-      "node": "763 圆寂；遗言“一生不杀一人，心里杀过千人”",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 186,
-          "year": 763,
-          "kind": "reported",
-          "note": "与净远同场，由弟子转述，本人不出场"
-        }
-      ],
-      "planned": [],
-      "notes": "窗口上限＝763。"
-    },
-    {
-      "name": "寒鸦",
-      "birth_year": null,
-      "death_year": 766,
-      "node": "766 刺杀顾琰失败，自杀（夜行司东卫）",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 211,
-          "year": 766,
-          "kind": "reported",
-          "note": "ch211《火盆》：驿亭淬药细针＋官道旁尸首＋东卫折纸印子（L0：只作遗物／尸体载体）"
-        }
-      ],
-      "planned": [],
-      "notes": "窗口上限＝766。按 L0 规则，766 之后不得再以活人在场或台词出现。"
-    },
-    {
-      "name": "席横",
-      "birth_year": 703,
-      "death_year": null,
-      "node": "766 双面身份被顾琰查出、丐帮分裂（本人不死，779 仍在）",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 3,
-          "note": "卷一在场（ch4—6／9／15 续现）"
-        },
-        {
-          "chapter": 212,
-          "year": 766,
-          "kind": "reported",
-          "note": "ch212《灰烬》顾琰转述分裂（本人不出场、不写帮派大会）"
-        }
-      ],
-      "planned": [
-        {
-          "chapter": 317,
-          "note": "卷十四《除名》——末两卷 ≤2 具名之第二位（与海天阔）"
-        }
-      ],
-      "notes": "窗口上限＝779（终卷）。"
-    },
-    {
-      "name": "杜陵娘",
-      "birth_year": 730,
-      "death_year": 763,
-      "node": "763 长安二次沦陷，酒宴毒杀吐蕃贵人后自尽（遗言“柳先生，长安的曲子，我唱完了”）",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 177,
-          "year": 763,
-          "kind": "reported",
-          "note": "ch177《破门》：墙外曲子→天亮口传＋那一行"
-        },
-        {
-          "chapter": 178,
-          "year": 763,
-          "kind": "document",
-          "note": "ch178《灯巷》：顾琰听后的半寸停顿（跨章回响）"
-        },
-        {
-          "chapter": 292,
-          "year": 776,
-          "kind": "document",
-          "note": "ch292《散伙》：线人册长安页『柳先生』三字入火（2026-09-17 落地）——L0 文书载体，纸上三字，不写人"
-        }
-      ],
-      "notes": "窗口上限＝763；『柳先生』不得登记为任何人的 aliases。ch292 为 L0 载体（纸上三字），死后按 F35③ 文书载体可续现。"
-    },
-    {
-      "name": "柳红",
-      "aliases": [
-        "红娘子"
-      ],
-      "birth_year": 715,
-      "death_year": null,
-      "node": "763 后将盐帮交弟子；779 安度晚年",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 167,
-          "year": 763,
-          "note": "ch167《名分》城东盐栈交棒（T-A7① 落地 2026-09-17）"
-        },
-        {
-          "chapter": 257,
-          "year": 771,
-          "note": "ch257 盐路一句（已交帮、停秤仍要问她）"
-        }
-      ],
-      "planned": [
-        {
-          "chapter": 294,
-          "note": "卷十三——本人场景首现（江南州府公堂出面保人）"
-        },
-        {
-          "chapter": 314,
-          "note": "卷十四《收网》——盐路归民漕，终局"
-        }
-      ],
-      "notes": "窗口上限＝779（终卷）。武力是“停”（停船／停工／停秤），不写单挑。"
-    },
-    {
-      "name": "薛青衣",
-      "birth_year": 727,
-      "death_year": 772,
-      "node": "772 围城战中为大部队撤退主动断后，战死；李承洲收尸“她是我的第一个兵”",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 260,
-          "year": 772,
-          "kind": "document",
-          "note": "ch260《北望》河东军报抄件一行＋角上小注（2026-09-17）"
-        }
-      ],
-      "planned": [],
-      "notes": "窗口上限＝772。不写围城现场、不写武斗；与谢沉璧冲突那句作传闻（传闻与军报分存）。"
-    },
-    {
-      "name": "拓跋赤德",
-      "birth_year": 715,
-      "death_year": 770,
-      "node": "770 侧翼断后战死（军令上只写“侧翼留守”）",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 245,
-          "year": 770,
-          "note": "ch245《侧令》"
-        },
-        {
-          "chapter": 246,
-          "year": 770,
-          "note": "ch246 民户撤出"
-        },
-        {
-          "chapter": 247,
-          "year": 770,
-          "note": "ch247"
-        },
-        {
-          "chapter": 248,
-          "year": 770,
-          "note": "ch248"
-        },
-        {
-          "chapter": 252,
-          "year": 770,
-          "kind": "reported",
-          "note": "ch252《断后》北门现场由阿史那口述（他本人已死于北门）"
-        },
-        {
-          "chapter": 256,
-          "kind": "document",
-          "note": "ch256 谢沉璧拒绝用他的名字去填那一行"
-        },
-        {
-          "chapter": 258,
-          "kind": "document",
-          "note": "ch258 木牌另一面的人"
-        },
-        {
-          "chapter": 260,
-          "kind": "document",
-          "note": "ch260 卷末回响"
-        }
-      ],
-      "planned": [],
-      "notes": "窗口上限＝770（不排期：他不是缺口）。死后只允许文书／口述载体。"
-    },
-    {
-      "name": "论莽热",
-      "birth_year": 710,
-      "death_year": 773,
-      "node": "773 吐蕃内乱中被政敌所杀；临终台词“可惜，我没能看到长安城破”不入正文",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 252,
-          "year": 770,
-          "kind": "document",
-          "note": "ch252《断后》陇右边报一行（770 西线交手）"
-        },
-        {
-          "chapter": 261,
-          "year": 773,
-          "kind": "document",
-          "note": "ch261《错籍》邸报末条（死讯；2026-09-17）"
-        }
-      ],
-      "planned": [],
-      "notes": "窗口上限＝773。不写他与李承洲同框、不写追忆专场；卷十三／十四不得出现（除文书回引）。"
-    },
-    {
-      "name": "崔正言",
-      "birth_year": 693,
-      "death_year": 779,
-      "node": "775 因直言进谏被贬为外郡司马；779 病逝于贬所",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 279,
-          "year": 775,
-          "kind": "document",
-          "note": "ch279《作保》京中抄报一条（本人不出场、无当场台词；2026-09-17）"
-        }
-      ],
-      "planned": [
-        {
-          "vol": 14,
-          "note": "779 贬所死讯——只作一笔讣闻（T-B1），不给台词、不写场面"
-        }
-      ],
-      "notes": "窗口上限＝779。贬（775）与卒（779）都写在窗口内；卷十二 773 之前不得出现。"
-    },
-    {
-      "name": "高元礼",
-      "birth_year": 697,
-      "death_year": 779,
-      "node": "779 德宗即位后被清洗（内侍省最后一道手）",
-      "status": "部分落地",
-      "landed": [
-        {
-          "chapter": 244,
-          "year": 770,
-          "note": "ch244 名录从内侍省出，最后一道手是他"
-        }
-      ],
-      "planned": [
-        {
-          "chapter": 293,
-          "note": "卷十三"
-        },
-        {
-          "chapter": 309,
-          "note": "卷十四《新帝》——被清洗"
-        }
-      ],
-      "notes": "窗口上限＝779（不许写成 779 之后仍掌权）。"
-    },
-    {
-      "name": "颜真卿",
-      "birth_year": 708,
-      "death_year": 785,
-      "node": "785 遇害（越界，不在正文范围）",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 73,
-          "year": 757,
-          "kind": "document",
-          "note": "ch73《空营》其名被引、人不出场（T-A4）"
-        }
-      ],
-      "planned": [
-        {
-          "chapter": 318,
-          "note": "卷十四《废榜》旁观席——只留一笔字，不给台词"
-        }
-      ],
-      "notes": "卒年 785 越出正文（779 收束），机械口径按 min(785, 779)=779 计。不得写他 779 之后仍在场。"
-    },
-    {
-      "name": "药罗葛·骨力裴罗",
-      "aliases": [
-        "骨力裴罗"
-      ],
-      "birth_year": 727,
-      "death_year": 779,
-      "node": "779 被部下所杀（史）",
-      "status": "部分落地",
-      "landed": [
-        {
-          "chapter": 152,
-          "year": 761,
-          "kind": "document",
-          "note": "ch152 中书省匣子里的三行价（只写债；本人不出场）"
-        }
-      ],
-      "planned": [
-        {
-          "chapter": 309,
-          "note": "卷十四《新帝》边报"
-        },
-        {
-          "chapter": 326,
-          "note": "卷十四《散册》残响"
-        }
-      ],
-      "notes": "窗口上限＝779；不得让他死在 779 之前。"
-    },
-    {
-      "name": "阿史那朵",
-      "birth_year": 731,
-      "death_year": null,
-      "node": "档案无卒（回纥鹰扬郡主）",
-      "status": "部分落地",
-      "landed": [
-        {
-          "chapter": 167,
-          "year": 763,
-          "kind": "reported",
-          "note": "ch167 崔玉真一句：李承洲与回纥鹰扬郡主的旧约"
-        }
-      ],
-      "planned": [
-        {
-          "chapter": 310,
-          "note": "卷十四"
-        },
-        {
-          "chapter": 311,
-          "note": "卷十四《交权》"
-        }
-      ],
-      "notes": "窗口上限＝779（终卷）。"
-    },
-    {
-      "name": "延光公主",
-      "birth_year": 737,
-      "death_year": null,
-      "node": "779 出家为尼",
-      "status": "部分落地",
-      "landed": [
-        {
-          "chapter": 255,
-          "year": 771,
-          "kind": "reported",
-          "note": "ch255 虞凤池口述苏妄之笛的来历（本人不出场）"
-        }
-      ],
-      "planned": [
-        {
-          "chapter": 309,
-          "note": "卷十四《新帝》首现（旧朝的活体残余）"
-        },
-        {
-          "chapter": 332,
-          "note": "卷十四《天明》——779 出家"
-        }
-      ],
-      "notes": "窗口上限＝779；779 之后不得再写她在朝。"
-    },
-    {
-      "name": "康莫梨",
-      "birth_year": 723,
-      "death_year": null,
-      "node": "档案无卒（九姓胡商·军火）",
-      "status": "部分落地",
-      "landed": [
-        {
-          "chapter": 257,
-          "year": 771,
-          "kind": "reported",
-          "note": "ch257 铁与硝走胡商车队，管这两样的是九姓胡商康莫梨"
-        }
-      ],
-      "planned": [
-        {
-          "chapter": 314,
-          "note": "卷十四《收网》——盐路归民漕的对手面"
-        }
-      ],
-      "notes": "窗口上限＝779（终卷）。只写货与账，不写成武力对抗。"
-    },
-    {
-      "name": "韦知言",
-      "birth_year": 720,
-      "death_year": null,
-      "node": "档案无卒（黑水盟文书）",
-      "status": "部分落地",
-      "landed": [
-        {
-          "chapter": 240,
-          "year": 770,
-          "note": "ch240 谢景船篷里记账的手"
-        },
-        {
-          "chapter": 289,
-          "year": 776,
-          "kind": "in_person",
-          "note": "ch289《传檄》合账页脚编号誊册人＋台词一句“落在我这页的，都经得起念”——只写把不能见光的货写进能见光的册子的本事，不替崔玉真判（2026-09-17 落地）"
-        }
-      ],
-      "planned": [
-        {
-          "chapter": 326,
-          "note": "卷十四《散册》"
-        }
-      ],
-      "notes": "窗口上限＝779（终卷）。与谢景同场只作誊录，不代替谢景做决定。"
-    },
-    {
-      "name": "公孙兰",
-      "birth_year": 733,
-      "death_year": null,
-      "node": "档案无卒（公孙大娘关门弟子）",
-      "status": "部分落地",
-      "landed": [
-        {
-          "chapter": 23,
-          "year": 756,
-          "note": "ch23 一场“剑器舞”"
-        }
-      ],
-      "planned": [
-        {
-          "chapter": 327,
-          "note": "卷十四《织机》"
-        },
-        {
-          "chapter": 332,
-          "note": "卷十四《天明》——一次不武的出场（舞，不是打）"
-        }
-      ],
-      "notes": "窗口上限＝779（终卷）。禁写成战斗。"
-    },
-    {
-      "name": "公输野",
-      "birth_year": 697,
-      "death_year": null,
-      "node": "779 将天工装置交给沈广农（墨门终局：封存，拒再入军械）",
-      "status": "部分落地",
-      "landed": [
-        {
-          "chapter": 242,
-          "year": 770,
-          "note": "ch242《断粮》墨门活人（公输衍／陈铁同场）"
-        }
-      ],
-      "planned": [
-        {
-          "chapter": 325,
-          "note": "卷十四《烧简》——封存由他执行"
-        }
-      ],
-      "notes": "窗口上限＝779；封存动作必须由墨门完成，不得由沈代办。"
-    },
-    {
-      "name": "明慧",
-      "birth_year": 717,
-      "death_year": null,
-      "node": "770 救伤兵与宁红叶结识（石梁寺带发修行）",
-      "status": "部分落地",
-      "landed": [
-        {
-          "chapter": 250,
-          "year": 770,
-          "note": "ch250 石梁寺药账线"
-        }
-      ],
-      "planned": [
-        {
-          "chapter": 299,
-          "note": "卷十三《托孤》"
-        },
-        {
-          "chapter": 328,
-          "note": "卷十四《晨钟》"
-        }
-      ],
-      "notes": "窗口上限＝779（终卷）。"
-    },
-    {
-      "name": "玄同散人",
-      "birth_year": 690,
-      "death_year": null,
-      "node": "770 出山（青城派掌门）",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 219,
-          "year": 768,
-          "note": "ch219“江湖上的人不进这本”"
-        }
-      ],
-      "planned": [
-        {
-          "vol": 14,
-          "note": "ch317 只作“另有二派来函”（89 岁，高龄宗师不动手）"
-        }
-      ],
-      "notes": "窗口上限＝779（终卷）；高龄不动手是配额，不是窗口问题。"
-    },
-    {
-      "name": "杨明道",
-      "birth_year": 685,
-      "death_year": null,
-      "node": "隐世（崆峒派掌门）",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 219,
-          "year": 768,
-          "note": "ch219 与玄同散人同场（只作来函口径）"
-        }
-      ],
-      "planned": [
-        {
-          "vol": 14,
-          "note": "ch317 只作“另有二派来函”（94 岁）"
-        }
-      ],
-      "notes": "窗口上限＝779（终卷）。"
-    },
-    {
-      "name": "海天阔",
-      "birth_year": 707,
-      "death_year": null,
-      "node": "档案无卒（海沙帮／钱）",
-      "status": "部分落地",
-      "landed": [
-        {
-          "chapter": 267,
-          "year": 773,
-          "kind": "reported",
-          "note": "ch267 水线老人一句：买水口位置，出的是现钱"
-        }
-      ],
-      "planned": [
-        {
-          "chapter": 317,
-          "note": "卷十四《除名》——末两卷 ≤2 具名之第一位"
-        },
-        {
-          "chapter": 326,
-          "note": "卷十四《散册》"
-        }
-      ],
-      "notes": "窗口上限＝779（终卷）。"
-    },
-    {
-      "name": "李忠臣",
-      "birth_year": 716,
-      "death_year": 784,
-      "node": "784 赐死（越界，不写）",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 283,
-          "year": 775,
-          "kind": "document",
-          "note": "ch283 军报一行：请增本道兵额，中书省未批"
-        }
-      ],
-      "planned": [
-        {
-          "chapter": 293,
-          "note": "卷十三"
-        }
-      ],
-      "notes": "卒年 784 越界，机械按 min(784, 779)=779 计；779 之前不得写他失势与被赐死。"
-    },
-    {
-      "name": "张孝忠",
-      "birth_year": 730,
-      "death_year": 791,
-      "node": "791 卒（越界）",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 76,
-          "note": "卷四"
-        },
-        {
-          "chapter": 77,
-          "note": "卷四"
-        },
-        {
-          "chapter": 106,
-          "note": "卷五"
-        },
-        {
-          "chapter": 109,
-          "note": "卷五"
-        },
-        {
-          "chapter": 110,
-          "note": "卷五"
-        }
-      ],
-      "planned": [
-        {
-          "chapter": 293,
-          "note": "卷十三"
-        },
-        {
-          "chapter": 295,
-          "note": "卷十三《旧部》"
-        }
-      ],
-      "notes": "卒年 791 越界，机械按 779 计。"
-    },
-    {
-      "name": "半面",
-      "birth_year": 715,
-      "death_year": null,
-      "node": "档案无卒（长安黑市掮客）",
-      "status": "已落地",
-      "landed_range": {
-        "first": 2,
-        "last": 243,
-        "count": 23,
-        "note": "卷一随行副手→卷二—卷十一市井通道（末现 ch243）"
-      },
-      "planned": [
-        {
-          "chapter": 330,
-          "note": "卷十四《旧账》——归市"
-        }
-      ],
-      "notes": "生年已补（715）。窗口上限＝779（终卷）。只作通道与价格，不作义士。",
-      "landed": [
-        {
-          "chapter": 287,
-          "year": 776,
-          "kind": "in_person",
-          "note": "ch287《押解》驿站外茶棚：卖“按榜押解”三道承办行情（议价、验过所、州界为止）——只作通道与价格，不作义士；末现 ch243 空窗清零（2026-09-17 落地）"
-        }
-      ]
-    },
-    {
-      "name": "慧恶",
-      "aliases": [
-        "食骨僧"
-      ],
-      "birth_year": 700,
-      "death_year": 773,
-      "node": "773 在长安自尽（临终语“你说慈悲不是罪？那我师父为什么死了？”）",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 251,
-          "year": 770,
-          "kind": "reported",
-          "note": "ch251 石梁寺山门口知客带话（本人不进门）"
-        },
-        {
-          "chapter": 264,
-          "year": 773,
-          "kind": "reported",
-          "note": "ch264《分药》宁红叶转述死讯（2026-09-17；不写长安现场、不写他与沈交手）"
-        }
-      ],
-      "planned": [],
-      "notes": "窗口上限＝773。⚠ 软点：档案“被沈广农击败后自尽”的前半句未落正文（773 主线在江南／开封），待裁。"
-    },
-    {
-      "name": "方七",
-      "birth_year": null,
-      "death_year": null,
-      "node": "779 沈广农成为天阙者后主动消失（有人说他去了漠北）",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 207,
-          "year": 765,
-          "kind": "reported",
-          "note": "ch207 山道上一句：接单最狠的那一个叫方七（含嘉仓钩子）"
-        },
-        {
-          "chapter": 284,
-          "year": 775,
-          "kind": "document",
-          "note": "ch284《下一榜》白衣楼旧单裁角列名（2026-09-17）"
-        }
-      ],
-      "planned": [
-        {
-          "vol": 14,
-          "note": "779 消失——只作他去向的一句口传／一页旧单，不写他会面"
-        }
-      ],
-      "notes": "窗口上限＝779（终卷）。案在含嘉仓（回收 ch317 韩魁线）；末两卷不做首次具名（F34②）。"
-    },
-    {
-      "name": "朱烈",
-      "birth_year": 713,
-      "death_year": 770,
-      "node": "770 吐蕃前线阵亡；李承洲亲自收尸",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 241,
-          "year": 770,
-          "note": "ch241 军府场"
-        },
-        {
-          "chapter": 243,
-          "year": 770,
-          "note": "ch243 军府场"
-        },
-        {
-          "chapter": 244,
-          "year": 770,
-          "note": "ch244 军府场"
-        },
-        {
-          "chapter": 249,
-          "year": 770,
-          "kind": "document",
-          "note": "ch249《强征》阵殁名录一行“收尸人：本部主将”（2026-09-17 回改）"
-        }
-      ],
-      "planned": [],
-      "notes": "窗口上限＝770；770 之后不得再以本人出场（收尸已落册面）。"
-    },
-    {
-      "name": "铁面",
-      "birth_year": null,
-      "death_year": 770,
-      "node": "770 战死于吐蕃前线（夜行司西卫）",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 238,
-          "year": 770,
-          "note": "ch238《拟名》首现（重甲，≤2 句台词）"
-        },
-        {
-          "chapter": 249,
-          "year": 770,
-          "kind": "document",
-          "note": "ch249 同册阵殁：连“无籍”三个字都没有"
-        }
-      ],
-      "planned": [],
-      "notes": "窗口上限＝770。四卫不列境界年龄；770 之后不得再以活人正面出场。"
-    },
-    {
-      "name": "无影",
-      "birth_year": null,
-      "death_year": null,
-      "node": "779 消失，去向不明（夜行司南卫）",
-      "status": "部分落地",
-      "landed": [
-        {
-          "chapter": 238,
-          "year": 770,
-          "kind": "document",
-          "note": "ch238《拟名》沈广农查档旧例：四卫经手外信各有折法——东卫十字痕、铁面不用纸、北卫只剩朱补批注；唯南卫档里只有诨号、查无手迹（L0·档案载体先行痕迹，2026-09-17 落地）"
-        }
-      ],
-      "planned": [
-        {
-          "chapter": 309,
-          "note": "ch309《新帝》冯延暗场内：夜行司四卫名录残页——南卫一栏人名纸整条被裁走、裁口新（L0·档案载体；承接寒鸦211/铁面249/北卫185空缺；779 消失的正典确认节拍，开写后回填 landed）"
-        }
-      ],
-      "notes": "L0 设定性零出场：只允许档案／名册／口述载体。双轨：先行痕迹 ch238（770 查档旧例，档案里没有手迹的人）＋正典消失 ch309（779 名录残页裁口）——两处补注已分别落 outline-vol11 §8.1 与 outline-vol14 §五。"
-    },
-    {
-      "name": "血手",
-      "birth_year": null,
-      "death_year": null,
-      "node": "763 被沈广农击败后隐退（夜行司北卫）",
-      "status": "已落地",
-      "landed": [
-        {
-          "chapter": 185,
-          "year": 763,
-          "kind": "document",
-          "note": "ch185《对簿》：清洗令协办名录抄件一行——北卫一栏空着，朱笔补注“其人自退，不补”（L0·文书载体，2026-09-17 回改）"
-        }
-      ],
-      "planned": [],
-      "notes": "L0：只以载体出现；763 隐退已落 ch185 协办名录小注（李承洲视角，不见本人、不写交手）。窗口上限＝779（终卷）。"
+     "chapter": 305,
+     "year": 778,
+     "kind": "in_person",
+     "note": "ch305《称量》巩县船坞更楼：下山看公孙白最后一面（偕苏映寒；掌教口径＝来看，不是收编）"
     }
-  ]
+   ],
+   "planned": [
+    {
+     "chapter": 319,
+     "note": "卷十四《留席》——79 岁，退隐前交遗训"
+    }
+   ],
+   "notes": "窗口上限＝779（终卷）。旧口径 773 圆寂已作废，故卷十三／十四可写；不得写他圆寂于正文范围内。 2026-09-18：ch305 已落地（场景首现），planned 只留 ch319。"
+  },
+  {
+   "name": "陆明远",
+   "birth_year": 720,
+   "death_year": 763,
+   "node": "758 叛出宗门（改口述）；763 战死河北、临终托剑回太白",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 183,
+     "year": 763,
+     "kind": "document",
+     "note": "ch183《拔营》河北战报一笔＋剑归太白（✅ 2026-09-16）"
+    }
+   ],
+   "planned": [
+    {
+     "vol": 4,
+     "note": "758 叛出只作守真／重辉口述，不回改、不新增场面"
+    }
+   ],
+   "notes": "叛出（758）与战死（763）都在窗口内；不得让他为救长安作战（他在河北）。"
+  },
+  {
+   "name": "萧若水",
+   "birth_year": 736,
+   "death_year": 763,
+   "node": "763 战死嘉山（“太白剑宗，不退！”）",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 183,
+     "year": 763,
+     "kind": "document",
+     "note": "与陆明远同一战报；喊话全书只许一次"
+    }
+   ],
+   "planned": [],
+   "notes": "窗口上限＝763。"
+  },
+  {
+   "name": "净远",
+   "birth_year": 695,
+   "death_year": 763,
+   "node": "756 率二十武僧下山、757 参战；763 夏战死河北",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 186,
+     "year": 763,
+     "kind": "document",
+     "note": "ch186《划痕》军府辕门外落讣：弟子怀中名册首名（本人不出场）"
+    }
+   ],
+   "planned": [],
+   "notes": "窗口上限＝763；塔与碑留卷十三 ch299／ch328（那时写的是“塔”，不是他活着）。"
+  },
+  {
+   "name": "慧寂",
+   "birth_year": 670,
+   "death_year": 763,
+   "node": "763 圆寂；遗言“一生不杀一人，心里杀过千人”",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 186,
+     "year": 763,
+     "kind": "reported",
+     "note": "与净远同场，由弟子转述，本人不出场"
+    }
+   ],
+   "planned": [],
+   "notes": "窗口上限＝763。"
+  },
+  {
+   "name": "寒鸦",
+   "birth_year": null,
+   "death_year": 766,
+   "node": "766 刺杀顾琰失败，自杀（夜行司东卫）",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 211,
+     "year": 766,
+     "kind": "reported",
+     "note": "ch211《火盆》：驿亭淬药细针＋官道旁尸首＋东卫折纸印子（L0：只作遗物／尸体载体）"
+    }
+   ],
+   "planned": [],
+   "notes": "窗口上限＝766。按 L0 规则，766 之后不得再以活人在场或台词出现。"
+  },
+  {
+   "name": "席横",
+   "birth_year": 703,
+   "death_year": null,
+   "node": "766 双面身份被顾琰查出、丐帮分裂（本人不死，779 仍在）",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 3,
+     "note": "卷一在场（ch4—6／9／15 续现）"
+    },
+    {
+     "chapter": 212,
+     "year": 766,
+     "kind": "reported",
+     "note": "ch212《灰烬》顾琰转述分裂（本人不出场、不写帮派大会）"
+    }
+   ],
+   "planned": [
+    {
+     "chapter": 317,
+     "note": "卷十四《除名》——末两卷 ≤2 具名之第二位（与海天阔）"
+    }
+   ],
+   "notes": "窗口上限＝779（终卷）。"
+  },
+  {
+   "name": "杜陵娘",
+   "birth_year": 730,
+   "death_year": 763,
+   "node": "763 长安二次沦陷，酒宴毒杀吐蕃贵人后自尽（遗言“柳先生，长安的曲子，我唱完了”）",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 177,
+     "year": 763,
+     "kind": "reported",
+     "note": "ch177《破门》：墙外曲子→天亮口传＋那一行"
+    },
+    {
+     "chapter": 178,
+     "year": 763,
+     "kind": "document",
+     "note": "ch178《灯巷》：顾琰听后的半寸停顿（跨章回响）"
+    },
+    {
+     "chapter": 292,
+     "year": 776,
+     "kind": "document",
+     "note": "ch292《散伙》：线人册长安页『柳先生』三字入火（2026-09-17 落地）——L0 文书载体，纸上三字，不写人"
+    }
+   ],
+   "notes": "窗口上限＝763；『柳先生』不得登记为任何人的 aliases。ch292 为 L0 载体（纸上三字），死后按 F35③ 文书载体可续现。"
+  },
+  {
+   "name": "柳红",
+   "aliases": [
+    "红娘子"
+   ],
+   "birth_year": 715,
+   "death_year": null,
+   "node": "763 后将盐帮交弟子；779 安度晚年",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 167,
+     "year": 763,
+     "note": "ch167《名分》城东盐栈交棒（T-A7① 落地 2026-09-17）"
+    },
+    {
+     "chapter": 257,
+     "year": 771,
+     "note": "ch257 盐路一句（已交帮、停秤仍要问她）"
+    },
+    {
+     "chapter": 294,
+     "year": 777,
+     "kind": "in_person",
+     "note": "ch294《连坐》公堂外杏树下保人：二十七户酱菜盐引、秤杆换手、对桑葚说要替名册背一趟江南水路（2026-09-17 落地）——本人场景首现"
+    }
+   ],
+   "planned": [
+    {
+     "chapter": 314,
+     "note": "卷十四《收网》——盐路归民漕，终局"
+    }
+   ],
+   "notes": "窗口上限＝779（终卷）。武力是“停”（停船／停工／停秤），不写单挑。"
+  },
+  {
+   "name": "薛青衣",
+   "birth_year": 727,
+   "death_year": 772,
+   "node": "772 围城战中为大部队撤退主动断后，战死；李承洲收尸“她是我的第一个兵”",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 260,
+     "year": 772,
+     "kind": "document",
+     "note": "ch260《北望》河东军报抄件一行＋角上小注（2026-09-17）"
+    }
+   ],
+   "planned": [],
+   "notes": "窗口上限＝772。不写围城现场、不写武斗；与谢沉璧冲突那句作传闻（传闻与军报分存）。"
+  },
+  {
+   "name": "拓跋赤德",
+   "birth_year": 715,
+   "death_year": 770,
+   "node": "770 侧翼断后战死（军令上只写“侧翼留守”）",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 245,
+     "year": 770,
+     "note": "ch245《侧令》"
+    },
+    {
+     "chapter": 246,
+     "year": 770,
+     "note": "ch246 民户撤出"
+    },
+    {
+     "chapter": 247,
+     "year": 770,
+     "note": "ch247"
+    },
+    {
+     "chapter": 248,
+     "year": 770,
+     "note": "ch248"
+    },
+    {
+     "chapter": 252,
+     "year": 770,
+     "kind": "reported",
+     "note": "ch252《断后》北门现场由阿史那口述（他本人已死于北门）"
+    },
+    {
+     "chapter": 256,
+     "kind": "document",
+     "note": "ch256 谢沉璧拒绝用他的名字去填那一行"
+    },
+    {
+     "chapter": 258,
+     "kind": "document",
+     "note": "ch258 木牌另一面的人"
+    },
+    {
+     "chapter": 260,
+     "kind": "document",
+     "note": "ch260 卷末回响"
+    }
+   ],
+   "planned": [],
+   "notes": "窗口上限＝770（不排期：他不是缺口）。死后只允许文书／口述载体。"
+  },
+  {
+   "name": "论莽热",
+   "birth_year": 710,
+   "death_year": 773,
+   "node": "773 吐蕃内乱中被政敌所杀；临终台词“可惜，我没能看到长安城破”不入正文",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 252,
+     "year": 770,
+     "kind": "document",
+     "note": "ch252《断后》陇右边报一行（770 西线交手）"
+    },
+    {
+     "chapter": 261,
+     "year": 773,
+     "kind": "document",
+     "note": "ch261《错籍》邸报末条（死讯；2026-09-17）"
+    }
+   ],
+   "planned": [],
+   "notes": "窗口上限＝773。不写他与李承洲同框、不写追忆专场；卷十三／十四不得出现（除文书回引）。"
+  },
+  {
+   "name": "崔正言",
+   "birth_year": 693,
+   "death_year": 779,
+   "node": "775 因直言进谏被贬为外郡司马；779 病逝于贬所",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 279,
+     "year": 775,
+     "kind": "document",
+     "note": "ch279《作保》京中抄报一条（本人不出场、无当场台词；2026-09-17）"
+    }
+   ],
+   "planned": [
+    {
+     "vol": 14,
+     "note": "779 贬所死讯——只作一笔讣闻（T-B1），不给台词、不写场面"
+    }
+   ],
+   "notes": "窗口上限＝779。贬（775）与卒（779）都写在窗口内；卷十二 773 之前不得出现。"
+  },
+  {
+   "name": "高元礼",
+   "birth_year": 697,
+   "death_year": 779,
+   "node": "779 德宗即位后被清洗（内侍省最后一道手）",
+   "status": "部分落地（293 已落，留 309）",
+   "landed": [
+    {
+     "chapter": 244,
+     "year": 770,
+     "note": "ch244 名录从内侍省出，最后一道手是他"
+    },
+    {
+     "chapter": 293,
+     "year": 777,
+     "kind": "document",
+     "note": "ch293 抄家·内侍省文书最后一道手"
+    }
+   ],
+   "planned": [
+    {
+     "chapter": 309,
+     "note": "卷十四《新帝》——被清洗"
+    }
+   ],
+   "notes": "窗口上限＝779（不许写成 779 之后仍掌权）。"
+  },
+  {
+   "name": "颜真卿",
+   "birth_year": 708,
+   "death_year": 785,
+   "node": "785 遇害（越界，不在正文范围）",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 73,
+     "year": 757,
+     "kind": "document",
+     "note": "ch73《空营》其名被引、人不出场（T-A4）"
+    }
+   ],
+   "planned": [
+    {
+     "chapter": 318,
+     "note": "卷十四《废榜》旁观席——只留一笔字，不给台词"
+    }
+   ],
+   "notes": "卒年 785 越出正文（779 收束），机械口径按 min(785, 779)=779 计。不得写他 779 之后仍在场。"
+  },
+  {
+   "name": "药罗葛·骨力裴罗",
+   "aliases": [
+    "骨力裴罗"
+   ],
+   "birth_year": 727,
+   "death_year": 779,
+   "node": "779 被部下所杀（史）",
+   "status": "部分落地",
+   "landed": [
+    {
+     "chapter": 152,
+     "year": 761,
+     "kind": "document",
+     "note": "ch152 中书省匣子里的三行价（只写债；本人不出场）"
+    }
+   ],
+   "planned": [
+    {
+     "chapter": 309,
+     "note": "卷十四《新帝》边报"
+    },
+    {
+     "chapter": 326,
+     "note": "卷十四《散册》残响"
+    }
+   ],
+   "notes": "窗口上限＝779；不得让他死在 779 之前。"
+  },
+  {
+   "name": "阿史那朵",
+   "birth_year": 731,
+   "death_year": null,
+   "node": "档案无卒（回纥鹰扬郡主）",
+   "status": "部分落地",
+   "landed": [
+    {
+     "chapter": 167,
+     "year": 763,
+     "kind": "reported",
+     "note": "ch167 崔玉真一句：李承洲与回纥鹰扬郡主的旧约"
+    }
+   ],
+   "planned": [
+    {
+     "chapter": 310,
+     "note": "卷十四"
+    },
+    {
+     "chapter": 311,
+     "note": "卷十四《交权》"
+    }
+   ],
+   "notes": "窗口上限＝779（终卷）。"
+  },
+  {
+   "name": "延光公主",
+   "birth_year": 737,
+   "death_year": null,
+   "node": "779 出家为尼",
+   "status": "部分落地",
+   "landed": [
+    {
+     "chapter": 255,
+     "year": 771,
+     "kind": "reported",
+     "note": "ch255 虞凤池口述苏妄之笛的来历（本人不出场）"
+    }
+   ],
+   "planned": [
+    {
+     "chapter": 309,
+     "note": "卷十四《新帝》首现（旧朝的活体残余）"
+    },
+    {
+     "chapter": 332,
+     "note": "卷十四《天明》——779 出家"
+    }
+   ],
+   "notes": "窗口上限＝779；779 之后不得再写她在朝。"
+  },
+  {
+   "name": "康莫梨",
+   "birth_year": 723,
+   "death_year": null,
+   "node": "档案无卒（九姓胡商·军火）",
+   "status": "部分落地",
+   "landed": [
+    {
+     "chapter": 257,
+     "year": 771,
+     "kind": "reported",
+     "note": "ch257 铁与硝走胡商车队，管这两样的是九姓胡商康莫梨"
+    }
+   ],
+   "planned": [
+    {
+     "chapter": 314,
+     "note": "卷十四《收网》——盐路归民漕的对手面"
+    }
+   ],
+   "notes": "窗口上限＝779（终卷）。只写货与账，不写成武力对抗。"
+  },
+  {
+   "name": "韦知言",
+   "birth_year": 720,
+   "death_year": null,
+   "node": "档案无卒（黑水盟文书）",
+   "status": "部分落地",
+   "landed": [
+    {
+     "chapter": 240,
+     "year": 770,
+     "note": "ch240 谢景船篷里记账的手"
+    },
+    {
+     "chapter": 289,
+     "year": 776,
+     "kind": "in_person",
+     "note": "ch289《传檄》合账页脚编号誊册人＋台词一句“落在我这页的，都经得起念”——只写把不能见光的货写进能见光的册子的本事，不替崔玉真判（2026-09-17 落地）"
+    }
+   ],
+   "planned": [
+    {
+     "chapter": 326,
+     "note": "卷十四《散册》"
+    }
+   ],
+   "notes": "窗口上限＝779（终卷）。与谢景同场只作誊录，不代替谢景做决定。"
+  },
+  {
+   "name": "公孙兰",
+   "birth_year": 733,
+   "death_year": null,
+   "node": "档案无卒（公孙大娘关门弟子）",
+   "status": "部分落地",
+   "landed": [
+    {
+     "chapter": 23,
+     "year": 756,
+     "note": "ch23 一场“剑器舞”"
+    }
+   ],
+   "planned": [
+    {
+     "chapter": 327,
+     "note": "卷十四《织机》"
+    },
+    {
+     "chapter": 332,
+     "note": "卷十四《天明》——一次不武的出场（舞，不是打）"
+    }
+   ],
+   "notes": "窗口上限＝779（终卷）。禁写成战斗。"
+  },
+  {
+   "name": "公输野",
+   "birth_year": 697,
+   "death_year": null,
+   "node": "779 将天工装置交给沈广农（墨门终局：封存，拒再入军械）",
+   "status": "部分落地",
+   "landed": [
+    {
+     "chapter": 242,
+     "year": 770,
+     "note": "ch242《断粮》墨门活人（公输衍／陈铁同场）"
+    }
+   ],
+   "planned": [
+    {
+     "chapter": 325,
+     "note": "卷十四《烧简》——封存由他执行"
+    }
+   ],
+   "notes": "窗口上限＝779；封存动作必须由墨门完成，不得由沈代办。"
+  },
+  {
+   "name": "明慧",
+   "birth_year": 717,
+   "death_year": null,
+   "node": "770 救伤兵与宁红叶结识（石梁寺带发修行）",
+   "status": "部分落地（299 已落，留 328）",
+   "landed": [
+    {
+     "chapter": 250,
+     "year": 770,
+     "note": "ch250 石梁寺药账线"
+    },
+    {
+     "chapter": 299,
+     "year": 777,
+     "kind": "in_person",
+     "note": "ch299 托孤·药箱抬到船边（一句台词）"
+    }
+   ],
+   "planned": [
+    {
+     "chapter": 328,
+     "note": "卷十四《晨钟》"
+    }
+   ],
+   "notes": "窗口上限＝779（终卷）。"
+  },
+  {
+   "name": "玄同散人",
+   "birth_year": 690,
+   "death_year": null,
+   "node": "770 出山（青城派掌门）",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 219,
+     "year": 768,
+     "note": "ch219“江湖上的人不进这本”"
+    }
+   ],
+   "planned": [
+    {
+     "vol": 14,
+     "note": "ch317 只作“另有二派来函”（89 岁，高龄宗师不动手）"
+    }
+   ],
+   "notes": "窗口上限＝779（终卷）；高龄不动手是配额，不是窗口问题。"
+  },
+  {
+   "name": "杨明道",
+   "birth_year": 685,
+   "death_year": null,
+   "node": "隐世（崆峒派掌门）",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 219,
+     "year": 768,
+     "note": "ch219 与玄同散人同场（只作来函口径）"
+    }
+   ],
+   "planned": [
+    {
+     "vol": 14,
+     "note": "ch317 只作“另有二派来函”（94 岁）"
+    }
+   ],
+   "notes": "窗口上限＝779（终卷）。"
+  },
+  {
+   "name": "海天阔",
+   "birth_year": 707,
+   "death_year": null,
+   "node": "档案无卒（海沙帮／钱）",
+   "status": "部分落地",
+   "landed": [
+    {
+     "chapter": 267,
+     "year": 773,
+     "kind": "reported",
+     "note": "ch267 水线老人一句：买水口位置，出的是现钱"
+    }
+   ],
+   "planned": [
+    {
+     "chapter": 317,
+     "note": "卷十四《除名》——末两卷 ≤2 具名之第一位"
+    },
+    {
+     "chapter": 326,
+     "note": "卷十四《散册》"
+    }
+   ],
+   "notes": "窗口上限＝779（终卷）。"
+  },
+  {
+   "name": "李忠臣",
+   "birth_year": 716,
+   "death_year": 784,
+   "node": "784 赐死（越界，不写）",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 283,
+     "year": 775,
+     "kind": "document",
+     "note": "ch283 军报一行：请增本道兵额，中书省未批"
+    },
+    {
+     "chapter": 293,
+     "year": 777,
+     "kind": "document",
+     "note": "ch293 抄家·淮西兵额留中一行"
+    }
+   ],
+   "planned": [],
+   "notes": "卒年 784 越界，机械按 min(784, 779)=779 计；779 之前不得写他失势与被赐死。"
+  },
+  {
+   "name": "张孝忠",
+   "birth_year": 730,
+   "death_year": 791,
+   "node": "791 卒（越界）",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 76,
+     "note": "卷四"
+    },
+    {
+     "chapter": 77,
+     "note": "卷四"
+    },
+    {
+     "chapter": 106,
+     "note": "卷五"
+    },
+    {
+     "chapter": 109,
+     "note": "卷五"
+    },
+    {
+     "chapter": 110,
+     "note": "卷五"
+    },
+    {
+     "chapter": 293,
+     "year": 777,
+     "kind": "document",
+     "note": "ch293 抄家·河北按榜调防一行"
+    },
+    {
+     "chapter": 295,
+     "year": 777,
+     "kind": "document",
+     "note": "ch295 旧部·归乡过所验讫印旁另纸抄样"
+    }
+   ],
+   "planned": [],
+   "notes": "卒年 791 越界，机械按 779 计。"
+  },
+  {
+   "name": "半面",
+   "birth_year": 715,
+   "death_year": null,
+   "node": "档案无卒（长安黑市掮客）",
+   "status": "已落地",
+   "landed_range": {
+    "first": 2,
+    "last": 243,
+    "count": 23,
+    "note": "卷一随行副手→卷二—卷十一市井通道（末现 ch243）"
+   },
+   "planned": [
+    {
+     "chapter": 330,
+     "note": "卷十四《旧账》——归市"
+    }
+   ],
+   "notes": "生年已补（715）。窗口上限＝779（终卷）。只作通道与价格，不作义士。",
+   "landed": [
+    {
+     "chapter": 287,
+     "year": 776,
+     "kind": "in_person",
+     "note": "ch287《押解》驿站外茶棚：卖“按榜押解”三道承办行情（议价、验过所、州界为止）——只作通道与价格，不作义士；末现 ch243 空窗清零（2026-09-17 落地）"
+    }
+   ]
+  },
+  {
+   "name": "慧恶",
+   "aliases": [
+    "食骨僧"
+   ],
+   "birth_year": 700,
+   "death_year": 773,
+   "node": "773 在长安自尽（临终语“你说慈悲不是罪？那我师父为什么死了？”）",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 251,
+     "year": 770,
+     "kind": "reported",
+     "note": "ch251 石梁寺山门口知客带话（本人不进门）"
+    },
+    {
+     "chapter": 264,
+     "year": 773,
+     "kind": "reported",
+     "note": "ch264《分药》宁红叶转述死讯（2026-09-17；不写长安现场、不写他与沈交手）"
+    }
+   ],
+   "planned": [],
+   "notes": "窗口上限＝773。⚠ 软点：档案“被沈广农击败后自尽”的前半句未落正文（773 主线在江南／开封），待裁。"
+  },
+  {
+   "name": "方七",
+   "birth_year": null,
+   "death_year": null,
+   "node": "779 沈广农成为天阙者后主动消失（有人说他去了漠北）",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 207,
+     "year": 765,
+     "kind": "reported",
+     "note": "ch207 山道上一句：接单最狠的那一个叫方七（含嘉仓钩子）"
+    },
+    {
+     "chapter": 284,
+     "year": 775,
+     "kind": "document",
+     "note": "ch284《下一榜》白衣楼旧单裁角列名（2026-09-17）"
+    }
+   ],
+   "planned": [
+    {
+     "vol": 14,
+     "note": "779 消失——只作他去向的一句口传／一页旧单，不写他会面"
+    }
+   ],
+   "notes": "窗口上限＝779（终卷）。案在含嘉仓（回收 ch317 韩魁线）；末两卷不做首次具名（F34②）。"
+  },
+  {
+   "name": "朱烈",
+   "birth_year": 713,
+   "death_year": 770,
+   "node": "770 吐蕃前线阵亡；李承洲亲自收尸",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 241,
+     "year": 770,
+     "note": "ch241 军府场"
+    },
+    {
+     "chapter": 243,
+     "year": 770,
+     "note": "ch243 军府场"
+    },
+    {
+     "chapter": 244,
+     "year": 770,
+     "note": "ch244 军府场"
+    },
+    {
+     "chapter": 249,
+     "year": 770,
+     "kind": "document",
+     "note": "ch249《强征》阵殁名录一行“收尸人：本部主将”（2026-09-17 回改）"
+    }
+   ],
+   "planned": [],
+   "notes": "窗口上限＝770；770 之后不得再以本人出场（收尸已落册面）。"
+  },
+  {
+   "name": "铁面",
+   "birth_year": null,
+   "death_year": 770,
+   "node": "770 战死于吐蕃前线（夜行司西卫）",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 238,
+     "year": 770,
+     "note": "ch238《拟名》首现（重甲，≤2 句台词）"
+    },
+    {
+     "chapter": 249,
+     "year": 770,
+     "kind": "document",
+     "note": "ch249 同册阵殁：连“无籍”三个字都没有"
+    }
+   ],
+   "planned": [],
+   "notes": "窗口上限＝770。四卫不列境界年龄；770 之后不得再以活人正面出场。"
+  },
+  {
+   "name": "无影",
+   "birth_year": null,
+   "death_year": null,
+   "node": "779 消失，去向不明（夜行司南卫）",
+   "status": "部分落地",
+   "landed": [
+    {
+     "chapter": 238,
+     "year": 770,
+     "kind": "document",
+     "note": "ch238《拟名》沈广农查档旧例：四卫经手外信各有折法——东卫十字痕、铁面不用纸、北卫只剩朱补批注；唯南卫档里只有诨号、查无手迹（L0·档案载体先行痕迹，2026-09-17 落地）"
+    }
+   ],
+   "planned": [
+    {
+     "chapter": 309,
+     "note": "ch309《新帝》冯延暗场内：夜行司四卫名录残页——南卫一栏人名纸整条被裁走、裁口新（L0·档案载体；承接寒鸦211/铁面249/北卫185空缺；779 消失的正典确认节拍，开写后回填 landed）"
+    }
+   ],
+   "notes": "L0 设定性零出场：只允许档案／名册／口述载体。双轨：先行痕迹 ch238（770 查档旧例，档案里没有手迹的人）＋正典消失 ch309（779 名录残页裁口）——两处补注已分别落 outline-vol11 §8.1 与 outline-vol14 §五。"
+  },
+  {
+   "name": "血手",
+   "birth_year": null,
+   "death_year": null,
+   "node": "763 被沈广农击败后隐退（夜行司北卫）",
+   "status": "已落地",
+   "landed": [
+    {
+     "chapter": 185,
+     "year": 763,
+     "kind": "document",
+     "note": "ch185《对簿》：清洗令协办名录抄件一行——北卫一栏空着，朱笔补注“其人自退，不补”（L0·文书载体，2026-09-17 回改）"
+    }
+   ],
+   "planned": [],
+   "notes": "L0：只以载体出现；763 隐退已落 ch185 协办名录小注（李承洲视角，不见本人、不写交手）。窗口上限＝779（终卷）。"
+  }
+ ]
 }

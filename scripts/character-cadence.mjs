@@ -121,6 +121,49 @@ const gapViolations = rows.filter((r) => r.maxGap != null && r.maxGap >= MAX_GAP
 const tailViolations = rows.filter((r) => r.tailGap != null && r.tailGap >= TAIL).sort((a, b) => b.tailGap - a.tailGap);
 const zero = rows.filter((r) => r.chapters === 0);
 
+// ---- 棘轮基线（T-F4：闸门只紧不松）----
+// 存量违规记入 state/cadence-baseline.json；此后：新出现违规、或某人空窗/断线比基线更长，都判失败。
+// 用法：npm run cadence:save 一次性把当前违规面写进基线；npm run cadence:check（verify 内置）做闸门。
+const SAVE_BASE = argv.includes('--save-baseline');
+const BASE_PATH = path.join(stateDir, 'cadence-baseline.json');
+const gapMap = Object.fromEntries(gapViolations.map((r) => [r.name, r.maxGap]));
+const tailMap = Object.fromEntries(tailViolations.map((r) => [r.name, r.tailGap]));
+if (SAVE_BASE) {
+  const base = {
+    _note: 'cadence 棘轮基线（同 F27「只紧不松」）：记录存量违规；新违规或空窗/断线变长都会被 --fail-on-violation 拦下。修好一处就重跑 --save-baseline 刷新。',
+    savedAt: new Date().toISOString().slice(0, 10),
+    maxGap: MAX_GAP,
+    tail: TAIL,
+    gaps: gapMap,
+    tails: tailMap,
+  };
+  fs.writeFileSync(BASE_PATH, JSON.stringify(base, null, 1) + '\n');
+  console.log(`\n✓ 基线已写入 ${BASE_PATH}（空窗 ${Object.keys(gapMap).length} 人／断线 ${Object.keys(tailMap).length} 人）`);
+}
+const newViolations = [];
+if (FAIL) {
+  let base = null;
+  try { base = JSON.parse(fs.readFileSync(BASE_PATH, 'utf8')); } catch { base = null; }
+  const hasBase = !!(base && base.gaps && base.tails);
+  for (const r of gapViolations) {
+    const prev = hasBase ? base.gaps[r.name] : undefined;
+    if (prev === undefined) newViolations.push(`空窗·新违规：${r.name}（maxGap ${r.maxGap}${hasBase ? '，基线无记录' : '，无基线'}）`);
+    else if (r.maxGap > prev) newViolations.push(`空窗·恶化：${r.name}（${prev} → ${r.maxGap}）`);
+  }
+  for (const r of tailViolations) {
+    const prev = hasBase ? base.tails[r.name] : undefined;
+    if (prev === undefined) newViolations.push(`断线·新违规：${r.name}（tailGap ${r.tailGap}${hasBase ? '，基线无记录' : '，无基线'}）`);
+    else if (r.tailGap > prev) newViolations.push(`断线·恶化：${r.name}（${prev} → ${r.tailGap}）`);
+  }
+  if (newViolations.length) {
+    console.log(`\n✗ cadence 闸门（棘轮只紧不松）：${newViolations.length} 处违规`);
+    for (const s of newViolations) console.log('  - ' + s);
+    console.log('  处置：存量既成事实→ npm run cadence:save 刷新基线；新稿违规→ 补落点或登记豁免。');
+  } else {
+    console.log('\n✓ cadence 闸门通过：无新增违规，存量均在基线内（棘轮只紧不松）。');
+  }
+}
+
 if (AS_JSON) {
   console.log(JSON.stringify({ book: BOOK, maxChapter: MAXN, maxGap: MAX_GAP, tail: TAIL, rows, gapViolations, tailViolations }, null, 2));
 } else {
@@ -141,4 +184,4 @@ if (AS_JSON) {
   console.log('\n说明：本工具只报告、不改稿；空窗＝同一人物相邻两次具名出现之间的章数差。');
 }
 
-if (FAIL && (gapViolations.length || tailViolations.length)) process.exit(1);
+if (FAIL && newViolations.length) process.exit(1);

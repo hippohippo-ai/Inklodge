@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-18T04:54:59.055Z",
+  "generatedAt": "2026-09-22T04:15:09.600Z",
   "repeatMin": 3,
   "repeatLen": 8,
   "books": {
@@ -684,7 +684,7 @@
           "src": "outline-vol10.md",
           "f26": true,
           "chapters": 24,
-          "chars": 98472,
+          "chars": 98471,
           "mean": 4103,
           "minChars": 4002,
           "maxChars": 4365,
@@ -871,18 +871,18 @@
           "src": "outline-vol13.md",
           "f26": false,
           "chapters": 24,
-          "chars": 98922,
-          "mean": 4121.8,
+          "chars": 99291,
+          "mean": 4137.1,
           "minChars": 4011,
           "maxChars": 4504,
           "underFloor": 0,
           "overCeil": 0,
           "exemptN": 23,
           "overExempt": 0,
-          "paraN": 1425,
-          "paraMean": 69.4,
+          "paraN": 1429,
+          "paraMean": 69.5,
           "paraLt20": 29,
-          "narN": 895,
+          "narN": 899,
           "narMean": 94,
           "narLt20": 13,
           "quoteN": 530,
@@ -890,10 +890,10 @@
           "quoteLt20": 55,
           "quoteShare": 37,
           "negation": 43,
-          "negationPer10k": 4.35,
+          "negationPer10k": 4.33,
           "negationPerChapter": 1.79,
           "dupHits": 6,
-          "dupPer10k": 0.61,
+          "dupPer10k": 0.6,
           "topDup": [
             [
               "李承洲没有立刻答",
@@ -938,6 +938,64 @@
           "close": 967
         },
         {
+          "label": "卷14",
+          "vol": 14,
+          "from": 309,
+          "to": 332,
+          "range": "ch309—332",
+          "src": "outline-vol14.md",
+          "f26": false,
+          "chapters": 24,
+          "chars": 99636,
+          "mean": 4151.5,
+          "minChars": 4000,
+          "maxChars": 4907,
+          "underFloor": 0,
+          "overCeil": 0,
+          "exemptN": 24,
+          "overExempt": 0,
+          "paraN": 2538,
+          "paraMean": 39.3,
+          "paraLt20": 53,
+          "narN": 1388,
+          "narMean": 62.2,
+          "narLt20": 22,
+          "quoteN": 1150,
+          "quoteMean": 11.6,
+          "quoteLt20": 91,
+          "quoteShare": 45,
+          "negation": 43,
+          "negationPer10k": 4.32,
+          "negationPerChapter": 1.79,
+          "dupHits": 0,
+          "dupPer10k": 0,
+          "topDup": [],
+          "ticHits": null,
+          "ticPer10k": 3.91,
+          "topTics": [
+            [
+              "本来",
+              14
+            ],
+            [
+              "至少",
+              11
+            ],
+            [
+              "并不",
+              8
+            ],
+            [
+              "反而",
+              4
+            ]
+          ],
+          "halfwidth": 0,
+          "unpaired": 0,
+          "open": 1942,
+          "close": 1942
+        },
+        {
           "label": "全卷",
           "vol": null,
           "from": 1,
@@ -945,30 +1003,30 @@
           "range": "ch1—99",
           "src": "全书",
           "f26": null,
-          "chapters": 308,
-          "chars": 1314000,
-          "mean": 4266.2,
+          "chapters": 332,
+          "chars": 1414004,
+          "mean": 4259,
           "minChars": 4000,
           "maxChars": 5576,
           "underFloor": 0,
           "overCeil": 9,
-          "exemptN": 74,
+          "exemptN": 98,
           "overExempt": 0,
-          "paraN": 29500,
-          "paraMean": 44.5,
-          "paraLt20": 41,
-          "narN": 15790,
-          "narMean": 63.3,
-          "narLt20": 18,
-          "quoteN": 13710,
-          "quoteMean": 23,
-          "quoteLt20": 67,
+          "paraN": 32042,
+          "paraMean": 44.1,
+          "paraLt20": 42,
+          "narN": 17182,
+          "narMean": 63.2,
+          "narLt20": 19,
+          "quoteN": 14860,
+          "quoteMean": 22.1,
+          "quoteLt20": 69,
           "quoteShare": 46,
-          "negation": 1001,
-          "negationPer10k": 7.62,
-          "negationPerChapter": 3.25,
+          "negation": 1044,
+          "negationPer10k": 7.38,
+          "negationPerChapter": 3.14,
           "dupHits": 134,
-          "dupPer10k": 1.02,
+          "dupPer10k": 0.95,
           "topDup": [
             [
               "沈广农没有立刻答",
@@ -992,29 +1050,29 @@
             ]
           ],
           "ticHits": null,
-          "ticPer10k": 2.52,
+          "ticPer10k": 2.62,
           "topTics": [
             [
               "至少",
-              100
+              111
             ],
             [
               "本来",
-              92
+              106
             ],
             [
               "反而",
-              60
+              64
             ],
             [
-              "其实",
-              32
+              "并不",
+              34
             ]
           ],
           "halfwidth": 0,
           "unpaired": 0,
-          "open": 24066,
-          "close": 24066
+          "open": 26008,
+          "close": 26008
         }
       ]
     }

@@ -1,6 +1,6 @@
 {
  "book": "天阙",
- "updated": "2026-09-16",
+ "updated": "2026-09-22",
  "rule": "F30·状态启用时刻（dedup-check.py）。① first_appearance：早于该章出现『姓名或 aliases 之一』即判失败（退出码 1）；② first_appearance 为 null = 台账声明『截至最新章尚未登场』，正文一旦出现即判失败（须先更新本表再写）；③ first_speech：早于该章出现台词归属（排除『对／向／跟…X说』这类『别人对 X 说』）即判失败；④ first_named 与 first_solo 为人工字段，机械不校验（写作用），其中 first_solo = 首次不经指派、自己决定并影响情节的一件事，无此类场合则留 null 并在 notes 说明。测量方法：姓名在 novel/chapter-*.md 全文检索（含 aliases），台词按『“…”X说』与『X说：“…”』两类归属句，排除旁述误报。改本表须同时核对 chapter-log.md 与 characters.md 对应条目。",
  "characters": [
   {

@@ -91,6 +91,19 @@ npm run verify                                   # 再顺带跑各书 state/dedu
 
 镜像（`public/novels/`）由 `npm run build` 的 prebuild（`node scripts/sync.mjs`）生成，**不要手改镜像文件**；正文唯一可编辑源是 `books/<书名>/novel/` 与 `books/<书名>/state/`。
 
+### 文笔探针（只出清单，判在人在）
+
+逐章精校用的家族探针本体在**每本书自己的** `state/summary-camera-scan.py`（卷界、寄存器、已裁台账都是书内数据），跑法：
+
+```bash
+npm run scan                 # 家族按卷汇总（A 枚举清单／B 段尾判语／C 长段无落点／D 解释腔）
+npm run scan -- --vol 13     # 单卷明细
+npm run scan:d               # 家族 D（解释腔）报告：按卷待裁可清单，并写回 state/d-family-report.md
+npm run scan:d -- --no-write # 只上屏，不盖写报告
+```
+
+两条纪律：①**探针不进 verify、不判失败、不进 git 钩子**——它一天里被迫补过三次寄存器，每次都让「最平的章」换人，判定权必须在人；②家族 D 的**已裁事项登记在探针的 `D_LEDGER`**（章号＋家族＋锚点＋判定），已裁不重复受理；台账按锚点而非段号匹配，**锚点消失＝该处已消除**。报告文件是生成物，勿手改（下次复跑盖写）。
+
 ### F23 跨章物件持有链（台账 `state/custody-chains.json`）
 
 同一件物证（木牌、民夫名单、簿外页、抄页、三册、出库单副联……）在**相邻几次出现的章节间**交接与分拆是否自洽，原先只能靠人工抽读；现在由一致脚本机械校验：

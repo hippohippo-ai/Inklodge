@@ -10,6 +10,8 @@
 //   npm run scan:d                     # 家族 D 报告：按卷待裁可清单 + 写 state/d-family-report.md
 //   npm run scan -- --vol 13           # 单卷明细
 //   npm run scan:d -- --no-write       # 只看终端，不盖写报告
+//   npm run scan:old                   # 家族 G「旧稿形态」（F24a 盲区补位）
+//   npm run scan:e                     # 家族 E「人称／归属／在场」（E1／E2 仅线索，E3 可靠）
 //   npm run scan -- --book 天阙 294     # 指定书／单章（多书时）
 //
 // 纪律（与 state/prose-polish-plan.md §八 同源）：探针**不进 verify、不判失败、不进钩子**，

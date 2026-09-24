@@ -78,7 +78,7 @@ ch90 的「救三笔／卖三笔」先归纳后整段复述、ch258 的「事实
   python state/summary-camera-scan.py d --no-write   # 同上，不写 md
 只报告、不改稿。
 """
-import sys, os, re, glob
+import sys, os, re, glob, json
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 BOOK = os.path.dirname(HERE)
@@ -266,6 +266,15 @@ def fam_c(p):
     return None
 
 
+# ==== G 家族·「旧稿形态」扫描（2026-09-24）====
+# ★ 命名变更（2026-09-24，同一日）：本家族原名「E」，后因作者要求把第五家族留给
+#   「人称错乱／台词归属／在场性断裂」（见下方 E 家族），此处改为 **G 家族**。
+#   G1／G2／G3 的旧名是 E1／E2／E3——chapter-log／plan §九／final-check 的旧条目已同步改称。
+# 口径：G1 精确重复（标点剥离后章内非重叠 ≥G1W 字窗口）／G2 编年提要块／G3 改写式复述（沿用 D3）。
+G1W = 16
+PUNCT_G = re.compile("[，。：；！？“”、—…《》（）\"'’‘·,.!?:;()\\[\\]\\n\\r]")
+CHRON_RE = re.compile("头一批|第一批|第二批|第三批|这一旬|文书上写|当堂|当庭|按等第|逐张|逐一|逐个|前三日|头三日|头两日|后三日|半数|另有一份")
+TJ_RE = re.compile("次日|翌日|第二日|第三日|第四日|此后|后来|随后|半月|一个月后|年末|岁末|开春|入冬|冬初|腊月里|当晚|数日后|几日后|同日|过了一个月|第二年|这一年")
 FAMS = (("A", fam_a), ("B", fam_b), ("C", fam_c), ("D1", fam_d1))
 
 VOLS = [(1, 1, 20), (2, 21, 44), (3, 45, 68), (4, 69, 92), (5, 93, 116),
@@ -414,8 +423,65 @@ D_LEDGER = [
 ]
 
 
+# ==== D3 改写式复述逐对人眼裁决（2026-09-24）====
+# 与 D_LEDGER 分开：D1/D2 是判定清单，D3 只出人眼线索。两条纪律相同：
+# ①按锚点匹配（段号会随归治／重写漂移）；②裁决一旦登记即不重复受理。
+# kind=有意回证 → 保留，note 写清「为什么是有意的」；kind=真复述 → 进报告 §二之三 处置清单。
+# ★ 人眼版保护名录：[state/foreshadowing.md] §「全书回证地图（D3 裁决·有意回证 12 处）」
+#   那里的 12 行＝本表 kind=有意回证 的 12 项。**新增有意回证先登本表（机器可核），再回填那节**，
+#   不反向操作——否则两边会漂移，改稿时按哪一份都可能误删。
+D3_LEDGER = [
+    # —— 有意回证（保留）12 对 ——
+    {"ch": 79, "tag": "D3", "anchor": "你追了段九二十年", "kind": "有意回证",
+     "note": "段85 是明写的回忆（「他想起出门前那句话」），引语回响，非重讲"},
+    {"ch": 82, "tag": "D3", "anchor": "只能给一句话", "kind": "有意回证",
+     "note": "老妇第二次讲述信息递进：从「有人问起」到「有人拿钱来听」——正是皮手套男人那两吊钱"},
+    {"ch": 83, "tag": "D3", "anchor": "不想再见死在路上的妇孺", "kind": "有意回证",
+     "note": "沈广农引宁红叶昨夜的立场并接过来（「我也不想再见」），是人物转向的支点"},
+    {"ch": 84, "tag": "D3", "anchor": "韦敬之说的是实话", "kind": "有意回证",
+     "note": "谢沉璧把韦敬之的警告再放一次给李承洲听，为下一句「把柄握在谁手里」铺垫"},
+    {"ch": 89, "tag": "D3", "anchor": "映着那车药材", "kind": "有意回证",
+     "note": "庙中「火—药材—册子」章内反照：段74 置景、段107 收束，同一夜的框"},
+    {"ch": 92, "tag": "D3", "anchor": "殁于征发之前", "kind": "有意回证",
+     "note": "告示首尾书挡：开头全文，章末只留核销一句"},
+    {"ch": 92, "tag": "D3", "anchor": "一直延伸到看不见的地方", "kind": "有意回证",
+     "note": "章末回环：段117 镜头切走，段125 告示反转后脚印重新往北"},
+    {"ch": 100, "tag": "D3", "anchor": "追到盐路的尽头", "kind": "有意回证",
+     "note": "崔玉真的追盐策由沈广农转述给船队（转述落点，必须再过一遍嘴）"},
+    {"ch": 121, "tag": "D3", "anchor": "三种记法", "kind": "有意回证",
+     "note": "同一情报向两处重述：段39 对领粮的弟弟，段88 对船主本人；错把同一听者当成重复会误删"},
+    {"ch": 193, "tag": "D3", "anchor": "扬州州府烧了大半", "kind": "有意回证",
+     "note": "老库吏两处提及扬州旧档（段1 初问、段28 临别追问），两处问题不同，属旁证口径"},
+    {"ch": 205, "tag": "D3", "anchor": "你娘死后", "kind": "有意回证",
+     "note": "递进揭示：先说暗桩查不到，后说裴弘度取走——同一件事的第二层"},
+    {"ch": 205, "tag": "D3", "anchor": "他娘病重的时候", "kind": "有意回证",
+     "note": "「一句话／另一句话」平行对照（怕人被找到／算账像外公），两段记忆各承一层主题"},
+    # —— 真复述（处置清单，见报告 §二之三）8 对 ——
+    {"ch": 100, "tag": "D3", "anchor": "静得能听见", "kind": "真复述",
+     "note": "同场二次置景（樟木桌＋河水静）两次，段47 可只留「谁也不让」"},
+    {"ch": 154, "tag": "D3", "anchor": "搁到左边那摞", "kind": "真复述",
+     "note": "同一动作六段内原句重复两次，段15 应改词（动作仍在，字面不重）"},
+    {"ch": 185, "tag": "D3", "anchor": "指腹按在那些名字上", "kind": "真复述",
+     "note": "同章收束动作近逐字两遍（0.62）：段46 与段62 只该留一处"},
+    {"ch": 95, "tag": "D3", "anchor": "扬州也有药铺", "kind": "真复述",
+     "note": "同一医药安排章内两度陈述（段23／段61，且段61 还复述了段25 的「慢慢走」）"},
+    {"ch": 322, "tag": "D3", "anchor": "判断哪条山路安全", "kind": "真复述",
+     "note": "提要段（段25）× 实拍段（段31）同一事两遍；删提要段会跌破 4,000 字"},
+    {"ch": 322, "tag": "D3", "anchor": "已砸裂", "kind": "真复述",
+     "note": "提要段（段26）× 实拍段（段32）同一事两遍；同上"},
+    {"ch": 323, "tag": "D3", "anchor": "途中受潮", "kind": "真复述",
+     "note": "提要段（段23）× 实拍段（段29）同一事两遍；同上"},
+    {"ch": 323, "tag": "D3", "anchor": "不需要他的印章才成立", "kind": "真复述",
+     "note": "提要段（段27）× 实拍段（段38）同一事两遍；同上"},
+]
+
+
+# 全书台账（D1/D2 判定 + D3 人眼裁决）；锚点匹配查这一份
+ALL_LEDGER = D_LEDGER + D3_LEDGER
+
+
 def ledger_lookup(ch, tag, texts):
-    for e in D_LEDGER:
+    for e in ALL_LEDGER:
         if e["ch"] == ch and e["tag"] == tag \
                 and any(e["anchor"] in t for t in texts):
             return e
@@ -475,7 +541,12 @@ def collect_d(with_d3=True):
         d3 = []
         if with_d3:
             for i, j, r in paraphrase_pairs(paras):
-                d3.append((i, j, r))
+                it = {"tag": "D3", "para": i, "para2": j, "ratio": r,
+                      "texts": [paras[i], paras[j]]}
+                e = ledger_lookup(n, "D3", it["texts"])
+                it["verdict"] = e["kind"] if e else "▢人眼读"
+                it["action"] = e["note"] if e else ""
+                d3.append(it)
         if items or d3:
             rows[n] = (items, d3)
     return rows
@@ -491,13 +562,26 @@ def main_d(write=True):
             plain.append((n, it))
     hit_anchors = set()
     alltext = {}
-    for n in set([n for n, _ in plain]):
+    # 台账「仍存在／已消除」的判法（2026-09-24 定，防回头路）：
+    #   ① D1／D2 条目：看**探针还抓不抓得到**——抓不到＝已消除。比字符串可靠：
+    #      ch229／ch315／ch321 的修正只删了重复段或重了全章，段首原句仍在新文里，
+    #      用「锚点文字还在不在」会把已改的报成未改（v5.1 踩过这个坑）。
+    #   ② D3 条目：同样看**探针还抓不抓得到**这组段对——改掉一半（相似度降到 0.50 以下）
+    #      即算已消除；若拿「锚点文字在不在正文」核，删了重的那半边也不算消除（会误报）。
+    # 全章正文只建有候选的章＋台账涉及的章（全 332 章没必要）。
+    for n in sorted(set(list(rows) + [e["ch"] for e in ALL_LEDGER])):
         alltext[n] = "".join(nows(p) for p in
                              paragraphs(open(os.path.join(BOOK, "novel", f"chapter-{n}.md"),
                                              encoding="utf-8").read()))
-    for e in D_LEDGER:
-        if e["anchor"] in alltext.get(e["ch"], ""):
-            hit_anchors.add(id(e))
+    cand_hit = set()
+    for n, (items, d3) in rows.items():
+        for it in items + d3:
+            e = ledger_lookup(n, it["tag"], it["texts"])
+            if e is not None:
+                cand_hit.add(id(e))
+    # 保留锚点文字比对作辅助：某条台账的锚点已完全不在正文＝该处已被改写（不作为判定依据）
+    text_hit = {id(e) for e in ALL_LEDGER if e["anchor"] in alltext.get(e["ch"], "")}
+    hit_anchors = cand_hit
     # 按卷汇总（D1/D2 进判定清单；D3 单列人眼线索）
     per_vol = {}
     d3_vol = {}
@@ -507,12 +591,17 @@ def main_d(write=True):
         for n in sorted(rows):
             if a <= n <= b:
                 items_all += [(n, it) for it in rows[n][0]]
-                for i, j, r in rows[n][1]:
-                    d3_all.append((n, i, j, r))
+                for it in rows[n][1]:
+                    d3_all.append(dict(it, ch=n))
         per_vol[v] = items_all
         d3_vol[v] = d3_all
     todo = [(v, n, it) for v in per_vol for n, it in per_vol[v]
             if it["verdict"].startswith("▢")]
+    d3_all_pairs = [it for v in d3_vol for it in d3_vol[v]]
+    d3_todo = [it for it in d3_all_pairs if it["verdict"].startswith("▢")]
+    d3_yes = [it for it in d3_all_pairs if it["verdict"] == "有意回证"]
+    d3_rep = [it for it in d3_all_pairs if it["verdict"] == "真复述"]
+    d3_gone = [e for e in D3_LEDGER if id(e) not in hit_anchors]
 
     def key(x):
         return (x[0], x[1]["para"])
@@ -529,13 +618,16 @@ def main_d(write=True):
               f"（其中已消除 {len(led_gone)}）｜ D3 人眼线索 {len(d3_vol[v])}")
         for e in led:
             print(f"  ✓ ch{e['ch']} {e['tag']} {e['verdict']}" +
-                  ("（锚点已消失）" if id(e) not in hit_anchors else ""))
+                  ("（已消除）" if id(e) not in hit_anchors else ""))
         for n, it in td:
             print(f"  ch{n:<4} 段{it['para']:<4} [{it['tag']}] {it['ev']}")
         if not td:
             print("  ✓ 无待裁可项")
-        for n, i, j, r in d3_vol[v][:6]:
-            print(f"  ch{n:<4} 段{i:<4} [D3] 段{i} × 段{j}（{r:.2f}，人眼读）")
+        for it in d3_vol[v][:6]:
+            mark = "✓" if it["verdict"] == "有意回证" else (
+                "⚠" if it["verdict"] == "真复述" else "▢")
+            print(f"  ch{it['ch']:<4} 段{it['para']:<4} [D3] 段{it['para']} × 段{it['para2']}"
+                  f"（{it['ratio']:.2f}）{mark} {it['verdict']}")
         if len(d3_vol[v]) > 6:
             print(f"  …（另 {len(d3_vol[v]) - 6} 对 D3 线索略，见报告文件）")
     gone = [e for e in D_LEDGER if id(e) not in hit_anchors]
@@ -543,8 +635,12 @@ def main_d(write=True):
           f"（其中锚点已消失＝已消除 {len(gone)} 项）")
     for e in gone:
         print(f"  ch{e['ch']} [{e['tag']}] 已消除：{e['action'][:28]}…")
-    tot_d3 = sum(len(d3_vol[v]) for v in d3_vol)
-    print(f"D3 改写式复述线索全书 {tot_d3} 对（参考，不入判定清单）。")
+    print(f"\nD3 改写式复述全书 {len(d3_all_pairs)} 对：有意回证 {len(d3_yes)} ／ 真复述 {len(d3_rep)}"
+          f" ／ 待人眼读 {len(d3_todo)}；台账锚点已消失 {len(d3_gone)} 对。")
+    for it in d3_rep:
+        print(f"  ⚠ ch{it['ch']} 段{it['para']} × 段{it['para2']}：{it['action']}")
+    for e in d3_gone:
+        print(f"  ✓ ch{e['ch']} D3 已消除：{e['anchor']}")
     print("纪律：候选≠违规；D3 假阳率高（章末回证／双人拉扯）只作人眼线索；"
           "探针不进 verify、不判失败（见 state/prose-polish-plan.md §八）。")
 
@@ -559,7 +655,7 @@ def main_d(write=True):
     L.append("# 家族 D（解释腔）待处置清单")
     L.append("")
     L.append(f"**生成**：{today}（可复跑：`npm run scan:d`）｜ **范围**：全书 332 章 ｜ "
-             "**口径**：v5（D1 标记／D2 近逐字复述；D3 改写式复述仅参考）")
+             "**口径**：v5（D1 标记／D2 近逐字复述／D3 改写式复述——已全量人眼裁完，见 §二之二、§四之二）")
     L.append("")
     L.append("## 一、怎么读这张清单")
     L.append("")
@@ -567,9 +663,11 @@ def main_d(write=True):
     L.append("- 判定三档：**改**（连接词后接的是读者刚看过的东西的翻版）／**保留**"
              "（后接从实物推出的新信息、章末回证、假阳）／**人眼读**（D3）。")
     L.append("- **已裁不重复受理**：见 §四 台账；台账按「章号＋家族＋锚点」匹配（段号会随归治漂移）。"
-             "**锚点消失＝该处已消除**（改掉或整章重写）。")
+             "「已消除」的判法：D1／D2 看**探针还抓不抓得到**（抓不到＝已消除，比字符串可靠）；"
+             "D3 看锚点文字在不在正文。")
     L.append("- D2 的能力边界（已量清）：只看得见近逐字复述；**改写式复述只能人眼读**"
-             "——ch90 那种 12 段各说一遍的复述，containment 最高只有 0.33。")
+             "——ch90 那种 12 段各说一遍的复述，containment 最高只有 0.33。D3 就是拿 difflib "
+             "给这类复述补位的（已逐对读完：§二之二）。")
     L.append("")
     L.append("## 二、按卷待裁可清单（D1／D2）")
     L.append("")
@@ -596,42 +694,68 @@ def main_d(write=True):
             ev = nows(it["ev"]).replace("|", "／")
             L.append(f"| ch{n} | {it['para']} | {it['tag']} | {ev} | | ▢改 ▢保留 |")
         L.append("")
-    L.append("## 二之二、D3 改写式复述人眼线索（参考，不入判定清单）")
+    L.append("## 二之二、D3 改写式复述——全量逐对裁决（台账已录满）")
     L.append("")
     L.append("D2 只看得到近逐字复述；以下是用第三轮 difflib 口径（ratio ≥0.50、段 ≥35 字、"
              "隔 ≥5 段，且 4-gram containment <0.55）补位抓到的**改写式**复述。"
-             "假阳率高（章末回证、双人拉扯对峙都会被抓），只作人眼线索。")
+             "假阳率高（章末回证、双人拉扯对峙都会被抓），所以逐对人眼读完再定。")
+    L.append("")
+    L.append(f"**台账共 {len(D3_LEDGER)} 对，已全部读完**：当前探针仍报 {len(d3_all_pairs)} 对，"
+             f"其中有意回证 **{len(d3_yes)}**（保留）／真复述 **{len(d3_rep)}**（处置清单见 §二之三）；"
+             f"已消除 **{len(d3_gone)}** 对（改稿后相似度降到 0.50 以下，探针不再报，见 §四之二）；"
+             f"待人眼读 {len(d3_todo)} 对。")
     L.append("")
     for v, a, b in VOLS:
         if not d3_vol[v]:
             continue
         L.append(f"**卷{v}（{len(d3_vol[v])} 对）**")
         L.append("")
-        L.append("| 章 | 段对 | difflib | 段首 |")
-        L.append("|---|---|---|---|")
-        for n, i, j, r in d3_vol[v]:
-            ps = paragraphs(open(os.path.join(BOOK, "novel", f"chapter-{n}.md"),
+        L.append("| 章 | 段对 | difflib | 判定 | 依据／处置 |")
+        L.append("|---|---|---|---|---|")
+        for it in d3_vol[v]:
+            vd = {"有意回证": "✓ 有意回证", "真复述": "⚠ 真复述"}.get(
+                it["verdict"], "▢ 未读")
+            note = nows(it["action"]).replace("|", "／")
+            L.append(f"| ch{it['ch']} | {it['para']} × {it['para2']} | {it['ratio']:.2f} | {vd} | {note} |")
+        L.append("")
+    L.append("## 二之三、D3 真复述处置清单（待执行）")
+    L.append("")
+    if not d3_rep:
+        L.append("✓ 无。")
+        L.append("")
+    else:
+        L.append("| # | 章 | 段对 | 提要段字数 | 处置 | 字数风险 |")
+        L.append("|---|---|---|---|---|---|")
+        for k, it in enumerate(d3_rep, 1):
+            ps = paragraphs(open(os.path.join(BOOK, "novel", f"chapter-{it['ch']}.md"),
                                  encoding="utf-8").read())
-            head = nows(ps[i])[:26].replace("|", "／")
-            L.append(f"| ch{n} | {i} × {j} | {r:.2f} | {head}… |")
+            cut = len(nows(ps[it["para"]]))
+            risk = "删后跌破 4,000（须整章重写／并段补写）" if cut > 80 else "删句级，无风险"
+            L.append(f"| {k} | ch{it['ch']} | {it['para']} × {it['para2']} | {cut} | "
+                     f"{nows(it['action']).replace('|', '／')} | {risk} |")
+        L.append("")
+        L.append("- ch322／ch323 的 4 对不是孤立句对：两章都有**整块提要（ch322 段18—28、"
+                 "ch323 段18—27）被后面的实拍块（ch322 段29—40、ch323 段28—41）重演一遍**。"
+                 "按段删会跌破 4,000 字下限，须按 ch321 的做法整章重写（提要并入实拍）。")
         L.append("")
     L.append("## 三、全书统计")
     L.append("")
-    L.append("| 卷 | D1 | D2 | 待裁可 | 已裁（台账） | 其中已消除 | D3（参考） |")
-    L.append("|---|---|---|---|---|---|---|")
+    L.append("| 卷 | D1 | D2 | 待裁可 | 已裁（台账） | 其中已消除 | D3 有意 | D3 真复述 |")
+    L.append("|---|---|---|---|---|---|---|---|")
     for v, a, b in VOLS:
         iv = per_vol[v]
         c = {t: sum(1 for _, it in iv if it["tag"] == t) for t in ("D1", "D2")}
         td = sum(1 for _, it in iv if it["verdict"].startswith("▢"))
         led = [e for e in D_LEDGER if a <= e["ch"] <= b]
         gonev = sum(1 for e in led if id(e) not in hit_anchors)
+        vy = sum(1 for it in d3_vol[v] if it["verdict"] == "有意回证")
+        vr = sum(1 for it in d3_vol[v] if it["verdict"] == "真复述")
         L.append(f"| 卷{v} | {c['D1']} | {c['D2']} | {td} | {len(led)} | {gonev} | "
-                 f"{len(d3_vol[v])} |")
+                 f"{vy} | {vr} |")
     allc = {t: sum(1 for v in per_vol for _, it in per_vol[v] if it["tag"] == t)
             for t in ("D1", "D2")}
-    tot_d3 = sum(len(d3_vol[v]) for v in d3_vol)
     L.append(f"| **合计** | {allc['D1']} | {allc['D2']} | {len(todo)} | {len(D_LEDGER)} | "
-             f"{len(gone)} | {tot_d3} |")
+             f"{len(gone)} | {len(d3_yes)} | {len(d3_rep)} |")
     L.append("")
     L.append(f"另：D1b 口语惯用语（「一句话：」「从头到尾」）全书 105 处，已实测**零真阳**，"
              "只计数不进候选。")
@@ -641,8 +765,16 @@ def main_d(write=True):
     L.append("| 章 | 家族 | 判定 | 处置／理由 | 锚点现状 |")
     L.append("|---|---|---|---|---|")
     for e in sorted(D_LEDGER, key=lambda x: (x["ch"], x["tag"])):
-        state = "锚点在正文（候选仍在）" if id(e) in hit_anchors else "**锚点已消失＝已消除**"
+        state = "探针仍抓得到（候选仍在）" if id(e) in hit_anchors else "**候选已消失＝已消除**"
         L.append(f"| ch{e['ch']} | {e['tag']} | {e['verdict']} | {e['action']} | {state} |")
+    L.append("")
+    L.append("### 四之二、D3 逐对裁决台账（人眼，按锚点匹配）")
+    L.append("")
+    L.append("| 章 | 判定 | 依据／处置 | 锚点 | 现状（探针是否仍报这组段对） |")
+    L.append("|---|---|---|---|---|")
+    for e in sorted(D3_LEDGER, key=lambda x: (x["ch"], x["anchor"])):
+        state = "仍在报（候选留存）" if id(e) in hit_anchors else "**已消除**（相似度已降到 0.50 以下）"
+        L.append(f"| ch{e['ch']} | {e['kind']} | {e['note']} | `{e['anchor']}` | {state} |")
     L.append("")
     L.append("## 五、复跑与纪律")
     L.append("")
@@ -654,16 +786,323 @@ def main_d(write=True):
     L.append("")
     L.append("- 探针**不进 verify**、不判失败、不进钩子（见 `prose-polish-plan.md` §八）；"
              "改稿仍按路线 A 逐章通读。")
-    L.append("- 已裁事项请登进脚本的 `D_LEDGER`（章号＋家族＋锚点＋判定＋处置），"
-             "**不要手改本文件**——下次复跑会盖写。")
+    L.append("- 已裁事项请登进脚本的 `D_LEDGER`（D1／D2：章号＋家族＋锚点＋判定＋处置）"
+             "或 `D3_LEDGER`（D3：章号＋锚点＋kind＋依据），**不要手改本文件**"
+             "——下次复跑会盖写。")
     L.append("")
     with open(out, "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(L))
     print(f"\n已写报告：state/{os.path.basename(out)}")
 
 
+# ---- G 家族：「旧稿形态」扫描（只报告、不判定、不进 verify）----
+def g1_hits(text, width=G1W):
+    """G1 精确重复：标点剥离后的章内非重叠重复窗口。
+    ★ F24a 盲区（2026-09-24 实测确认）：单章 12 字滑窗跳过任何**含标点**的窗口，
+      于是「由短句拼成的长重复段」整段逃逸——ch196 段4／段5 有 74 字近逐字重复，
+      中间夹着 6 处标点，每个 12 字窗口都跨标点，F24a 一次没报。剥离标点后取 16 字即可抓到。
+    ★ 误报边界：本书「短句＋逗号」的文风使 16 字窗口偏保守，但仍会命中正当重复
+      （章首章末书挡、引用同一份文书、人物当面复述）。所以只出候选，由人判。"""
+    t = PUNCT_G.sub("", re.sub(r"^#.*$", "", text, flags=re.M))
+    spans, out = set(), []
+    for i in range(0, len(t) - width + 1):
+        if any(i <= s < i + width for s in spans):
+            continue
+        w = t[i:i + width]
+        j = t.find(w, i + 1)
+        if j >= 0:
+            out.append((w, j - i))
+            spans.update(range(i, i + width))
+            spans.update(range(j, j + width))
+    return out
+
+
+def g2_hits(paras):
+    """G2 编年提要块：叙述段 ≥100 字 且（编年标记 ≥2）或（编年 1＋时间跳 ≥2）或（时间跳 ≥3）。
+    ★ 剔除的假阳源（实测）：一栏／各留／各签／三栏／两栏／条目／名目——「栏」是本书
+      制度词的高频日常用法（ch287／ch323 重写之后仍被误报），不构成编年体标志。"""
+    out = []
+    for i, p in enumerate(paras):
+        if not is_narr(p):
+            continue
+        n = len(nows(p))
+        if n < 100:
+            continue
+        c, j = len(CHRON_RE.findall(p)), len(TJ_RE.findall(p))
+        if c >= 2 or (c >= 1 and j >= 2) or j >= 3:
+            out.append((i, n, c, j))
+    return out
+
+
+# 已过「路线 A 整章重写」的章（源：prose-polish-plan.md §六／§七 与 chapter-log）
+REWRITTEN = {79: "阶段1一批", 104: "阶段1一批", 258: "阶段1一批＋五批三轮",
+             151: "阶段0样板", 80: "三批", 90: "五批", 82: "五批",
+             321: "第七轮", 322: "第七轮", 323: "第七轮"}
+
+
+def collect_g():
+    rows = []
+    for path in sorted(glob.glob(os.path.join(BOOK, "novel", "chapter-*.md"))):
+        n = int(re.search(r"(\d+)", os.path.basename(path)).group(1))
+        t = open(path, encoding="utf-8").read()
+        paras = paragraphs(t)
+        rows.append(dict(ch=n, vol=vol_of(n),
+                         words=len(nows(re.sub(r"^#.*$", "", t, flags=re.M))),
+                         g1=g1_hits(t), g2=g2_hits(paras), g3=paraphrase_pairs(paras)))
+    return rows
+
+
+def oldform_score(r):
+    return len(r["g1"]) * 3 + len(r["g3"]) * 3 + sum(c[1] for c in r["g2"]) / 100.0
+
+
+def main_oldform(write=True, vol=None):
+    """G 家族报告：按卷出「旧稿形态」清单（含是否已过路线 A）。"""
+    rows = collect_g()
+    if vol:
+        rows = [r for r in rows if r["vol"] == vol]
+    hit = [r for r in rows if r["g1"] or r["g2"] or r["g3"]]
+    L = []
+    L.append("# 「旧稿形态」扫描（G 家族·生成物，勿手改）")
+    L.append("")
+    L.append("口径：**G1** 精确重复（标点剥离后章内非重叠 ≥16 字窗口——F24a 的构造性盲区）／"
+             "**G2** 编年提要块（叙述段 ≥100 字＋编年／时间跳标记）／**G3** 改写式复述（difflib，沿用 D3）。")
+    L.append("")
+    L.append("**只报告、不判定、不进 verify。**候选≠违规：书挡、引用同一份文书、人物当面复述都会命中，逐条人判。")
+    L.append("")
+    L.append(f"全书 {len(rows)} 章，命中 {len(hit)} 章；已过路线 A 整章重写者另标（{len(REWRITTEN)} 章）。")
+    L.append("")
+    L.append("## 一、按卷清单")
+    for v, a, b in VOLS:
+        rs = [r for r in rows if r["vol"] == v and (r["g1"] or r["g2"] or r["g3"])]
+        if not rs:
+            continue
+        L.append("")
+        L.append(f"### 卷 {v}（ch{a}—ch{b}）——命中 {len(rs)} 章")
+        L.append("")
+        L.append("| 章 | G1 精确重复 | G2 编年提要块 | G3 改写式复述 | 已过路线 A | 判定栏 |")
+        L.append("|---|---|---|---|---|---|")
+        for r in sorted(rs, key=lambda x: -oldform_score(x)):
+            g2 = "／".join(f"段{c[0]}({c[1]}字)" for c in r["g2"]) or "—"
+            L.append(f"| ch{r['ch']} | {len(r['g1'])} | {g2} | {len(r['g3'])} | "
+                     f"{REWRITTEN.get(r['ch'], '—')} | ▢改 ▢保留 |")
+    L.append("")
+    L.append("## 二、G1 明细（窗口＋两处距离）")
+    for r in sorted(hit, key=lambda x: -len(x["g1"])):
+        if not r["g1"]:
+            continue
+        L.append("")
+        L.append(f"**ch{r['ch']}**（卷{r['vol']}）")
+        for w, d in r["g1"]:
+            L.append(f"- 距 {d} 字：「{w}」")
+    L.append("")
+    L.append("## 三、复跑与纪律")
+    L.append("")
+    L.append("- `npm run scan:old`（或 `python state/summary-camera-scan.py old`）；`--vol 13` 可单卷。")
+    L.append("- 校准集：已过路线 A 的章，其**旧版在 git 里**（`4b64e92`／`HEAD`）——ch321 旧版 G1 11—16 处、"
+             "D3 5 对 → 现版 0／0；ch322／ch323 旧版 D3 各 2 对 → 现版 0。")
+    L.append("- G1 是 **F24a 的补位**，不是新规矩：F24a 跳过含标点的 12 字窗口，本书文风（短句＋逗号）下几乎全都跨标点。")
+    L.append("- 本报告不判失败、不改稿；要改判定就改稿，再重跑。")
+    txt = "\n".join(L) + "\n"
+    if write:
+        open(os.path.join(HERE, "oldform-report.md"), "w", encoding="utf-8").write(txt)
+    print(txt)
+
+
+# ---- E 家族：人称错乱／台词归属／在场性断裂（只报告、不判定、不进 verify）----
+# 动机：ch127（谢沉璧被写成「他」，全章 19 处）、ch123（引语归属挂错人）、
+#   ch78（宁红叶在段81／86 才首次出现，出现即互动）三处，机械闸门全都没拦住。
+#
+# ★ 实测能力边界（三型都试过，勿再走回头路）：
+#   E1 人称错乱 —— **只出线索，不判定**。首版想做「章内反向代词占多数」自动投票，
+#     报了 60 处／47 章，抽读全是假阳：本书写法是「他想起谢沉璧写字的样子：她从不抬头…」
+#     ——段落只出现一个人名，而「他」指另一个人（POV 视角在回忆／打量在场者），
+#     甚至 ch196 蒋默 会得 正0／反13。加「只统计不含人名的句子」反而更糟（76 处）：
+#     人名的代词归属在段落层就定不下来（一段里两个人物、代词指谁靠语义）。
+#     故 E1 只输出**章级人称比值离群**（反向 ≥3 且正向 0），全部标「线索」，
+#     校准值可读：旧 ch127 谢沉璧 正0／反19 → 现 ch127 归零。密度量具补过三次洞，
+#     这里**不再第三次硬凑判据**——留给逐章人读（路线 A 每章必通读的理由又多一条）。
+#   E2 台词归属 —— **跨章冲突零真阳**。全书 16,814 句引语／跨章重复 152 条／归属不同 7 条，
+#     逐条读全是「你怎么知道？」这类通用短句（不同人问同一句话是本意）；
+#     且 72% 的引语在 ±1 段内取不到具名归属（本书大量无归属台词段）。
+#     故 E2 只保留**同段双重归属**（一段内 ≥2 个具名人物带说字且该段含引号＝归属可争）；
+#     实测 20 处，逐条读**全是正常问答往来**（「李虎问…萧寒山说…」），零真阳。
+#     这类 bug（引语挂错人）目前没有机械判据，报告里如实写明，不假装抓得到。
+#   E3 在场性断裂 —— **可靠**。判据：该人物首次出现的段位 ≥E3_K(0.85) × 章段数、
+#     首现段即互动（对／向／跟 X 说｜X 说／问／答／笑）、且非回忆引语（想起／记得／说过）。
+#     校准：旧 ch78（宁红叶 段81／86）命中 → 现 ch78 归零 ✓。
+E3_K = 0.85
+E3_MEM = re.compile("想起|记得|念着|说过|听过|提起")
+E2_ATT = re.compile(r"([\u4e00-\u9fa5]{2,4})(?:说|道|问|答|应道|笑)")
+
+
+def gender_map():
+    """从 characters.md 人物卡正文的 他／她 投票推性别（作者手写元数据，比正文投票可靠）。"""
+    p = os.path.join(HERE, "characters.md")
+    if not os.path.exists(p):
+        return {}
+    txt = open(p, encoding="utf-8").read()
+    g = {}
+    for card in re.split(r"\n(?=#{3,4}\s)", txt):
+        head = card.split("\n")[0]
+        mm = re.match(r"^#{3,4}\s+(.+)", head)
+        if not mm:
+            continue
+        t = re.sub(r"^[0-9]+[a-z]?[\.、]\s*", "", mm.group(1).strip())
+        n0 = re.split(r"[（(｜|·\s——]", t)[0].strip()
+        if not (2 <= len(n0) <= 8 and re.fullmatch(r"[\u4e00-\u9fa5]+", n0)):
+            continue
+        body = card[card.index("\n"):] if "\n" in card else ""
+        he, she = len(re.findall("他", body)), len(re.findall("她", body))
+        if he + she >= 3 and he != she:
+            g[n0] = "M" if he > she else "F"
+    return g
+
+
+def e1_hits(text, g, k=3):
+    """E1 人称比值离群（线索）：段落内该人物反向代词 ≥k 且正向 0。"""
+    P = paragraphs(text)
+    acc = {}
+    for p in P:
+        for n in g:
+            if len(n) < 2 or n not in p:
+                continue
+            a = acc.setdefault(n, [0, 0])
+            a[0] += len(re.findall("他", p)); a[1] += len(re.findall("她", p))
+    out = []
+    for n, (he, she) in acc.items():
+        fwd, opp = (he, she) if g[n] == "M" else (she, he)
+        if opp >= k and fwd == 0:
+            out.append((n, fwd, opp))
+    return sorted(out, key=lambda x: -x[2])
+
+
+def e2_hits(text, names):
+    """E2 同段双重归属：一段内 ≥2 个具名人物带说字，且该段含引号＝归属可争。"""
+    out = []
+    for i, p in enumerate(paragraphs(text)):
+        if "“" not in p:
+            continue
+        sp = sorted({x for x in E2_ATT.findall(p) if x in names})
+        if len(sp) >= 2:
+            out.append((i, sp, nows(p)[:60]))
+    return out
+
+
+def e3_hits(text, names, k=E3_K):
+    """E3 在场性断裂：人物在 ≥k 段位才首现，且出现即互动、且非回忆引语。"""
+    P = paragraphs(text); n = len(P)
+    if not n:
+        return []
+    first = {}
+    for i, p in enumerate(P):
+        for nm in names:
+            if len(nm) >= 2 and nm in p and nm not in first:
+                first[nm] = i
+    out = []
+    for nm, i in first.items():
+        if i < k * n:
+            continue
+        s = P[i]
+        if E3_MEM.search(s):
+            continue
+        if re.search(r"(?:对|向|朝|跟)" + re.escape(nm) + r"(?:说|道|问|看)|"
+                     + re.escape(nm) + r"(?:说|问|答|笑)", s):
+            out.append((nm, i, n, nows(s)[:50]))
+    return sorted(out, key=lambda x: -x[1])
+
+
+def collect_e():
+    g = gender_map()
+    names = set(g)
+    d = os.path.join(HERE, "character-onsets.json")
+    if os.path.exists(d):
+        on = json.load(open(d, encoding="utf-8"))
+        for c in on.get("characters", []):
+            names.add(c["name"]); names.update(c.get("aliases") or [])
+    rows = []
+    for path in sorted(glob.glob(os.path.join(BOOK, "novel", "chapter-*.md"))):
+        n = int(re.search(r"(\d+)", os.path.basename(path)).group(1))
+        t = open(path, encoding="utf-8").read()
+        rows.append(dict(ch=n, vol=vol_of(n), e1=e1_hits(t, g), e2=e2_hits(t, names),
+                         e3=e3_hits(t, names)))
+    return rows
+
+
+def main_e(write=True, vol=None):
+    """E 家族报告：按卷出「人称／归属／在场」待裁可清单与能力边界说明。"""
+    rows = collect_e()
+    if vol:
+        rows = [r for r in rows if r["vol"] == vol]
+    hit = [r for r in rows if r["e1"] or r["e2"] or r["e3"]]
+    L = []
+    L.append("# 人称／归属／在场扫描（E 家族·生成物，勿手改）")
+    L.append("")
+    L.append("口径：**E1** 人称比值离群（线索，非判定）／**E2** 同段双重归属（归属可争）／"
+             "**E3** 在场性断裂（章末首现且出现即互动）。")
+    L.append("")
+    L.append("**只报告、不判定、不进 verify。**E1 尤其只能当线索读——它的假阳机制已查明（见 §三）。")
+    L.append("")
+    L.append(f"全书 {len(rows)} 章，命中 {len(hit)} 章；"
+             f"E1 {sum(len(r['e1']) for r in rows)} 处／E2 {sum(len(r['e2']) for r in rows)} 处／"
+             f"E3 {sum(len(r['e3']) for r in rows)} 处。")
+    L.append("")
+    L.append("## 一、按卷待裁可清单")
+    L.append("")
+    L.append("| 卷 | 章 | E1 人称离群 | E2 双重归属 | E3 在场性断裂 | 判定栏 |")
+    L.append("|---|---|---|---|---|---|")
+    for v, a, b in VOLS:
+        for r in rows:
+            if r["vol"] != v or not (r["e1"] or r["e2"] or r["e3"]):
+                continue
+            e1 = "／".join(f"{n}(反{o})" for n, f, o in r["e1"]) or "—"
+            e2 = "／".join(f"段{i}" for i, _, _ in r["e2"]) or "—"
+            e3 = "／".join(f"{n} 段{i}／{t}" for n, i, t, _ in r["e3"]) or "—"
+            L.append(f"| {v} | ch{r['ch']} | {e1} | {e2} | {e3} | ▢改 ▢保留 |")
+    L.append("")
+    L.append("## 二、E3 明细（唯一可靠的一型）")
+    for r in rows:
+        for nm, i, n, s in r["e3"]:
+            L.append("")
+            L.append(f"**ch{r['ch']}（卷{r['vol']}）{nm}** 首现段 {i}／{n}＝{100.0*i/n:.0f}%")
+            L.append(f"> {s}")
+    L.append("")
+    L.append("## 三、能力边界（为什么 E1 只是线索、E2 抓不到 ch123 那一类）")
+    L.append("")
+    L.append("- **E1**：段落里出现的反向代词多指**别人**。本书写法「他想起谢沉璧写字的样子：她从不抬头…」")
+    L.append("  ——段落只出现谢沉璧一个人名，而「他」是另一人（POV 在回忆／打量在场者）；ch196 蒋默 会因此得 反14。")
+    L.append("  首版章级投票报 60 处／47 章、加「只统计不含人名句」反而升到 76 处（人名归属在段落层就定不下来），均属此类。")
+    L.append("  **校准值可读**：旧 ch127 谢沉璧 正0／反19 → 现 ch127 **归零**；比值是能看的，判定权留给人。")
+    L.append("- **E2**：两层都不成立——①跨章同句归属冲突 7 条，全是「你怎么知道？」这类**通用短句**（不同人问同一句是本意）；")
+    L.append("  ②同段双重归属 20 处，逐条读**全是正常问答往来**（「李虎问…萧寒山说…」「宁红叶问…沈广农说…」），零真阳。")
+    L.append("  且 72% 的引语在 ±1 段内取不到具名归属（本书大量无归属台词段）。")
+    L.append("  **结论：ch123 那类「引语挂错人」目前没有机械判据**，只能靠路线 A 逐章通读；E2 保留仅为记录。")
+
+    L.append("- **E3 是唯一可靠的一型**：校准集旧 ch78 命中、现 ch78 归零，全书只剩极少数，逐条可人读。")
+    L.append("")
+    L.append("## 四、复跑与纪律")
+    L.append("")
+    L.append("- `npm run scan:e`（或 `python state/summary-camera-scan.py e`）；`--vol 13` 可单卷；`--no-write` 只上屏。")
+    L.append("- 校准集：已过路线 A 的章，其旧版在 git 里（`4b64e92`／`HEAD`）。")
+    L.append("- 本报告不判失败、不改稿；E1 一律当线索，凡按它改稿须先人读该章上下文。")
+    txt = "\n".join(L) + "\n"
+    if write:
+        open(os.path.join(HERE, "e-family-report.md"), "w", encoding="utf-8").write(txt)
+    print(txt)
+
+
 def main():
     args = sys.argv[1:]
+    if args and args[0] == "e":
+        rest = args[1:]
+        vol = int(rest[rest.index("--vol") + 1]) if "--vol" in rest else None
+        main_e(write="--no-write" not in rest, vol=vol)
+        return
+    if args and args[0] == "old":
+        rest = args[1:]
+        vol = int(rest[rest.index("--vol") + 1]) if "--vol" in rest else None
+        main_oldform(write="--no-write" not in rest, vol=vol)
+        return
     if args and args[0] == "d":
         rest = args[1:]
         if "--vol" in rest:
@@ -674,8 +1113,9 @@ def main():
                 print(f"=== ch{n} ===")
                 for it in items:
                     print(f"  段{it['para']:<4} [{it['tag']}] {it['ev']} → {it['verdict']} {it['action']}")
-                for i, j, r in d3:
-                    print(f"  段{i:<4} [D3] 段{i} × 段{j}（{r:.2f}，人眼读）")
+                for it in d3:
+                    print(f"  段{it['para']:<4} [D3] 段{it['para']} × 段{it['para2']}"
+                          f"（{it['ratio']:.2f}）→ {it['verdict']} {it['action']}")
             return
         main_d(write="--no-write" not in rest)
         return
@@ -721,6 +1161,8 @@ def main():
                  if is_narr(p) and IDIOM_RE.search(p))
         print(f"（另：D1b 口语惯用语「一句话：／从头到尾」全书 {ib} 处，实测零真阳，不计入候选）")
     print("\n说明：候选≠违规。四个家族都要人眼判「改写／保留」——详见文件头「边界」节。")
+    print("E／G 家族另有独立报告：`npm run scan:e`（人称／归属／在场）、"
+          "`npm run scan:old`（旧稿形态·F24a 盲区补位）。")
 
 
 if __name__ == "__main__":

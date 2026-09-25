@@ -9,6 +9,7 @@
     "build": "vite build",
     "check": "node scripts/consistency-check.mjs",
     "check:strict": "node scripts/consistency-check.mjs --strict",
+    "check:f24a": "node scripts/f24a-gate.mjs",
     "verify": "node scripts/consistency-check.mjs --dedup && node scripts/character-cadence.mjs --book 天阙 --max-gap 100 --tail 100 --fail-on-violation",
     "cadence": "node scripts/character-cadence.mjs --book 天阙 --max-gap 100 --tail 100",
     "cadence:save": "node scripts/character-cadence.mjs --book 天阙 --max-gap 100 --tail 100 --save-baseline",

@@ -41,6 +41,9 @@
           F24a 章内重复段落(去空白后逐字相同且 ≥12 字) → 全书判失败 (已清零, 防回归);
           F24b 否定矫正句「不是…(而是|是)」单章 >F24_NB_CAP(=3) → ch237+ 判失败, 更早仅按存量汇总报告;
           F24c 跨章整段重复(≥16 字) → 仅报告 (刻意复现的书信/规程句不判失败)。
+          F24a·标点剥离收紧模式(2026-09-25 新增, 默认关闭): F24A_STRIP_PUNCT=1 时先剥标点再取
+            ≥F24A_STRIP_WIDTH(=16) 字非重叠窗(= G 家族 G1 口径, 补 F24a/章内12字滑窗的跨标点盲区);
+            判定仿 F26 棘轮: F24A_TREATED={章号: 存量基线}, 已入册章命中 > 基线即判失败, 未入册章仅报告。
        ⑲ F25 正典台词登记核销 (源: 2026-09-14 ch283 契约审计——5 条登记台词 4 条未用未划销,
           而当时无任何机械规则覆盖该口径): F25a 逐条核销 foreshadowing.md 中表头为
           「台词（正典，用后划销）」的登记表——每行台词须逐字出现于该节标题所示 chNNN 正文,
@@ -433,6 +436,23 @@ F24_NB_FROM = int(os.environ.get("F24_NB_FROM", "237"))
 F24_DUP_MIN = 12
 F24_CROSS_MIN = 16
 F24_NB_RE = re.compile(r"不是[^，。！？\n]{1,22}[，]?(?:而是|是)")
+# === F24a·标点剥离收紧模式 (源: 2026-09-25; 见 state/oldform-report.md §二 E1 明细) ===
+#   默认关闭: 原「章内 12 字滑窗」(dedup_windows width=12) 跳过含标点窗口, 本书「短句＋逗号」
+#   文风下跨标点的整段重复整段逃逸 (铁证 ch196 段4/段5 74 字)。显式 F24A_STRIP_PUNCT=1 收紧。
+#   判定仿 F26 棘轮: F24A_TREATED={章号: 存量基线}——已入册章命中 > 基线即判失败 (存量锁死、
+#   增量归零); 未入册章仅作存量汇总报告。换宽度: F24A_STRIP_WIDTH=N (默认 16)。
+F24A_STRIP_PUNCT = bool(os.environ.get("F24A_STRIP_PUNCT"))
+F24A_STRIP_WIDTH = int(os.environ.get("F24A_STRIP_WIDTH", "16"))
+F24A_PUNCT = re.compile("[，。：；！？“”、—…《》（）\"'’‘·,.!?:;()\\[\\]\\n\\r]")
+F24A_TREATED = {  # 2026-09-25 首登: 44 章 (17 章归治至 0, 27 章存量锁基线); 棘轮只增不减
+    79: 2, 84: 1, 88: 1, 93: 0, 97: 0, 98: 1, 112: 1, 116: 1, 129: 1, 137: 2,
+    146: 4, 152: 1, 153: 1, 157: 1, 163: 0, 169: 0, 172: 1, 173: 1, 174: 2,
+    176: 0, 182: 1, 185: 2, 193: 2, 196: 0, 199: 0, 206: 1, 210: 0, 211: 0,
+    217: 1, 220: 1, 223: 0, 230: 0, 231: 1, 232: 0, 234: 0, 290: 1, 293: 0,
+    299: 1, 300: 0, 302: 1, 303: 0, 304: 0, 308: 2, 326: 1,
+}
+if os.environ.get("F24A_STRIP_FROM"):  # 调试: 临时把某章并入已入册(基线 0)
+    F24A_TREATED[int(os.environ["F24A_STRIP_FROM"])] = 0
 # === F26 段落体例 (源: 2026-09-14 段落碎片化治理) ===
 #   叙述段(不以 “ 开头)均段长下限 / <20字占比上限。引号段不纳入(单行对白属文本层)。
 #   已归治区间(闭区间): 2026-09-14 先治卷十一二 ch219—284, 同批再治卷一二 ch1—44。
@@ -876,6 +896,22 @@ def dedup_windows(text: str, others: list[str], width: int, self_idx=None):
                 break
     return hits
 
+def f24a_strip_hits(body: str, width: int = F24A_STRIP_WIDTH):
+    """F24a 标点剥离收紧模式: 剥离标点后, 章内非重叠的 ≥width 字重复窗口 (= G 家族 G1 口径)。
+    仅当 F24A_STRIP_PUNCT 显式开启时由 main() 调用; 默认关闭, 不动 F24a 原口径。"""
+    t = F24A_PUNCT.sub("", body)
+    spans, out = set(), []
+    for i in range(0, len(t) - width + 1):
+        if any(i <= s < i + width for s in spans):
+            continue
+        w = t[i:i + width]
+        j = t.find(w, i + 1)
+        if j >= 0:
+            out.append((w, j - i))
+            spans.update(range(i, i + width))
+            spans.update(range(j, j + width))
+    return out
+
 def _echo_core(s: str) -> str:
     """F14A 提取段落用于回声判定的核心正文: 取引号内正文(若有), 去首尾引号/空白/尾标点。"""
     m = re.search(r"[“\"]([^”\"]*)[”\"]", s)
@@ -904,6 +940,10 @@ def _family_counts(text: str) -> dict[str, int]:
     return out
 
 def main():
+    # --f24a-treated: 只打印已入册章号（供 scripts/f24a-gate.mjs 与预提交钩子枚举；非章号参数）
+    if sys.argv[1:2] == ["--f24a-treated"]:
+        print(" ".join(str(n) for n in sorted(F24A_TREATED)))
+        sys.exit(0)
     args = [int(a) for a in sys.argv[1:]]
     if not args:
         print(__doc__); sys.exit(2)
@@ -916,6 +956,7 @@ def main():
     f24b_legacy = []  # F24b 存量章(超过上限但早于 F24_NB_FROM), 汇总一行报告
     f26_legacy = []   # F26 未归治章段中未达新标的章, 汇总一行报告
     f28_legacy = []   # F28 早章的残障标记存量(独臂/断臂/跛脚/盲女等), 汇总一行报告
+    f24a_strip_legacy = []  # F24a 标点剥离收紧模式下未入册章的存量命中, 汇总一行报告
     # F20S 榜单台账自审 (rankings.md 席位年龄 ↔ chronology.md 生年, 每次运行一次)
     f20s = f20_selfaudit()
     if f20s:
@@ -983,6 +1024,26 @@ def main():
                 f24b_legacy.append((n, f24_nb))
         elif f24_nb:
             print(f"  [F24b·否定矫正句] ×{f24_nb} ✓")
+        # ⑱a F24a·标点剥离收紧模式 (默认关闭; 见 F24A_* 常量与 docstring)
+        _f24a_any = False
+        if F24A_STRIP_PUNCT:
+            _a_hits = f24a_strip_hits(body)
+            _a_base = F24A_TREATED.get(n)
+            if _a_base is not None:
+                if len(_a_hits) > _a_base:
+                    fail += 1
+                    _f24a_any = True
+                    print(f"  [F24a·章内重复(标点剥离)] ×{len(_a_hits)} ✗ 超过入册基线 {_a_base}——存量锁死、增量归零")
+                    for _w, _d in _a_hits:
+                        print(f"    × 距{_d} “{_w}”")
+                elif _a_hits:
+                    _f24a_any = True
+                    print(f"  [F24a·章内重复(标点剥离)] ×{len(_a_hits)} = 入册基线 {_a_base} ✓ (存量)")
+                else:
+                    print(f"  [F24a·章内重复(标点剥离)] ✓ 0 (入册基线 {_a_base})")
+            elif _a_hits:
+                _f24a_any = True
+                f24a_strip_legacy.append((n, len(_a_hits)))
         # ⑳ F26 段落体例 (叙述段均段长 / <20字占比; F26_TREATED 已归治章段判失败, 其余汇总一行报告)
         _n26, _mean26, _lt26, _dq26 = f26_stats(body)
         if _n26:
@@ -1365,7 +1426,7 @@ def main():
             for w, c in b_hits:
                 print(f"    • {w}  ×{c}")
         # (F8/F9/卷六词 命中已在各自块内 fail+=1 并打印; v6_issue 抑制误报 ✓)
-        if not v6_issue and not f22_fail and not f24_dup and not (f_hits or d_hits or f4_hits or f6_hits or f7_hits or x_hits or i_hits or f16_hits or f20_f or f21_f):
+        if not v6_issue and not f22_fail and not f24_dup and not _f24a_any and not (f_hits or d_hits or f4_hits or f6_hits or f7_hits or x_hits or i_hits or f16_hits or f20_f or f21_f):
             print("  ✓ 基线比对通过")
     # F22 单章字数台账合计 (本次运行范围)
     if wc_ledger:
@@ -1404,6 +1465,12 @@ def main():
         print("  · 章目: " + "、".join(f"ch{n}×{m}" for n, m, _ in f26_legacy))
         print("  · 归治: node scripts/coalesce-paragraphs.mjs --book 天阙 --from A --to B --target 70"
               "（跑到不动点，即再跑报「改动 0 章」）")
+    # F24a 标点剥离收紧模式·未入册章的存量 (仅报告)
+    if f24a_strip_legacy:
+        _tot_a = sum(c for _, c in f24a_strip_legacy)
+        print(f"\n[F24a·标点剥离收紧模式(仅报告)] 未入册 {len(f24a_strip_legacy)} 章 / {_tot_a} 窗"
+              f" (收紧需 F24A_STRIP_PUNCT=1; 已入册 {len(F24A_TREATED)} 章锁存量基线)")
+        print("  · 章目: " + "、".join(f"ch{n}×{c}" for n, c in f24a_strip_legacy))
     # F24c 跨章整段重复 (仅报告)
     f24_cross_report(args)
     sys.exit(1 if fail else 0)

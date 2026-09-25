@@ -24,6 +24,8 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - name: F24a 收紧态回归门禁（已入册章）
+        run: npm run check:f24a
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

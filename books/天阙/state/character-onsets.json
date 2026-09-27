@@ -372,12 +372,12 @@
    "name": "谢沉璧",
    "aliases": [],
    "first_appearance": 42,
-   "first_speech": 66,
+   "first_speech": 42,
    "first_named": 42,
    "first_solo": null,
    "evidence": {
     "appearance": "ch42 河东军府史官身份出场",
-    "speech": "ch66 军府对答首次出声",
+    "speech": "ch42 城墙对答『这不是军法。』『我会写。』『我来数。』（裸引号对白，F30归属句式漏检，2026-09-27回填）",
     "solo": ""
    },
    "notes": "first_solo 留空（她的独立决断集中在卷十一合读段，可在收尾时补登 ch254 前后的『不交』）。",

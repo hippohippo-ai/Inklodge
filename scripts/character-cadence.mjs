@@ -65,7 +65,10 @@ const cards = readIf(path.join(stateDir, 'characters.md'));
 if (cards) {
   for (const m of cards.matchAll(/^#{3,4}\s+(.+)$/gm)) {
     let h = m[1].trim().replace(/^附：/, '');
-    let name = h.split(/[（(——]/)[0].replace(/^[\d.、]+\s*/, '').replace(/^[a-c]\.\s*/, '').replace(/["“”]/g, '').trim();
+    // 分隔符还包括全角竖线｜与斜杠／：人卡标题形如「6. 柳九娘｜船主」「12. 施晚晴｜绣灯娘 / 隐藏证人」。
+    // 不切这两样，标题会被整串当成一个人名——长度恰好 ≤6 的（如「柳九娘｜船主」）会混进名单并显示
+    // 「零出场」，《留春信》2026-09-25 实测；更长的（「阮孤灯｜黑刀客」）反而被长度过滤掉，静默丢人。
+    let name = h.split(/[（(——｜／|]/)[0].replace(/^[\d.、]+\s*/, '').replace(/^[a-c]\.\s*/, '').replace(/["“”]/g, '').trim();
     if (name.includes('·')) name = name.split('·').pop().trim();
     if (!name || NOT_PERSON.test(name)) continue;
     add(name, '人物卡');

@@ -8,17 +8,19 @@
     "volumes": 1
   },
   "progress": {
-    "stage": 40,
-    "currentChapter": 40,
-    "totalChapters": 40,
-    "status": "全书完成（第 1–40 章正文均已落文，4000–4500 字/章达标，纯汉字总计约 142,700）；卷五收尾与状态文件已同步"
+    "stage": 43,
+    "currentChapter": 43,
+    "totalChapters": 43,
+    "status": "全书完成（第 1–43 章正文均已落文，全书实测均值约 4982 字/章）；开篇拆章后旧第 1–40 章顺移为第 4–43 章，新增第 1–3 章“三路来客”"
   },
   "stateFiles": [
     "artifacts",
+    "audit-checklist",
     "chapter-log",
     "chapters",
     "characters",
     "conflicts",
+    "continuity-report",
     "final-check",
     "foreshadowing",
     "knowledge",
@@ -71,6 +73,9 @@
     "chapter-38",
     "chapter-39",
     "chapter-40",
+    "chapter-41",
+    "chapter-42",
+    "chapter-43",
     "copyright",
     "preface"
   ]

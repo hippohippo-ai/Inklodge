@@ -922,6 +922,11 @@ def main_oldform(write=True, vol=None):
 #     故 E1 只输出**章级人称比值离群**（反向 ≥3 且正向 0），全部标「线索」，
 #     校准值可读：旧 ch127 谢沉璧 正0／反19 → 现 ch127 归零。密度量具补过三次洞，
 #     这里**不再第三次硬凑判据**——留给逐章人读（路线 A 每章必通读的理由又多一条）。
+#     ★ 2026-09-25 全书 60 处逐条裁定后，真阳/口径项已处置归零，另加**收紧门禁**：
+#     探针主体仍只报告，但 E1_TREATED 列出的已入册章超过存量基线即判失败（见下方
+#     E1_TREATED／e1_gate，接入 pre-commit 与 CI：npm run check:e）。
+#     与之配对的是**性别口径门禁**（GENDER_EXPECT 硬断言 + gender-baseline.json 翻转检测，
+#     见 gender_gate；跑法 e --gender，重存基线 e --gender --save）。
 #   E2 台词归属 —— **跨章冲突零真阳**。全书 16,814 句引语／跨章重复 152 条／归属不同 7 条，
 #     逐条读全是「你怎么知道？」这类通用短句（不同人问同一句话是本意）；
 #     且 72% 的引语在 ±1 段内取不到具名归属（本书大量无归属台词段）。
@@ -937,7 +942,10 @@ E2_ATT = re.compile(r"([\u4e00-\u9fa5]{2,4})(?:说|道|问|答|应道|笑)")
 
 
 def gender_map():
-    """从 characters.md 人物卡正文的 他／她 投票推性别（作者手写元数据，比正文投票可靠）。"""
+    """从 characters.md 人物卡推性别：先读显式 `- **性别：** 男／女`（权威），
+    无该行时退化为正文 他／她 投票（作者手写元数据，比正文投票可靠）。
+    注意：分割按行首 ###／####，若标题与上一行粘连（如「## 六、石梁寺僧侣### 慧寂大师」）
+    会把下一张卡正文误并进本卡——2026-09-25 已修 characters.md 那处粘连并给两张卡补上显式性别。"""
     p = os.path.join(HERE, "characters.md")
     if not os.path.exists(p):
         return {}
@@ -953,6 +961,10 @@ def gender_map():
         if not (2 <= len(n0) <= 8 and re.fullmatch(r"[\u4e00-\u9fa5]+", n0)):
             continue
         body = card[card.index("\n"):] if "\n" in card else ""
+        m = re.search(r"\*\*性别：\*\*\s*([男女])", body)
+        if m:
+            g[n0] = "M" if m.group(1) == "男" else "F"
+            continue
         he, she = len(re.findall("他", body)), len(re.findall("她", body))
         if he + she >= 3 and he != she:
             g[n0] = "M" if he > she else "F"
@@ -961,7 +973,8 @@ def gender_map():
 
 # E1 已裁台账 (2026-09-25 全书 60 处逐条人读完毕; 已裁不重复受理)
 #   判定：假阳＝反代词指别人（他＝李承洲／沈广农，她＝顾琰／宁红叶／明慧等）；
-#         改＝正文人称错乱（他→她）；台账口径＝characters.md 卡性别投票与正文冲突（改卡不改正）；
+#         已改＝正文人称已改且复跑归零（ch273／279／284 他→她；ch305 她→他）；
+#         已裁＝性别口径已统一（修卡／改探针定向、正文不动）且复跑归零（ch184 云裳改判女）；
 #         待裁＝性别口径冲突，待作者拍板。真阳与口径的处置见 prose-polish-plan.md §十二。
 E1_LEDGER = {
     43: {"宁红叶": "假阳", "崔玉真": "假阳"},
@@ -973,7 +986,7 @@ E1_LEDGER = {
     130: {"顾琰": "假阳"}, 132: {"顾琰": "假阳"}, 138: {"顾琰": "假阳"},
     139: {"宁红叶": "假阳", "顾琰": "假阳"}, 141: {"崔玉真": "假阳"},
     152: {"谢沉璧": "假阳"}, 162: {"桑葚": "假阳"},
-    184: {"云裳": "台账口径"}, 187: {"沈念": "假阳"},
+    184: {"云裳": "已裁"}, 187: {"沈念": "假阳"},
     188: {"谢沉璧": "假阳", "桑葚": "假阳"}, 189: {"谢沉璧": "假阳"},
     191: {"顾琰": "假阳"}, 194: {"谢沉璧": "假阳"},
     196: {"蒋默": "假阳"}, 197: {"蒋默": "假阳", "凌虚": "假阳"}, 201: {"崔玉真": "假阳"},
@@ -983,14 +996,114 @@ E1_LEDGER = {
     226: {"宁红叶": "假阳"}, 229: {"宁红叶": "假阳"}, 235: {"谢沉璧": "假阳"},
     236: {"宁红叶": "假阳", "崔玉真": "假阳"}, 239: {"宁红叶": "假阳"}, 247: {"沈广农": "假阳"},
     263: {"柳七": "假阳"}, 271: {"柳七": "假阳"},
-    273: {"谢沉璧": "改"}, 279: {"谢沉璧": "改"}, 284: {"谢沉璧": "改"},
-    299: {"了然": "假阳"}, 305: {"守真真人": "待裁"},
+    273: {"谢沉璧": "已改"}, 279: {"谢沉璧": "已改"}, 284: {"谢沉璧": "已改"},
+    299: {"了然": "假阳"}, 305: {"守真真人": "已改"},
     308: {"谢沉璧": "假阳", "桑葚": "假阳", "沈念": "假阳"}, 331: {"顾琰": "假阳"},
 }
 
 
 def _e1v(ch, nm):
     return E1_LEDGER.get(ch, {}).get(nm, "")
+
+
+# === E1 收紧门禁 (2026-09-25; 仿 F24a/F26 棘轮) ===
+#   探针默认口径不变(只报告、不判失败、不进 verify); 本表只服务「已入册章回归门禁」:
+#   E1_TREATED = {章号: 存量基线}——已入册章 E1 命中数 > 基线即判失败(存量锁死、增量归零),
+#   未入册章仅报告、不判失败。入册 = E1 已裁定且断言归零的章(真阳 273／279／284 与口径 184／305),
+#   棘轮只增不减。调试: E1_GATE_FROM=<章> 临时并入(基线 0)。
+#   跑法: python summary-camera-scan.py e --gate [章…] / --e-treated
+E1_TREATED = {
+    184: 0,  # 云裳 性别定向修正(台账口径, 正文不动)
+    273: 0,  # 谢沉璧 他→她 ×8
+    279: 0,  # 谢沉璧 他→她 ×6
+    284: 0,  # 谢沉璧 他→她 ×3
+    305: 0,  # 守真真人 她→他 ×7(口径)
+}
+if os.environ.get("E1_GATE_FROM"):
+    E1_TREATED[int(os.environ["E1_GATE_FROM"])] = 0
+
+
+def e1_gate(rows, sel=None):
+    """E1 收紧门禁: 已入册章(E1_TREATED)命中 > 存量基线即判失败。
+    未入册章不在此判定(仍由报告只报告)。返回退出码 0/1。"""
+    bad = 0
+    checked = 0
+    for r in rows:
+        n = r["ch"]
+        if n not in E1_TREATED or (sel and n not in sel):
+            continue
+        checked += 1
+        base = E1_TREATED[n]
+        got = len(r["e1"])
+        if got > base:
+            bad += 1
+            names = "／".join(f"{nm}(反{o})" for nm, _, o in r["e1"])
+            print(f"  ch{n}: E1 ×{got} ✗ 超过入册基线 {base}——存量锁死、增量归零  [{names}]")
+        else:
+            print(f"  ch{n}: E1 ×{got} ✓ (入册基线 {base})")
+    if not checked:
+        print("  (无可判定章: 指定章未入册或为空)")
+    return 1 if bad else 0
+
+
+# === 性别口径门禁 (2026-09-25; 与 E1 人称门禁配对) ===
+#   ① GENDER_EXPECT: 作者已裁定的性别定向, **硬断言**——探针算出别的值即判失败;
+#   ② gender-baseline.json: gender_map() 的全量快照——某个名字的性别**翻转**即判失败
+#      (新增／减少只报告: 补卡删卡属正常增删)。重存: e --gender --save。
+#   只服务门禁; 探针默认口径不变(仍只报告、不进 verify)。
+GENDER_EXPECT = {
+    "云裳": "F",      # 2026-09-25 裁定: 正文「她」×8 + factions.md「女」; 旧投票误判男系标题粘连
+    "守真真人": "M",  # 2026-09-25 裁定: 卡他7 / ch122·ch319 均他; 卷十三 ch305「她」为笔误已改
+}
+GENDER_BASELINE = os.path.join(HERE, "gender-baseline.json")
+
+
+def _load_gender_baseline():
+    if not os.path.exists(GENDER_BASELINE):
+        return {}
+    try:
+        return json.load(open(GENDER_BASELINE, encoding="utf-8")).get("gender", {})
+    except Exception:
+        return {}
+
+
+def gender_gate(save=False):
+    """性别口径门禁: ① 硬断言 GENDER_EXPECT; ② 与基线快照比对, 翻转即失败。
+    save=True 时把当前 gender_map() 存为基线(收集模式, 不判失败)。返回退出码 0/1。"""
+    g = gender_map()
+    if save:
+        data = {"note": "gender_map() 快照; 性别翻转即门禁失败（新增／减少只报告）。重存: e --gender --save",
+                "gender": {k: g[k] for k in sorted(g)}}
+        open(GENDER_BASELINE, "w", encoding="utf-8").write(
+            json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+        print(f"✓ 已写入 {os.path.basename(GENDER_BASELINE)}: {len(g)} 人")
+        return 0
+    bad = 0
+    for nm, want in GENDER_EXPECT.items():
+        got = g.get(nm)
+        if got == want:
+            print(f"  {nm}: {got} ✓ (已裁定 {want})")
+        else:
+            bad += 1
+            print(f"  {nm}: {got} ✗ 已裁定 {want}——性别口径回退")
+    base = _load_gender_baseline()
+    flips = [(nm, want, g.get(nm)) for nm, want in base.items()
+             if g.get(nm) is not None and g.get(nm) != want]
+    gone = [nm for nm in base if g.get(nm) is None]
+    added = [nm for nm in g if nm not in base]
+    for nm, want, got in sorted(flips):
+        bad += 1
+        print(f"  {nm}: {want} → {got} ✗ 与基线不符（性别翻转）")
+    print(f"  基线 {len(base)} 人：翻转 {len(flips)} ／ 新增 {len(added)} ／ 消失 {len(gone)}")
+    if added:
+        print("    · 新增（未入基线；补卡属正常）: " + "、".join(sorted(added)[:20])
+              + ("…" if len(added) > 20 else ""))
+    if gone:
+        print("    · 消失（可能改名／删卡）: " + "、".join(sorted(gone)[:20])
+              + ("…" if len(gone) > 20 else ""))
+    if not base:
+        print("  (尚无基线快照——先跑 e --gender --save 生成)")
+    return 1 if bad else 0
 
 
 def e1_hits(text, g, k=3):
@@ -1120,23 +1233,28 @@ def main_e(write=True, vol=None):
     L.append("- 校准集：已过路线 A 的章，其旧版在 git 里（`4b64e92`／`HEAD`）。")
     L.append("- 本报告不判失败、不改稿；E1 一律当线索，凡按它改稿须先人读该章上下文。")
     L.append("")
-    L.append("## 五、E1 已裁台账（2026-09-25 全书 60 处逐条人读完毕）")
+    L.append("## 五、E1 已裁台账（2026-09-25 全书 60 处逐条人读，真阳＋口径 19 处全部处置归零）")
     L.append("")
-    L.append("**真阳性 17 处**（ch273×8／ch279×6／ch284×3）——均为**谢沉璧被写成「他」**，与旧 ch127 同病，")
-    L.append("**是 E1 唯一抓对的一批**（此三章含「谢沉璧」的段落她＝0，全书其余同类章她均 >0）。")
-    L.append("**台账口径 2 处**（ch184 云裳、ch305 守真真人）——`characters.md` 卡性别投票与正文冲突；")
+    L.append("**真阳性 17 处（ch273×8／ch279×6／ch284×3）已于 2026-09-25 全部改回「她」，复跑归零**——")
+    L.append("均为**谢沉璧被写成「他」**，与旧 ch127 同病；这是 E1 唯一抓对的一批，账仍留在 `E1_LEDGER` 备查。")
+    L.append("**台账口径 2 处已于 2026-09-25 全部处置——ch184 云裳改判女（修 `characters.md` 标题粘连＋显式性别）、ch305 守真真人正文她→他（7 处；卡他7／ch122·ch319 均他）；**")
     L.append("**其余 41 处假阳**——反代词指别人（他＝李承洲／沈广农，她＝顾琰／宁红叶／明慧等）。")
-    L.append("**已裁不重复受理**；逐条（含假阳）存于探针 `E1_LEDGER`，§一 判定栏已回填。需动作的只有下列 5 行：")
+    L.append("**已裁不重复受理**；逐条（含假阳／已改／已裁）存于探针 `E1_LEDGER`，§一 判定栏已回填。**账上已无待动作行。**")
     L.append("")
-    L.append("| 章 | 人名 | 判定 | 说明 |")
-    L.append("|---|---|---|---|")
-    for _ch in sorted(E1_LEDGER):
-        for _nm, _v in E1_LEDGER[_ch].items():
-            if _v == "假阳":
-                continue
-            _why = {"改": "正文人称错乱，他→她", "台账口径": "卡性别与正文冲突，改卡不改正",
-                    "待裁": "性别口径冲突，待作者拍板"}.get(_v, "")
+    L.append("**收紧门禁（2026-09-25）**：已入册 5 章（ch184／273／279／284／305）E1 命中 > 存量基线即判失败"
+             "（探针内 `E1_TREATED`，仿 F24a 棘轮，接入预提交钩子与 CI：`npm run check:e`）；未入册章仍只报告。")
+    L.append("")
+    _rows = [(c, nm, v, {"已改": "正文已改，E1 归零",
+                         "已裁": "性别口径已统一（改卡／定向），E1 归零"}.get(v, ""))
+             for c in sorted(E1_LEDGER) for nm, v in E1_LEDGER[c].items()
+             if v not in ("假阳", "已改", "已裁")]
+    if _rows:
+        L.append("| 章 | 人名 | 判定 | 说明 |")
+        L.append("|---|---|---|---|")
+        for _ch, _nm, _v, _why in _rows:
             L.append(f"| ch{_ch} | {_nm} | **{_v}** | {_why} |")
+    else:
+        L.append("（无）——真阳 17 处与口径 2 处均已处置归零。")
     txt = "\n".join(L) + "\n"
     if write:
         open(os.path.join(HERE, "e-family-report.md"), "w", encoding="utf-8").write(txt)
@@ -1145,8 +1263,19 @@ def main_e(write=True, vol=None):
 
 def main():
     args = sys.argv[1:]
+    # --e-treated: 只打印已入册章号（供 scripts/e-gate.mjs 与预提交钩子枚举；非章号参数）
+    if args[:1] == ["--e-treated"]:
+        print(" ".join(str(n) for n in sorted(E1_TREATED)))
+        return
     if args and args[0] == "e":
         rest = args[1:]
+        # e --gender [--save]: 性别口径门禁（比对已裁定定向 + 基线快照的翻转）
+        if "--gender" in rest:
+            sys.exit(gender_gate(save="--save" in rest))
+        # e --gate [章…]: E1 收紧门禁（已入册章超基线即 exit 1；未入册章不判）
+        if "--gate" in rest:
+            sel = {int(x) for x in rest if x.isdigit()}
+            sys.exit(e1_gate(collect_e(), sel=sel or None))
         vol = int(rest[rest.index("--vol") + 1]) if "--vol" in rest else None
         main_e(write="--no-write" not in rest, vol=vol)
         return

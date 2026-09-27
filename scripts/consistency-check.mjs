@@ -11,10 +11,13 @@
 //      单章低于 --min 默认只登记警告；加 --strict 升为失败（卷收尾用）
 //   ⑥ F23 跨章物件持有链（台账 state/custody-chains.json）：同一件物证在两次出现的章节间
 //      交接/分拆是否自洽——A 每步须命中持有锚点；B 易主须有交接词；C 分拆/归档后再以整体出现即报错。
-//   ⑩ F33 人物首现台账闭环（state/character-onsets.json × 正文）：
-//      ①台账声明的首现章必须真的查得到其人（防“台账先行、正文空转”）；
-//      ②首次具名仍在末两卷的人数超阈值即警告（作者口径：不要都挤在卷十三／十四）。
-//      与 F30 分工：F30 管“不得早于台账出现”，F33 管“不得晚于／落空台账声明”。
+//   ⑩ F33 人物首现台账闭环（state/character-onsets.json × 正文）：**双向**校验——
+//      ①前置：早于 first_appearance 出现姓名／别名、或早于 first_speech 出现台词归属即判失败；
+//        first_appearance 为 null（声明“尚未登场”）而全文出现姓名同样判失败；
+//      ②反向：台账声明的首现章必须真的查得到其人（防“台账先行、正文空转”，只警告）；
+//        首次具名仍在末两卷的人数超阈值即警告（作者口径：不要都挤在卷十三／十四）。
+//      与 F30 分工：两处判定同源（同一套正则与排除词）。有 state/dedup-check.py 的书由脚本按章跑 F30、
+//      这里再按台账跑一遍①；**没有该脚本的书（如《留春信》），① 就是唯一的“不得提前出现”闸门**。
 //   ⑧ F31 人物卡排期闭环（state/characters.md × outline-vol13/14 × appearance-plan.md §十二）：
 //      每张人物卡必须回答“排入哪一卷”或“为什么不回”（不回需登记豁免/已故/待裁决），否则判失败。
 //   ⑪ F35 在世窗口闭环（state/life-windows.json × 卷→年表 × chronology.md §一）：
@@ -364,14 +367,30 @@ function checkSeatOnsets({ stateDir, novelDir, allMap, fail, warn, notes }) {
 }
 
 // ── ⑩ F33 人物首现台账闭环（state/character-onsets.json × 正文）──────
-//   台账（F30 读它做“不得提前出现”的校验）里写下的 first_appearance，本项做两件反向校验：
-//     a) 声明落在已写章的，该章正文必须真的查得到这个人——否则是“台账上写了、正文里没落”
-//        的假闭环（声明而未落者单列警告，不判失败：如李虎 ch279 属已裁决待回改）；
-//     b) 统计首次具名仍在末两卷（≥ ch286）的人数——作者口径是“不要都挤在卷十三／十四卷纲”，
-//        超阈值即警告（首现本身可以晚，但全堆在末尾必须看得见）。
-//   与 F30 分工：F30 管“不得早于台账出现”，F33 管“不得晚于/落空台账声明”。
+//   台账里写下的 first_appearance / first_speech，本项**双向**校验：
+//     a) 前置（拦“提前出现”，判失败）——早于 first_appearance 的章命中『姓名或 aliases 之一』，
+//        或早于 first_speech 的章命中台词归属（“…”X说 / X说：“…”两类，排除『对／向／跟…X说』
+//        这类旁述）；first_appearance 为 null ＝ 台账声明“尚未登场”，全文一出现即判失败。
+//     b) 反向（拦“台账落空”，只警告）——声明落在已写章的，该章正文必须真的查得到这个人，
+//        否则是“台账上写了、正文里没落”的假闭环（如已裁决待回改项）；并统计首次具名仍挤在
+//        末两卷（≥ ch286）或未定的人数，超阈值即警告。
+//   与 F30 的分工：同一套正则与排除词，两处同源。state/dedup-check.py 按章跑 F30 的书会得到两
+//   遍同样的判定（都过才过）；**没有该脚本的书（如《留春信》）则 a) 是唯一的“不得提前出现”闸门**
+//   ——这也是本轮给《留春信》建台账的目的：第 1—3 章不得再写“阿七”。
 const ONSET_LATE_FROM = 286
 const ONSET_LATE_MAX = 10
+/** 台词归属检测：与 books/天阙/state/dedup-check.py 的 f30_say_re 逐字同源。 */
+const ONSET_SAY_CACHE = new Map()
+function onsetSayRe(name) {
+  if (!ONSET_SAY_CACHE.has(name)) {
+    const n = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const lb = '(?<![对向跟和与替给叫让催问求告带扶看喊教拉推拍])'
+    ONSET_SAY_CACHE.set(name, new RegExp(
+      `${lb}${n}(?:说|问|答|喊|道)(?=[^。！？\\n]{0,4}[“])`
+      + `|[”][^。！？\\n]{0,12}${lb}${n}(?:说|问|答|喊|道)`))
+  }
+  return ONSET_SAY_CACHE.get(name)
+}
 function checkOnsetLedger({ stateDir, novelDir, allMap, fail, warn, notes }) {
   const raw = read(path.join(stateDir, 'character-onsets.json'))
   if (!raw) { notes.push('F33 人物首现台账：本书无 state/character-onsets.json，规则不适用'); return null }
@@ -382,16 +401,58 @@ function checkOnsetLedger({ stateDir, novelDir, allMap, fail, warn, notes }) {
   }
   const late = []      // 首现仍在末两卷（或未定）
   const pending = []   // 声明了已写章，但该章正文查无其名
+  const early = []     // 早于台账声明就出现（姓名 / 台词归属 / 声明未登场却出现）
   let verified = 0
+  let guarded = 0      // 做过前置扫描的条目数
+  const cache = new Map()
+  const textOf = (n) => {
+    if (cache.has(n)) return cache.get(n)
+    const f = allMap.get(n)
+    const t = f ? read(path.join(novelDir, f)) || '' : ''
+    cache.set(n, t)
+    return t
+  }
+  const hitsBefore = (toks, before) => [...allMap.keys()]
+    .filter((n) => before == null ? true : n < before)
+    .filter((n) => toks.some((x) => textOf(n).includes(x)))
+    .sort((a, b) => a - b)
   for (const c of list) {
     const n = c.first_appearance
     const toks = [c.name, ...(c.aliases || [])]
+    // a) 前置：姓名／别名不得早于 first_appearance；null ＝ 声明尚未登场（全书都不许出现）
+    if (n == null) {
+      const hit = hitsBefore(toks, null)
+      if (hit.length) {
+        early.push(`${c.name}：台账声明“尚未登场”，正文已见于 ${hit.map((h) => `ch${h}`).join('、')}`)
+      }
+    } else {
+      const hit = hitsBefore(toks, n)
+      if (hit.length) {
+        early.push(`${c.name}：首现声明 ch${n}，但 ${hit.map((h) => `ch${h}`).join('、')} 已出现姓名／别名`)
+      }
+    }
+    // a) 前置：台词归属不得早于 first_speech
+    if (c.first_speech != null) {
+      const re = toks.map((x) => onsetSayRe(x))
+      const hit = [...allMap.keys()].filter((m) => m < Number(c.first_speech))
+        .filter((m) => re.some((r) => r.test(textOf(m))))
+        .sort((a, b) => a - b)
+      if (hit.length) {
+        early.push(`${c.name}：首次台词声明 ch${c.first_speech}，但 ${hit.map((h) => `ch${h}`).join('、')} 已有台词归属`)
+      }
+    }
+    guarded += 1
+    // b) 反向：声明的章必须真的查得到其人
     if (n == null || n >= ONSET_LATE_FROM) { late.push(`${c.name}(${n == null ? '未定' : `ch${n}`})`); continue }
     const file = allMap.get(n)
     if (!file) continue                       // 该章不在本次检查范围内（--vol 限定）
     const t = read(path.join(novelDir, file)) || ''
     if (toks.some((x) => t.includes(x))) verified += 1
     else pending.push(`${c.name}(声明 ch${n})`)
+  }
+  if (early.length) {
+    fail(`F33 前置：人物早于台账出现（${early.length} 人）：${early.join('；')}`
+      + '　→ 要么把它写进更晚的章，要么先改 state/character-onsets.json 再落笔（改表即生效）')
   }
   if (pending.length) {
     warn(`F33 台账声明首现章查无其名（${pending.length} 人）：${pending.join('、')}`
@@ -400,8 +461,8 @@ function checkOnsetLedger({ stateDir, novelDir, allMap, fail, warn, notes }) {
   if (late.length > ONSET_LATE_MAX) {
     warn(`F33 人物首现前移：${list.length} 人中 ${late.length} 人首次具名仍在末两卷（目标 ≤${ONSET_LATE_MAX}）：${late.join('、')}`)
   }
-  notes.push(`F33 人物首现台账：${list.length} 人 · 末两卷首现 ${late.length}（目标 ≤${ONSET_LATE_MAX}）· 声明章已核 ${verified} · 待落 ${pending.length}`)
-  return { entries: list.length, late: late.length, pending: pending.length, verified }
+  notes.push(`F33 人物首现台账：${list.length} 人 · 前置已校 ${guarded} · 末两卷首现 ${late.length}（目标 ≤${ONSET_LATE_MAX}）· 声明章已核 ${verified} · 待落 ${pending.length}`)
+  return { entries: list.length, late: late.length, pending: pending.length, verified, early: early.length }
 }
 
 // ── ⑪ F35 在世窗口闭环（state/life-windows.json × 卷→年表 × 正文落点）──
@@ -840,7 +901,7 @@ for (const b of books) {
         console.log(`  F32 双榜席位首现闭环：${r.seats.seats} 席 / 未闭环 ${r.seats.unclosed.length} ${r.seats.unclosed.length ? '✗' : '✓'}　· 正文 ≤1 章者 ${r.seats.thin}（目标 ≤6）`)
       }
       if (r.onsets) {
-        console.log(`  F33 人物首现台账：${r.onsets.entries} 人 · 末两卷首现 ${r.onsets.late}（目标 ≤10）${r.onsets.late > 10 ? ' ✗' : ' ✓'} · 声明章已核 ${r.onsets.verified} · 待落 ${r.onsets.pending}`)
+        console.log(`  F33 人物首现台账：${r.onsets.entries} 人 · 前置早现 ${r.onsets.early}${r.onsets.early ? ' ✗' : ''} · 末两卷首现 ${r.onsets.late}（目标 ≤10）${r.onsets.late > 10 ? ' ✗' : ' ✓'} · 声明章已核 ${r.onsets.verified} · 待落 ${r.onsets.pending}`)
       }
     }
     if (r.windows) {

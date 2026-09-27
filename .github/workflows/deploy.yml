@@ -26,6 +26,8 @@ jobs:
       - run: npm ci
       - name: F24a 收紧态回归门禁（已入册章）
         run: npm run check:f24a
+      - name: E1 人称收紧态回归门禁（已入册章）
+        run: npm run check:e
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

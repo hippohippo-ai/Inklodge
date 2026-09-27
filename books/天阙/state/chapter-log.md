@@ -1,3 +1,69 @@
+## 2026-09-25（十六）｜性别口径门禁：与 E1 人称门禁配对（云裳 F／守真真人 M 锁死）
+
+**为什么**：（十三）的 E1 门禁只锁「章内人称」——云裳／守真真人那两处**性别口径**判定一旦被改回，E1 仍会因基线为 0 而放行。同轮把它补上。
+
+**机制**：`summary-camera-scan.py` 新增 **`GENDER_EXPECT = {云裳: F, 守真真人: M}`**（硬断言，探针算出别的值即失败）＋ **`gender-baseline.json`**（`gender_map()` 全量快照，102 人）＋ `gender_gate()`：某名字性别**翻转**即失败，**新增／减少只报告**（补卡删卡属正常）。卡里 `- **性别：**` 字段优先于代词投票，改字段即改定向。重存基线：`e --gender --save`。
+
+**接入**：`scripts/e-gate.mjs` 改为每本书先跑 `e --gender` 再跑章级 `e --gate`；`scripts/pre-commit` 加 **③b**（本次改了 `books/*/state/characters.md` 的书跑 `e --gender`）；CI 沿用 `npm run check:e`（两样都跑）。
+
+**实测**：happy path `npm run check:e` → 云裳 F ✓／守真真人 M ✓／基线 102 人翻转 0，exit 0；**两条失败路径都验过**——改基线里公孙白 → `公孙白: F → M ✗ 与基线不符` exit 1；把 characters.md 云裳性别改男 → `云裳: M ✗ 已裁定 F` ＋翻转 exit 1（均已回退）；钩子实测（staged characters.md）性别门禁跑完 exit 0。**未提交 Git。**
+
+## 2026-09-25（十五）｜新增 state 台账结构校验 `npm run lint:state`
+
+**做了什么**：新增 `scripts/state-md-lint.mjs` ＋ `npm run lint:state`，扫各书 `state/*.md`，只报告、不改稿。检查项分三档：
+
+- **① 结构错误**：`glued-heading` 标题粘连（一行里嵌两个标题，正是本次修过的「## 六、石梁寺僧侣### 慧寂大师」之型）、`level-jump` 层级跳跃、`dup-card` 重复卡名（卡片文件内同层级同规范化名）、`dup-field` 同卡字段重复、`field-halfwidth-colon` 字段半角冒号、`table-columns` 表格列数与表头不符（代码段内的 `|` 不计）。
+- **② 文本体例**：`quote-imbalance` 中文双引号不配对（用栈定位首个未闭合的 “ ／ 多余的 ” 行）。
+- **③ 建议**：`field-alias` 同一核心字段（年龄／身份／外貌…）在本文件出现 ≥2 种写法时提示统一。
+
+**范围与口径**：卡名／字段类检查只跑白名单卡片文件（`characters.md`，各书同名），其余台账的 `###` 多为分节标题。`--fail` 可让结构错误拦 CI；`--json`／`--book`／`--only` 辅助。
+
+**首跑结果**（`npm run lint:state`）：**81 文件 / 结构错误 5 ／ 体例 5 ／ 建议 6**。其中真结构错误已定位（待作者处置）：
+
+- 天阙 `characters.md` L1112：**重复卡名「鬼市牙人」**（与 L1105 重；前一张缺年龄／境界／身份，疑为旧稿残留）。
+- 天阙 `task-list.md` L93：**表格行粘连**（T-D2 那行并入 T-D1b 行，列数 9≠4）。
+- 天阙 `outline-vol11.md` L152 / `outline-vol14.md` L154：**整行缺一列**（5≠6）。
+- 留春信 `timeline.md` L20：**行内含字面 `\n`**（应为换行，列数 14≠4）。
+- 中文引号不配对 5 处（天阙 chapter-log L183、final-check L134、progress L102；高太公造反 final-check L24、revisions L12）。
+
+**未提交 Git。**
+
+## 2026-09-25（十四）｜全探针总控 `npm run probes`：一命令跑完 F/F24a/E1/S/D/G/E
+
+**做了什么**：把散在 `consistency-check.mjs`／`dedup-check.py`／`f24a-gate.mjs`／`e-gate.mjs`／`prose-scan.mjs` 的探针与门禁收成一个入口。新增 `scripts/probe-all.mjs` ＋ `npm run probes`，7 步一表（ID／结果／退出码／摘要）：**判失败类** F（跨文件一致性＋全书规则，含 dedup）、F24a、E1；**报告类** S（A/B/C/D 汇总）、D、G·oldform、E。
+
+**纪律**：报告类只出候选、不影响退出码（默认**不盖写** report，`--write` 才写）；判失败类任一失败即 exit 1。`--full` 追加 cadence／style；`--only F,E1` 只跑指定步；`--json` 机读；`--list` 列步骤；缺 python 时报告步标 ⚠（不影响退出码）。
+
+**实测**：默认 7 步 `npm run probes` **exit 0**（F 存量 138 处／76 章；F24a 基线存量；E1 5 章 ✓；S 82 章／101 处；D 待裁 0；G 41 章；E 57 章）；失败路径 `E1_GATE_FROM=196 npm run probes -- --only E1` → ✗ 且 exit 1；`--full --only cadence,style` exit 0；`--json`／`--list` 正常；`node --check` 通过。**耗时**：F 步（全书 dedup-check）占大头（约 3—4 分钟），其余每步 1—2 秒。
+
+**顺带**：`npm run probes` 的 `--write` 模式重生成 `d-family-report.md`（日期 09-24→09-25；ch232 D2 锚点已随改写消失，已改入已消除），已 sync。**未提交 Git。**
+
+## 2026-09-25（十三）｜E1 人称收紧门禁：仿 F24a 接入预提交钩子与 CI
+
+**做了什么**：把已裁定的 E1 真阳／口径项做成收紧门禁。`summary-camera-scan.py` 新增 **`E1_TREATED = {章号: 存量基线}`**（ch184／273／279／284／305，棘轮只增不减）＋ `e1_gate()`：**已入册章 E1 命中 > 基线即判失败**（存量锁死、增量归零），未入册章仍只报告（探针默认口径一字未动）。CLI：`e --gate [章…]`、`--e-treated`、调试 `E1_GATE_FROM=<章>`。
+
+**工程化**：新增跨平台 `scripts/e-gate.mjs` ＋ `npm run check:e`（缺 python 跳过）；`scripts/pre-commit` 加 step ③（对本次提交章节跑 `e --gate`，treated 章超基线即拦提交）；`deploy.yml` build 前置 `npm run check:e`；`scan:e` 报告 §五 末尾加门禁说明行。
+
+**实测**：`npm run check:e` 5 章 exit 0；失败路径 `E1_GATE_FROM=196 npm run check:e -- 196` → `ch196 ×1 ✗` exit 1；`node --check scripts/e-gate.mjs`／`sh -n scripts/pre-commit` 均过；`npm run hooks:install` 已覆盖（.git/hooks 含 `e --gate`），钩子实测（staged ch273）dedup＋E 门禁 exit 0。**未提交 Git。**
+
+## 2026-09-25（十二）｜性别口径 2 处统一：ch184 云裳＝女（修卡）·ch305 守真真人＝男（改正文），E1 归零
+
+**做了什么**：定案（十）遗留的 2 处口径冲突，**修错的那一侧**。
+
+**ch184 云裳＝女（正文不动）**——ch184 正文「她」×8；旧判男是解析 bug：`characters.md` 标题粘连（`## 六、石梁寺僧侣### 慧寂大师（方丈）`）使慧寂卡的「他」×8 被 `gender_map()` 误并进云裳卡。已拆行，并给 `gender_map()` 加**显式 `性别` 字段优先**（卡写 `- **性别：** 男／女` 即权威，否则才退化为代词投票）；两卡均补该行。
+
+**ch305 守真真人＝男（改正文，她→他 7 处）**——三源对一：卡他7／她0、ch122「他**不**下山」、ch319「**他**取出掌教印」；仅 ch305 孤例。改段3×3／段8／段19×2／段23，并「老妇人→老汉」；段19 并句避两个「他」相撞。未动指公孙白／苏映寒／沈广农的代词。
+
+**实测**：`scan:e` **E1 60→55 处、62→57 章**，ch184／ch305 均归零，§五 动作表**（无）**；F22 4121／4270 字，两章 `dedup-check` 均「基线比对通过」；`verify`（含镜像 md5）／`style:diff` exit 0，sync 已同步。台账 `E1_LEDGER`：184「台账口径→**已裁**」、305「待裁→**已改**」。
+
+## 2026-09-25（十一）｜E1 真阳 17 段他→她改回（ch273／279／284），E1 归零
+
+**做了什么**：把（九）裁出的**17 段真阳全部改回「她」**，共 20 处（ch273 十处／ch279 七处／ch284 三处）。**逐处看主语**——只改指谢沉璧的「他」，保留指李承洲／程砚的（如 ch279 段14 引语「后面写他与黑水盐路有往来」、段138「纸上他写的那三个“没有”／替他加一个“至少”」；ch273 段74 李承洲句）。
+
+**实测**：`scan:e` **E1 60→57 处、62→59 章**，三章归零且不再进 §一；`dedup-check 273 279 284` 均「基线比对通过」，F22 4020／4369／4448 字（均 ≥4000）；`npm run verify`（含镜像 md5）exit 0、`style:diff` exit 0、sync 已同步。
+
+**台账**：探针 `E1_LEDGER` 三章值由「改」改记「**已改**」；§五动作表只剩 ch184（云裳，改卡不改正）／ch305（守真真人，待作者拍板）两行；报告标题改「真阳 17 处已改归零」。
+
 ## 2026-09-25（十）｜F24a 收紧态接入预提交钩子＋CI：treated 章回归门禁
 
 **做了什么**：把 `F24A_STRIP_PUNCT=1` 从「手动开关」变成「门禁」——`scripts/pre-commit` 跑各书 dedup-check 时置该变量（已入册章命中 > 存量基线即拦提交；未入册章仍只报告），新增跨平台的 `scripts/f24a-gate.mjs`＋`npm run check:f24a`（CI／收尾用），`deploy.yml` 的 build 前置该步；`dedup-check.py` 新增 `--f24a-treated`（只打印入册章号，供 gate 枚举）。

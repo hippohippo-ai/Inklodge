@@ -5,6 +5,11 @@
 # ② 本次提交涉及的正文章节跑各书 state/dedup-check.py（含 F22 单章字数下限 4000 的拦截）
 #    并置 F24A_STRIP_PUNCT=1：F24a 标点剥离收紧态 —— 已入册章(F24A_TREATED)出现超基线的新重复即拦截
 #    （treated 章回归门禁）；未入册章仍只报告、不判失败（存量锁基线，见 state/prose-polish-plan.md §十一）。
+# ③ 本次提交涉及的正文章节跑各书 state/summary-camera-scan.py 的 `e --gate`：
+#    E1 人称收紧态 —— 已入册章(E1_TREATED)出现超基线的新人称离群即拦截；未入册章只报告
+#    （同 F24a 棘轮；见 state/prose-polish-plan.md §十二）。
+#    另:改了 state/characters.md 的书跑 `e --gender`——已裁定的性别定向被改／性别翻转即拦截
+#    （GENDER_EXPECT 硬断言 + gender-baseline.json 快照；见 §十三）。
 #
 # 任一失败即中止提交；node/python 缺失时对应步骤跳过并提示，不会因为环境问题卡住提交。
 
@@ -56,8 +61,42 @@ if [ -n "$PY" ]; then
       fail=1
     fi
   done
+
+  # ── ③ 本次提交的正文章节 → E1 人称收紧门禁（treated 章回归；未入册章只报告） ──
+  any_e=0
+  for b in $books; do
+    script="$ROOT/$b/state/summary-camera-scan.py"
+    [ -f "$script" ] || continue
+    nums=$(printf '%s\n' "$staged" \
+           | sed -n "s#^$b/novel/chapter-\([0-9]*\)\.md\$#\1#p" | tr '\n' ' ')
+    [ -n "$(printf '%s' "$nums" | tr -d ' ')" ] || continue
+    any_e=1
+    if ! PYTHONIOENCODING=utf-8 "$PY" "$script" e --gate $nums >&2; then
+      echo "" >&2
+      echo "[pre-commit] E1 人称收紧门禁未通过，提交已中止：$b" >&2
+      echo "  · 已入册章出现超过存量基线的新「人称离群」（某人物被连续写成反向代词）——逐处看主语修正" >&2
+      echo "  · 确属正当（反代词指别人）时改 E1_TREATED 基线并在 state/prose-polish-plan.md §十二 登记" >&2
+      fail=1
+    fi
+  done
+  [ "$any_e" = 1 ] || echo "[pre-commit] 本次提交未涉及正文章节，跳过 E1 门禁" >&2
+
+  # ③b 改了人物卡（state/characters.md）的书 → 性别口径门禁
+  cbooks=$(printf '%s\n' "$staged" \
+           | sed -n 's#^\(books/[^/]*\)/state/characters\.md$#\1#p' | sort -u)
+  for b in $cbooks; do
+    script="$ROOT/$b/state/summary-camera-scan.py"
+    [ -f "$script" ] || continue
+    if ! PYTHONIOENCODING=utf-8 "$PY" "$script" e --gender >&2; then
+      echo "" >&2
+      echo "[pre-commit] 性别口径门禁未通过，提交已中止：$b" >&2
+      echo "  · 已裁定定向被改动（云裳＝F／守真真人＝M？）或某人物性别相对 gender-baseline.json 翻转" >&2
+      echo "  · 若确属有意改动：改 GENDER_EXPECT／正文与卡，并重存基线 e --gender --save，在 §十三 登记" >&2
+      fail=1
+    fi
+  done
 else
-  echo "[pre-commit] 未找到 python，跳过 dedup-check（字数拦截本次未生效）" >&2
+  echo "[pre-commit] 未找到 python，跳过 dedup-check 与 E1 门禁（字数／F24a／E1 拦截本次未生效）" >&2
 fi
 
 exit $fail

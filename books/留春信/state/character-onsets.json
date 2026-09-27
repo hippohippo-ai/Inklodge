@@ -1,0 +1,429 @@
+{
+  "book": "留春信",
+  "updated": "2026-09-25",
+  "rule": "人物首现台账（状态启用时刻）｜由 scripts/consistency-check.mjs 的 F33 双向读取（npm run check）。① first_appearance：早于该章出现『姓名或 aliases 之一』即判失败（退出码 1）；② first_appearance 为 null = 台账声明『截至最新章尚未登场』，正文一旦出现即判失败（须先更新本表再落笔）；③ 声明落在已写章的，该章正文必须真的查得到本人或别名，否则警告（反向核对）；④ first_speech：早于该章出现台词归属（“…”X说 / X说：“…” 两类，排除『对／向／跟…X说』这类旁述）即判失败；⑤ first_named 与 first_solo 为人工字段，机械不校验（写作用），其中 first_solo = 首次不经指派、自己决定并影响情节的一件事，无此类场合则留 null 并在 notes 说明。测量方法：姓名（含 aliases）在 novel/chapter-*.md 全文检索；台词按 F30 同源正则（『说／问／答／喊／道』＋引号邻接）归属句。改本表须同时核对 state/characters.md 与 state/chapter-log.md 对应条目。",
+  "characters": [
+    {
+      "name": "阿七",
+      "aliases": ["陆七"],
+      "first_appearance": 4,
+      "first_speech": 5,
+      "first_named": 4,
+      "first_solo": 19,
+      "evidence": {
+        "appearance": "ch4（卷首汇合章）舱中摞碗时首次落名：「阿七正把茶碗一只只往托盘上摞。数到第六只，他停住，把手缩回来，把第七只碗塞进怀里」——新版第 1—3 章（阮孤灯／陶未明＋梅照影／秦半夏＋陆秋水三路）他一次也没有出现，第 4 章在七名具名人物之后才露面",
+        "speech": "ch5（雨声房）首次带归属句的台词；ch4 已开口（『船一动水就晃，晃出来归我擦』），按 F30 归属句口径不计",
+        "solo": "ch19 雨声房：水里抢出湿账副页与黑砂药碗，阿七第一次不经指派自己决定并影响情节（卡片第十九章『第一次主动救人』）"
+      },
+      "notes": "真名『陆七』首次落字在 ch40 证词（ch43 复述），故 first_named 按常用名记 4；aliases 里的『陆七』用于拦住「谁在更早的章写了真名」。本表是第一道护栏：任何把『阿七／陆七』写进第 1—3 章的改动都会被 F33 判失败。"
+    },
+    {
+      "name": "阮孤灯",
+      "aliases": [],
+      "first_appearance": 1,
+      "first_speech": 1,
+      "first_named": 1,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch1 开篇第一句：『阮孤灯踩着渡厄寺山门外的湿沙，站得像一枚生生凿进石阶的熟铁死钉』",
+        "speech": "ch1 与法远对答（『法远师父的灯，比早课先醒』）",
+        "solo": ""
+      },
+      "notes": "全书开篇人物，不设前移。手抖（见明照耳后旧疤）埋于 ch1、ch6 火光下再现，回收 ch31——属 F-01 暗线，不属本表校验范围。"
+    },
+    {
+      "name": "明照",
+      "aliases": [],
+      "first_appearance": 1,
+      "first_speech": 1,
+      "first_named": 1,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch1 山门外：法远唤名『明照。』，本人托油纸包立于门槛前",
+        "speech": "ch1（『我知道姐姐要去哪里』）",
+        "solo": ""
+      },
+      "notes": "红盖头七针与『先停手』暗号的主要承接者（ch36／37／41）；ch41 脱下红盖头还俗。"
+    },
+    {
+      "name": "沈红绡",
+      "aliases": [],
+      "first_appearance": 2,
+      "first_speech": null,
+      "first_named": 2,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch2（县城说书场）陶未明翻被换页的案卷时首次点名：『那页写的是沈红绡死亡当夜的时辰』；第 1 章只以『姐姐』『沈姑娘』与油纸包出现，未落名",
+        "speech": "",
+        "solo": ""
+      },
+      "notes": "已故人物（死亡夜为四月初八），全书只以信件、回忆、他人转述与物件出现。first_speech 记 null 是『无归属句台词』，不是『尚未登场』——F33 的『未定』统计只取 first_appearance 为 null 的条目，不含她。口径：不复活、不化鬼，不指定凶手。"
+    },
+    {
+      "name": "谢三更",
+      "aliases": [],
+      "first_appearance": 4,
+      "first_speech": 4,
+      "first_named": 4,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch4 码头：『「客人今晚到齐。」谢三更把簿子摊在膝上翻开，「名字我先记下，箱子也要记。」』",
+        "speech": "ch4（同上，记名与记箱）",
+        "solo": ""
+      },
+      "notes": "第 1—3 章不出现（第 3 章只以『谢管家的手条』间接在场）；他的簿子（记名与记行李）是日后换匣换帖的账目口子，已在 ch4 落字。"
+    },
+    {
+      "name": "柳九娘",
+      "aliases": [],
+      "first_appearance": 4,
+      "first_speech": 4,
+      "first_named": 4,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch4 码头：『柳家那条货船停在最外档，吃水很深』一段落名；第 3 章只以『柳家船』间接在场",
+        "speech": "ch4 码头迎接（拦茶箱不许点数）",
+        "solo": ""
+      },
+      "notes": "空木匣（E-04）第 10 章的持有者，见 state/custody-chains.json。"
+    },
+    {
+      "name": "陶未明",
+      "aliases": [],
+      "first_appearance": 2,
+      "first_speech": 2,
+      "first_named": 2,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch2 说书场后排：『陶未明坐在最后一排的柱子边上。』",
+        "speech": "ch2（『你是说书先生。……你的印呢？』）",
+        "solo": ""
+      },
+      "notes": "原始验尸草纸（E-06）的持有者，自 ch2 起缝在公服内衬夹层里，见 custody-chains.json。"
+    },
+    {
+      "name": "梅照影",
+      "aliases": [],
+      "first_appearance": 2,
+      "first_speech": 4,
+      "first_named": 2,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch2 县前街第三个茶棚台上（月白长衫、三指宽白布蒙眼、缺骨折扇）",
+        "speech": "ch4 首次带归属句的台词；ch2 她已有独立引语（『梅照影。城南场子今天没有座，我来借这个棚。』）与《三口茶》全场，但均无『X说』归属句，按 F30 归属句口径不计",
+        "solo": ""
+      },
+      "notes": "『死亡夜三种脚步』的听者（F-10／F-39），ch2 已把赤脚那一双藏进段子《三口茶》。两处计数提示：真台词早于本表 first_speech，机械口径只认归属句。"
+    },
+    {
+      "name": "陆秋水",
+      "aliases": [],
+      "first_appearance": 3,
+      "first_speech": 3,
+      "first_named": 3,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch3 渡口镇账房：『陆秋水坐在账房的桌子后面。』",
+        "speech": "ch3（『坐不下。……手条上写的是七客，另有端茶一人。』）",
+        "solo": ""
+      },
+      "notes": "缺页湿账（E-02）第 13 章的持有者；第 3 章已见两套页码与第七页。"
+    },
+    {
+      "name": "秦半夏",
+      "aliases": [],
+      "first_appearance": 3,
+      "first_speech": 3,
+      "first_named": 3,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch3 渡口镇药铺：『秦半夏蹲在第三只匾前翻药。』",
+        "speech": "ch3（与孟铁山、陆秋水对答）",
+        "solo": ""
+      },
+      "notes": "黑砂药碗（E-01）第 3／12／16 章的持有者；第 3 章药箱底层那包黑砂与木匣封蜡上的同味，是 F-08 的埋设点。"
+    },
+    {
+      "name": "觉岸",
+      "aliases": [],
+      "first_appearance": 18,
+      "first_speech": 18,
+      "first_named": 18,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch18（禁房）：『觉岸的半封信在他手里。』",
+        "speech": "ch18 禁房对答",
+        "solo": ""
+      },
+      "notes": "第 1 章渡厄寺一场只出现法远，觉岸迟至 ch18 才下场（F-21 半封信的持有者）。"
+    },
+    {
+      "name": "施晚晴",
+      "aliases": [],
+      "first_appearance": 5,
+      "first_speech": 5,
+      "first_named": 5,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch5：『那是施晚晴。』",
+        "speech": "ch5（『不要打开。』）",
+        "solo": ""
+      },
+      "notes": "带血袖口与红针（E-05）的线头人；ch7 抽出红针、ch15 露出袖口内衬的半个沈家旧印。"
+    },
+    {
+      "name": "俞听潮",
+      "aliases": [],
+      "first_appearance": 5,
+      "first_speech": 5,
+      "first_named": 5,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch5：『俞听潮从另一边的石门里出来。』",
+        "speech": "ch5（『我年轻时。』——答柳九娘『你这水路是谁修的』）",
+        "solo": ""
+      },
+      "notes": "空木匣（E-04）ch17 的持有者（『转身把顺流卷来的空木匣护进怀里』）；徒弟阿顺的绳结见 ch17／33／37／43。"
+    },
+    {
+      "name": "赵无咎",
+      "aliases": [],
+      "first_appearance": 6,
+      "first_speech": 11,
+      "first_named": 6,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch6：『赵无咎的声音从第三条路尽头传来。』",
+        "speech": "ch11 首次带归属句的台词",
+        "solo": ""
+      },
+      "notes": "黑线短刃的行刑人（F-14／F-25／F-35）；ch31 旧物与黑线扣回收、ch42 收束。"
+    },
+    {
+      "name": "顾长亭",
+      "aliases": [],
+      "first_appearance": 6,
+      "first_speech": 6,
+      "first_named": 6,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch6：『顾长亭停在门内。』",
+        "speech": "ch6 旧戏楼对答",
+        "solo": ""
+      },
+      "notes": "第六封总密折的真本／抄件与厚胎机关铜钱（F-13／F-36）都记在他名下，见 custody-chains.json 第 10 条；ch43 交出身契副本。"
+    },
+    {
+      "name": "裴九重",
+      "aliases": [],
+      "first_appearance": 21,
+      "first_speech": 34,
+      "first_named": 21,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch21 旧戏楼旧案／县衙假封水令上的暗印处首次点名（『裴九重。』）",
+        "speech": "ch34 真身现身之后首次带归属句的台词",
+        "solo": ""
+      },
+      "notes": "**别名『不见先生』只在人物卡里，正文 43 章 0 次命中，故不入 aliases**（防该词另有用法时误判）。纪律：第 20 章以前不得直呼其名，前期只写不自然的水声、火路、掌印与站位；第 21—23 章经旧案／债契／假封水令点名『裴九重／无灯楼』，第 34 章才是真身。"
+    },
+    {
+      "name": "顾青禾",
+      "aliases": [],
+      "first_appearance": 13,
+      "first_speech": 18,
+      "first_named": 13,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch13 账房火场：顾长亭举着被火燎去一角的债契喊『……就告诉我顾青禾在哪！』——本人之名首次落字（此前只作『他阿姐』）",
+        "speech": "ch18 首次带归属句的台词",
+        "solo": ""
+      },
+      "notes": "查账捕快，ch18 起与陶未明同组（护着半页湿账退往……）；ch43 交出旧账与现场证物。"
+    },
+    {
+      "name": "小墨",
+      "aliases": [],
+      "first_appearance": 17,
+      "first_speech": 17,
+      "first_named": 17,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch17 旧船：『顾长亭认出他：「小墨？」』",
+        "speech": "ch17（『我不能打开。』／『这是信使的规矩，信没送到，手不能松。』）",
+        "solo": ""
+      },
+      "notes": "只出现在 ch17／19／21（三章）。**2026-09-25 已补卡**：`characters.md` 第 24 条「小墨｜无灯楼的童信使／第二封信的送信人」——身份定为**无灯楼线上的童信使（不是顾长亭的学徒，两人是旧识同层：顾长亭替他送过一封“给一个不会回信的人”的信）**，年龄由卡定为 12 岁，卡里写明“脸与身量正文未写，不擅自补长相”。他是红针（E-05）ch17 一场的实际执行者（针尾红线绕着自己的手）；cadence 扫描里他属“末现太早”（末现 ch21，距末尾 22 章）。"
+    },
+    {
+      "name": "施小满",
+      "aliases": [],
+      "first_appearance": 15,
+      "first_speech": 43,
+      "first_named": 15,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch15：『是施小满的鞋，鞋绳被刀割断，像被人从孩子脚上硬剥下来的。』",
+        "speech": "ch43 渡口聚日首次带归属句的台词",
+        "solo": ""
+      },
+      "notes": "人质线（F-42）：ch16 被谢三更当筹码、ch19 由明照救下、ch37 明照替他穿回小鞋。"
+    },
+    {
+      "name": "阿顺",
+      "aliases": [],
+      "first_appearance": 5,
+      "first_speech": null,
+      "first_named": 5,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch5：『「阿顺呢？」』（俞听潮失踪的徒弟，首次被问起）",
+        "speech": "",
+        "solo": ""
+      },
+      "notes": "L0 载体型：只以工具、遗留绳结与尸体线索出现（ch5 被问起、ch8 绣房门口的绳结、ch17 手腕缠三圈绳结的尸首、ch33 私路图、ch43『阿顺的绳结，我替他打完了。三圈，一圈不少』）。**不补实体出场、不给台词**——他死在水闸里，灭口是水闸线的起点。"
+    },
+    {
+      "name": "孟铁山",
+      "aliases": [],
+      "first_appearance": 3,
+      "first_speech": 3,
+      "first_named": 3,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch3 药铺：『「送信的。」孟铁山把手里一张折成长条的纸递过来』",
+        "speech": "ch3（念手条，把『端茶一人』念成『瑞茶一人』）",
+        "solo": ""
+      },
+      "notes": "四名护院武师之一（守账房），ch3 首次下场；ch11／17／28／33 续现。"
+    },
+    {
+      "name": "罗照壁",
+      "aliases": [],
+      "first_appearance": 11,
+      "first_speech": 28,
+      "first_named": 11,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch11：『四名护院从右廊的白灯后撞出来。孟铁山的棍、罗照壁的铁钩和韩七斤的链子挤在一处』",
+        "speech": "ch28 首次带归属句的台词",
+        "solo": ""
+      },
+      "notes": "守药房的武师；ch17／28／33 续现（ch33 后受伤／逃散／改供）。"
+    },
+    {
+      "name": "韩七斤",
+      "aliases": [],
+      "first_appearance": 11,
+      "first_speech": null,
+      "first_named": 11,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch11（同上，『韩七斤的链子』）",
+        "speech": "",
+        "solo": ""
+      },
+      "notes": "守门的武师，ch11／17／28 三章，无归属句台词。"
+    },
+    {
+      "name": "邱白面",
+      "aliases": [],
+      "first_appearance": 3,
+      "first_speech": null,
+      "first_named": 3,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch3 货栈廊下：『正是守水闸的邱白面。他把木匣重新抱紧』",
+        "speech": "",
+        "solo": ""
+      },
+      "notes": "守水闸的武师，空木匣（E-04）ch3 的抱匣人（跳板上手臂一坠）；ch11／17／28 续现，无归属句台词。"
+    },
+    {
+      "name": "刘主事",
+      "aliases": [],
+      "first_appearance": 39,
+      "first_speech": null,
+      "first_named": 39,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch39：『轿里的人探出半张脸，是无灯楼安插在按察分司的暗桩刘主事』",
+        "speech": "",
+        "solo": ""
+      },
+      "notes": "全书只一章；不亲自出手，只靠文书与条子控制局面（ch39 收场处）。"
+    },
+    {
+      "name": "白砚生",
+      "aliases": [],
+      "first_appearance": 18,
+      "first_speech": null,
+      "first_named": 18,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch18：『「白砚生在等你。」赵无咎在他身后说。』",
+        "speech": "",
+        "solo": ""
+      },
+      "notes": "L0 载体型：十年前沈家托阮孤灯处理他，阮孤灯没出刀、把人送走；七年前才遭无灯楼灭口（F-24）。只作旧案、回忆与口述出现，**不给实体出场与台词**。"
+    },
+    {
+      "name": "法远",
+      "aliases": [],
+      "first_appearance": 1,
+      "first_speech": 1,
+      "first_named": 1,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch1 渡厄寺山门内（提灯开门、交出请帖与封着红盖头的油纸包）",
+        "speech": "ch1（『施主要看就进殿看，门外风大。』）",
+        "solo": ""
+      },
+      "notes": "全书只 ch1 一章（知客僧，觉岸的二弟子）；他对沈红绡那半封信避而不谈，是 F-21 的第一次缺口。"
+    },
+    {
+      "name": "老张",
+      "aliases": [],
+      "first_appearance": 2,
+      "first_speech": 2,
+      "first_named": 2,
+      "first_solo": null,
+      "evidence": {
+        "appearance": "ch2 茶棚（『前头那个穿深褐公服，腰间挂着旧腰牌』一段落名）",
+        "speech": "ch2（『未明。……你在这儿做什么？』）",
+        "solo": ""
+      },
+      "notes": "县衙班头、陶未明旧同僚，ch2／26／39／40／43；ch38 倒戈砍断封水令旗（F-23 回收线的一环）。"
+    },
+    {
+      "name": "屈寒声",
+      "aliases": [],
+      "first_appearance": null,
+      "first_speech": null,
+      "first_named": null,
+      "first_solo": null,
+      "evidence": { "appearance": "", "speech": "", "solo": "" },
+      "notes": "**已声明『截至 ch43 尚未登场』。**人物卡有（无灯楼记簿／裴九重的影子账房），正文 43 章 0 次命中。若要让他出现，**先改本表**（写 first_appearance 与实际章号），否则 F33 判失败。"
+    },
+    {
+      "name": "商老七",
+      "aliases": [],
+      "first_appearance": null,
+      "first_speech": null,
+      "first_named": null,
+      "first_solo": null,
+      "evidence": { "appearance": "", "speech": "", "solo": "" },
+      "notes": "**已声明『截至 ch43 尚未登场』，但这里有一条台账矛盾要摊开：** state/chapters.md 第 1 章条写『商老七以无名探子身份下场』，而正文全书 0 次命中『商老七』——即第 1—3 章那个递手条、断人掌骨的探子始终无名。本表按**正文口径**记 null（声明尚未具名登场）。要把他与探子合一，须先在本表写上 1（并在 chapter-log 记明），再动正文。"
+    },
+    {
+      "name": "齐水生",
+      "aliases": [],
+      "first_appearance": null,
+      "first_speech": null,
+      "first_named": null,
+      "first_solo": null,
+      "evidence": { "appearance": "", "speech": "", "solo": "" },
+      "notes": "**已声明『截至 ch43 尚未登场』。**人物卡有（柳家船队老船工／柳九娘的旧伙计），正文 0 次命中。柳家船上至今只有柳九娘与阿七两个有名字的人——若要补一位老船工，先改本表。"
+    }
+  ]
+}

@@ -10,6 +10,7 @@
     "check": "node scripts/consistency-check.mjs",
     "check:strict": "node scripts/consistency-check.mjs --strict",
     "check:f24a": "node scripts/f24a-gate.mjs",
+    "check:e": "node scripts/e-gate.mjs",
     "verify": "node scripts/consistency-check.mjs --dedup && node scripts/character-cadence.mjs --book 天阙 --max-gap 100 --tail 100 --fail-on-violation",
     "cadence": "node scripts/character-cadence.mjs --book 天阙 --max-gap 100 --tail 100",
     "cadence:save": "node scripts/character-cadence.mjs --book 天阙 --max-gap 100 --tail 100 --save-baseline",
@@ -27,7 +28,11 @@
     "scan": "node scripts/prose-scan.mjs",
     "scan:d": "node scripts/prose-scan.mjs d",
     "scan:old": "node scripts/prose-scan.mjs old",
-    "scan:e": "node scripts/prose-scan.mjs e"
+    "scan:e": "node scripts/prose-scan.mjs e",
+    "probes": "node scripts/probe-all.mjs",
+    "continuity": "node scripts/continuity-scan.mjs",
+    "continuity:write": "node scripts/continuity-scan.mjs --write",
+    "lint:state": "node scripts/state-md-lint.mjs"
   },
   "dependencies": {
     "marked": "^12.0.2",

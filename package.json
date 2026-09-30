@@ -29,6 +29,7 @@
     "scan:d": "node scripts/prose-scan.mjs d",
     "scan:old": "node scripts/prose-scan.mjs old",
     "scan:e": "node scripts/prose-scan.mjs e",
+    "scan:style": "node scripts/style-audit.mjs",
     "probes": "node scripts/probe-all.mjs",
     "continuity": "node scripts/continuity-scan.mjs",
     "continuity:write": "node scripts/continuity-scan.mjs --write",

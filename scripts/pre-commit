@@ -11,7 +11,8 @@
 #    另:改了 state/characters.md 的书跑 `e --gender`——已裁定的性别定向被改／性别翻转即拦截
 #    （GENDER_EXPECT 硬断言 + gender-baseline.json 快照；见 §十三）。
 #
-# 任一失败即中止提交；node/python 缺失时对应步骤跳过并提示，不会因为环境问题卡住提交。
+# 硬门禁失败即中止提交；文风报告无论命中或运行异常均不影响提交。
+# node/python 缺失时对应步骤跳过并提示，不会因为环境问题卡住提交。
 
 set -u
 ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
@@ -97,6 +98,15 @@ if [ -n "$PY" ]; then
   done
 else
   echo "[pre-commit] 未找到 python，跳过 dedup-check 与 E1 门禁（字数／F24a／E1 拦截本次未生效）" >&2
+fi
+
+# ── ④ 独立文风信号步骤：即使无 Python 或探针异常也不改变提交判定 ──
+# 仅打印相对 HEAD 新增候选，不计入 fail、不影响 dedup-check 或提交结果。
+if command -v node >/dev/null 2>&1; then
+  node "$ROOT/scripts/style-signals-delta.mjs" --staged >&2 || \
+    echo "[pre-commit] 文风信号报告异常，已忽略（不影响提交）" >&2
+else
+  echo "[pre-commit] 未找到 node，跳过 R3/R4/R5 新增信号报告" >&2
 fi
 
 exit $fail

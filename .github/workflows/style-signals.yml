@@ -1,0 +1,36 @@
+name: Style signal report
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Report newly introduced R3/R4/R5 candidates (non-blocking)
+        if: github.event_name == 'push'
+        continue-on-error: true
+        run: npm run check:style-signals -- --base "${{ github.event.before }}" --head "${{ github.sha }}" --each-commit
+      - name: Report pull request R3/R4/R5 candidates (non-blocking)
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        run: npm run check:style-signals -- --base "${{ github.event.pull_request.base.sha }}" --head "${{ github.event.pull_request.head.sha }}" --each-commit
+      - name: Skip manual run without a commit range
+        if: github.event_name == 'workflow_dispatch'
+        run: echo "Manual run has no commit range; style signal reporting is skipped."

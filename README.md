@@ -107,7 +107,7 @@ npm run probes               # 全探针总控：一命令跑完 F/F24a/E1/S/D/G
 npm run lint:state           # 各书 state/*.md 结构校验（标题粘连／重复卡名／字段口径／表格列数…）
 ```
 
-**全探针总控（2026-09-25）**：`npm run probes` 把各家族探针与收紧门禁串成一步，输出汇总表与失败退出码（本地与 CI 共用）。表里**报告类**（家族 A/B/C/D、G·旧稿形态、E）只出候选、不影响退出码（默认不盖写 report，`--write` 才写）；**判失败类**（F·跨文件一致性+全书规则含 dedup、F24a 与 E1 收紧门禁）任一失败即退出码 1。`--full` 再追加 cadence／style；`--only F,E1` 只跑指定步；`--json` 机读；`--list` 列步骤。F 步（全书 dedup-check）占大头（约 3—4 分钟）。
+**全探针总控（2026-09-25）**：`npm run probes` 把各家族探针与收紧门禁串成一步，输出汇总表与失败退出码（本地与 CI 共用）。文风 R3/R4/R5 新增候选另由独立步骤 `npm run check:style-signals -- --base <before-sha> --head <after-sha>` 报告（本地预提交自动比较暂存区与 HEAD，CI push 比较 before/head）；它只打印新候选、不判失败，也不并入 `dedup-check.py`。表里**报告类**（家族 A/B/C/D、G·旧稿形态、E）只出候选、不影响退出码（默认不盖写 report，`--write` 才写）；**判失败类**（F·跨文件一致性+全书规则含 dedup、F24a 与 E1 收紧门禁）任一失败即退出码 1。`--full` 再追加 cadence／style；`--only F,E1` 只跑指定步；`--json` 机读；`--list` 列步骤。F 步（全书 dedup-check）占大头（约 3—4 分钟）。
 
 **state 台账结构校验（2026-09-25）**：`npm run lint:state` 扫各书 `state/*.md`，报告标题粘连（一行嵌两个标题）、标题层级跳跃、重复卡名、同卡字段重复、字段半角冒号、表格列数与表头不符、中文引号不配对，以及核心字段口径不统一（建议）。**只报告、不改稿**；`--fail` 可让「结构错误」拦 CI，`--json` 机读，`--book`／`--only` 可缩小范围。
 

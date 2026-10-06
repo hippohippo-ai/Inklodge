@@ -13,8 +13,9 @@
 //   npm run scan:style -- --ch 242 --todo  # R3/R4/R5 待修清单（段末金句/同场重复/对白对仗）
 //   npm run scan:style -- --worklist   # 写全章回炉工单 state/style-worklist.md
 //   npm run scan:style -- --selftest   # 判据回归用例（M13/M14/M15）
+//   npm run check:style-signals       # 提交前后新增 R3/R4/R5 单独报告
 //
-// 纪律：探针**不进 verify、不判失败、不进钩子**——它只出候选，判定权在人。
+// 纪律：style-audit 总览不进 verify；R3/R4/R5 delta 在独立 CI/预提交步骤只报告，不判失败。
 import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'

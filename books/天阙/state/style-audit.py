@@ -118,9 +118,8 @@ def _last_sent(seg):
     return ps[-1].strip() if ps else ""
 
 
-def sig_r4_dup(txt):
-    """同章段落近重复：对 2-gram 取容器相似度，返回 (最高相似, 命中对数, 样例)。
-    只比**清洗后 ≥20 字**的叙述段，且交集 ≥6 才算命中（防短段共字虚高）。"""
+def sig_r4_dup_details(txt):
+    """返回 R4 段落近重复候选对（清洗后的段落对），判据与 sig_r4_dup 相同。"""
     narr = []
     for p in re.split(r"\n\s*\n", txt):
         p = p.strip()
@@ -130,7 +129,7 @@ def sig_r4_dup(txt):
         if len(c) >= 20:
             narr.append((c, p))
     sh = [({c[i:i + 2] for i in range(len(c) - 1)}, c) for c, _ in narr]
-    best, hits, sample = 0.0, 0, ""
+    best, pairs = 0.0, []
     for i in range(len(sh)):
         for j in range(i + 1, len(sh)):
             a, b = sh[i][0], sh[j][0]
@@ -142,22 +141,100 @@ def sig_r4_dup(txt):
             cont = inter / min(len(a), len(b))
             best = max(best, cont)
             if cont >= 0.42:
-                hits += 1
-                if not sample:
-                    sample = narr[i][1][:24] + " ／ " + narr[j][1][:24]
-    return round(best, 2), hits, sample
+                pairs.append((narr[i][0], narr[j][0], narr[i][1], narr[j][1]))
+    return round(best, 2), pairs
 
 
-def sig_r4_sent(txt):
-    """章内复句：≥6 字整句在同章出现 ≥2 次。返回 (重复余数, 样例)。"""
+def sig_r4_dup(txt):
+    """同章段落近重复：返回 (最高相似, 命中对数, 样例)。"""
+    best, pairs = sig_r4_dup_details(txt)
+    sample = ""
+    if pairs:
+        sample = pairs[0][2][:24] + " ／ " + pairs[0][3][:24]
+    return best, len(pairs), sample
+
+
+def sig_r4_sent_details(txt):
+    """返回章内重复整句及重复余数，口径与 sig_r4_sent 相同。"""
     sents = [s.strip() for s in re.split(r"[。！？!?…\n]", txt)]
     c = defaultdict(int)
     for s in sents:
         k = _clean(s)
         if len(k) >= 6:
             c[k] += 1
-    rep = {k: v for k, v in c.items() if v >= 2}
-    return sum(v - 1 for v in rep.values()), list(rep)[:3]
+    return {k: v - 1 for k, v in c.items() if v >= 2}
+
+
+def sig_r4_sent(txt):
+    """章内复句：≥6 字整句在同章出现 ≥2 次。返回 (重复余数, 样例)。"""
+    rep = sig_r4_sent_details(txt)
+    return sum(rep.values()), list(rep)[:3]
+
+
+def style_signal_counts(txt):
+    """各章 R3/R4/R5 信号多重集，用于比较提交前后的新增候选。"""
+    counts = {
+        "R3": defaultdict(int),
+        "R4近重复": defaultdict(int),
+        "R4复句": defaultdict(int),
+        "R5": defaultdict(int),
+    }
+    for hit in sig_r3_judge(txt):
+        counts["R3"][hit] += 1
+    _, pairs = sig_r4_dup_details(txt)
+    for a, b, _, _ in pairs:
+        counts["R4近重复"][tuple(sorted((a, b)))] += 1
+    for sent, n in sig_r4_sent_details(txt).items():
+        counts["R4复句"][sent] = n
+    for hit in sig_r5_dui(txt):
+        counts["R5"][hit] += 1
+    return counts
+
+
+def style_signal_delta(before, after):
+    """多重集差值；仅返回当前新增的 R3/R4/R5 候选。"""
+    old = style_signal_counts(before)
+    new = style_signal_counts(after)
+    return {kind: {sig: count - old[kind].get(sig, 0)
+                   for sig, count in new[kind].items()
+                   if count > old[kind].get(sig, 0)}
+            for kind in new}
+
+
+def format_signal(kind, sig):
+    """将信号签名格式化成适合 CI 日志阅读的一行例句。"""
+    clip = lambda s: s if len(s) <= 96 else s[:93] + "…"
+    if kind == "R4近重复":
+        return "「%s」≈「%s」" % (clip(sig[0]), clip(sig[1]))
+    return "「%s」" % clip(sig)
+
+
+_SELFTEST_R4_DUP_BEFORE = "沈广农推开木门，屋里潮气扑面，桌边放着一碗凉茶，灯芯快烧尽了。"
+_SELFTEST_R4_DUP_AFTER = "沈广农推开木门，屋里潮气扑面，桌边放着一碗凉茶，灯芯快烧尽了。\n\n沈广农推开木门，屋里潮气扑面，桌边放着一碗凉茶，窗纸已经破了。"
+_SELFTEST_R4_SENT = "沈广农推开木门，屋里潮气扑面。"
+
+STYLE_SIGNAL_SELFTEST = [
+    ("R3 新段末金句计入 delta", lambda: bool(style_signal_delta("", "这世道如此。\n")["R3"])),
+    ("R4 近重复新增对计入 delta", lambda: bool(style_signal_delta(_SELFTEST_R4_DUP_BEFORE, _SELFTEST_R4_DUP_AFTER)["R4近重复"])),
+    ("R4 章内复句新增计入 delta", lambda: bool(style_signal_delta("", _SELFTEST_R4_SENT + "\n" + _SELFTEST_R4_SENT)["R4复句"])),
+    ("R5 对白收尾计入 delta", lambda: bool(style_signal_delta("", "“这世道如此。”")["R5"])),
+    ("既有信号不重复报告", lambda: not style_signal_delta("“这世道如此。”", "“这世道如此。”")["R5"]),
+    ("旧信号计数增加才报告差额", lambda: style_signal_delta("“这世道如此。”", "“这世道如此。”“这世道如此。”")["R5"].get("这世道如此", 0) == 1),
+]
+
+
+def run_style_signal_selftest():
+    passed = 0
+    for name, test in STYLE_SIGNAL_SELFTEST:
+        try:
+            ok = bool(test())
+        except Exception:
+            ok = False
+        print("  %s %s" % ("✓" if ok else "✗", name))
+        passed += int(ok)
+    print("R3/R4/R5 delta 自测：%d/%d 通过" % (passed, len(STYLE_SIGNAL_SELFTEST)))
+    return passed == len(STYLE_SIGNAL_SELFTEST)
+
 
 
 def sig_r3_judge(txt):
@@ -706,7 +783,30 @@ def main():
     ap.add_argument("--todo", action="store_true", help="只打印 R3/R4/R5 待修清单（配 --ch/--vol 选章）")
     ap.add_argument("--selftest", action="store_true", help="跑内置判据回归用例（M13/M14/M15）")
     ap.add_argument("--worklist", action="store_true", help="写回炉工单 style-worklist.md（全章排名＋可点链接）")
+    ap.add_argument("--signal-delta-stdin", action="store_true", help="从 stdin 读取 JSON 章节前后文，输出新增 R3/R4/R5 信号")
+    ap.add_argument("--selftest-signals", action="store_true", help="测试 R3/R4/R5 新增信号比较")
     args = ap.parse_args()
+
+    if args.selftest_signals:
+        return 0 if run_style_signal_selftest() else 1
+
+    if args.signal_delta_stdin:
+        try:
+            payload = json.load(sys.stdin)
+            report = []
+            for item in payload:
+                delta = style_signal_delta(item.get("before", ""), item.get("after", ""))
+                additions = []
+                for kind in ("R3", "R4近重复", "R4复句", "R5"):
+                    for sig, count in delta[kind].items():
+                        additions.append({"kind": kind, "signal": format_signal(kind, sig), "count": count})
+                if additions:
+                    report.append({"chapter": item.get("chapter"), "signals": additions})
+            print(json.dumps(report, ensure_ascii=False))
+            return 0
+        except Exception as e:
+            print("style signal delta error: %s" % e, file=sys.stderr)
+            return 2
 
     if args.selftest:
         return run_selftest()
@@ -743,7 +843,6 @@ def main():
     summ = summarize(rows)
 
     if args.json:
-        import json
         print(json.dumps({"summary": summ, "chapters": rows}, ensure_ascii=False, indent=2))
     else:
         rep = fmt_report(rows, summ)
